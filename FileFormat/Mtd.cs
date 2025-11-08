@@ -45,41 +45,35 @@ namespace hogs_gameEditor_wpf.FileFormat
 
             string fldr = GlobalVars.mapsFolder + mapMTDFileName + ".mtd";
 
-            using (FileStream fs = File.Open(fldr, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mtdData = File.ReadAllBytes(fldr);
+            int endContenTable = BitConverter.ToInt32(mtdData, 16); //the first item offset define table content size ! 
+
+            var indexes = model.GetIndexes();
+
+            int counter = 0;
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mtdData = new byte[fs.Length];
-                fs.Read(mtdData, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mtdData, 16); //the first item offset define table content size ! 
-
-                var indexes = model.GetIndexes();
-
-                int counter = 0;
-                for (int i = 0; i <= endContenTable; i++)
+                if( indexes.Contains(counter) )
                 {
-                    if( indexes.Contains(counter) )
+                    int endblockContentTable = i + 24;
+                    if (endblockContentTable <= endContenTable)
                     {
-                        int endblockContentTable = i + 24;
-                        if (endblockContentTable <= endContenTable)
+                        Mtd tg = new Mtd
                         {
-                            Mtd tg = new Mtd
-                            {
-                                Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
-                                DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
-                                DataSize = BitConverter.ToInt32(mtdData[(i + 20)..(i + 24)]),
-                                indexNumber = counter
-                            };
-                            //tg.textureData = mtdData[tg.DataOffset..(tg.DataOffset + tg.DataSize)];
-                            tg.textureTim = new TIM(mtdData[tg.DataOffset..(tg.DataOffset + tg.DataSize)]);
-                            textures.Add(tg);
-                        }
+                            Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
+                            DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
+                            DataSize = BitConverter.ToInt32(mtdData[(i + 20)..(i + 24)]),
+                            indexNumber = counter
+                        };
+                        //tg.textureData = mtdData[tg.DataOffset..(tg.DataOffset + tg.DataSize)];
+                        tg.textureTim = new TIM(mtdData[tg.DataOffset..(tg.DataOffset + tg.DataSize)]);
+                        textures.Add(tg);
                     }
-
-                    i += 23;
-                    counter++;
                 }
 
-
-            }
+                i += 23;
+                counter++;
+            }          
 
             return textures;
         }
@@ -88,46 +82,37 @@ namespace hogs_gameEditor_wpf.FileFormat
         {
             List<Mtd> textures = new List<Mtd>();
 
-            using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mtdData = File.ReadAllBytes(path);
+            int endContenTable = BitConverter.ToInt32(mtdData, 16); //the first item offset define table content size ! 
+            var indexes = model.GetIndexes();
+
+            int counter = 0;
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mtdData = new byte[fs.Length];
-                fs.Read(mtdData, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mtdData, 16); //the first item offset define table content size ! 
-
-                var indexes = model.GetIndexes();
-
-                int counter = 0;
-                for (int i = 0; i <= endContenTable; i++)
+                if (indexes.Contains(counter))
                 {
-                    if (indexes.Contains(counter))
+                    int endblockContentTable = i + 24;
+                    if (endblockContentTable <= endContenTable)
                     {
-                        int endblockContentTable = i + 24;
-                        if (endblockContentTable <= endContenTable)
+                        Mtd tempTex = new Mtd
                         {
-                            Mtd tempTex = new Mtd
-                            {
-                                Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
-                                DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
-                                DataSize = BitConverter.ToInt32(mtdData[(i + 20)..(i + 24)]),
-                                indexNumber = counter
-                            };
-                            tempTex.textureTim = new TIM( mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)] );
-                            textures.Add(tempTex);
-                        }
+                            Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
+                            DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
+                            DataSize = BitConverter.ToInt32(mtdData[(i + 20)..(i + 24)]),
+                            indexNumber = counter
+                        };
+                        tempTex.textureTim = new TIM( mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)] );
+                        textures.Add(tempTex);
                     }
-
-                    i += 23;
-                    counter++;
                 }
 
-
+                i += 23;
+                counter++;
             }
+            
 
             return textures;
         }
-
-
-
 
     }
 }

@@ -30,10 +30,38 @@ namespace hogs_gameEditor_wpf.FileFormat
         {
             List<HIR> skeletons = new List<HIR>();
 
-            using (FileStream fs = File.Open(GlobalVars.gameFolder + "/devtools/EXTRACTED/chars/pig.hir", FileMode.Open, FileAccess.Read, FileShare.ReadWrite) ) 
-            using (BinaryReader reader = new BinaryReader(fs))
+            using (MemoryStream ms = new MemoryStream( File.ReadAllBytes(GlobalVars.gameFolder + "Chars/pig.hir") ))
+            using (BinaryReader reader = new BinaryReader(ms))
             {
-                while (fs.Position < fs.Length)
+                while (ms.Position < ms.Length)
+                {
+                    skeletons.Add(new HIR
+                    {
+                        boneParentIndex = reader.ReadInt32(),
+                        TransformX = reader.ReadInt16(),
+                        TransformY = reader.ReadInt16(),
+                        TransformZ = reader.ReadInt16(),
+                        TransformW = reader.ReadInt16(),
+                        RotationX = reader.ReadInt16(),
+                        RotationY = reader.ReadInt16(),
+                        RotationZ = reader.ReadInt16(),
+                        RotationW = reader.ReadInt16(),
+                    });
+                }
+
+            }
+
+            return skeletons;
+        }
+
+        public static List<HIR> GetSkeletonList(string path)
+        {
+            List<HIR> skeletons = new List<HIR>();
+
+            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(path)))
+            using (BinaryReader reader = new BinaryReader(ms))
+            {
+                while (ms.Position < ms.Length)
                 {
                     skeletons.Add(new HIR
                     {

@@ -24,15 +24,11 @@ namespace hogs_gameEditor_wpf.FileFormat
         
         public PMG(string filepath)
         {
-            using (FileStream fs = File.Open(filepath + ".PMG", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (BinaryReader reader = new BinaryReader(fs)) //using a binaryreader make the offset advance by itself
+            using (MemoryStream ms = new MemoryStream( File.ReadAllBytes(filepath + ".PMG") ))
+            using (BinaryReader reader = new BinaryReader(ms)) //using a binaryreader make the offset advance by itself
             {
 
-                //short minHeight = 1000;
-                //short maxHeight = 0;
-
-
-                while (fs.Position < fs.Length)
+                while (ms.Position < ms.Length)
                 {
                     for (int yBlock = 0; yBlock < 16; yBlock++)
                     {
@@ -92,7 +88,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                     }
                 }
 
-                
+
             }
 
            

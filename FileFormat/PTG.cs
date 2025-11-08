@@ -21,16 +21,16 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public PTG(string filepathWithoutExtension)
         {
-            using (FileStream fs = File.Open(filepathWithoutExtension + ".PTG", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (BinaryReader reader = new BinaryReader(fs))
+            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(filepathWithoutExtension + ".PTG")))
+            using (BinaryReader reader = new BinaryReader(ms))
             {
                 this.textureCount = reader.ReadInt32();
 
-                int texSize = (int)(fs.Length - 4) / this.textureCount;
+                int texSize = (int)(ms.Length - 4) / this.textureCount;
 
-                while (fs.Position < fs.Length)
+                while (ms.Position < ms.Length)
                 {
-                    textures.Add( new TIM( reader.ReadBytes(texSize)) );
+                    textures.Add(new TIM(reader.ReadBytes(texSize)));
                 }
 
             }
@@ -43,7 +43,6 @@ namespace hogs_gameEditor_wpf.FileFormat
             string destination = GlobalVars.gameFolder + "devtools/EXPORT/map/"; 
             for (int i = 0; i < this.textureCount; i++)
             {
-
                 File.WriteAllBytes(destination + i + ".png", this.textures[i].ToPngBytes().Item3 );
             }
             
@@ -256,7 +255,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
             bandImage.RotateFlip(RotateFlipType.Rotate270FlipNone);
 
-
+            //the image is  stored in a special way for the game read lines by line, we need to swap lines to get a real view 
             Bitmap temp = bandImage.Clone(new Rectangle(0, 128, 512, 128), bandImage.PixelFormat);
             
             // Copy band 2 into band 1's place

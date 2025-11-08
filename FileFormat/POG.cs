@@ -137,51 +137,23 @@ namespace hogs_gameEditor_wpf.FileFormat
         {
             List<POG> mapEntities = new List<POG>();
 
-            using (FileStream fs = File.Open(GlobalVars.mapsFolder + mapName + ".POG", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mapdata = File.ReadAllBytes(GlobalVars.mapsFolder + mapName + ".POG");
+            ushort blocks = BitConverter.ToUInt16(mapdata, 0); //get number of map objects
+
+            for (int i = 1; i <= blocks; i++)
             {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                ushort blocks = BitConverter.ToUInt16(mapdata, 0); //get number of map objects
+                int endblock = i * 94 + 2;
+                int startblock = endblock - 94; //a map object is 94 bytes, so every 94 bytes, cut and create a mapobject
 
-                for (int i = 1; i <= blocks; i++)
+                if (endblock < mapdata.Length)  //if this is not the end of file
                 {
-                    int endblock = i * 94 + 2;
-                    int startblock = endblock - 94; //a map object is 94 bytes, so every 94 bytes, cut and create a mapobject
-
-                    if (endblock < mapdata.Length)  //if this is not the end of file
-                    {
-                        mapEntities.Add(new POG(mapdata[startblock..endblock]));
-                    }
+                    mapEntities.Add(new POG(mapdata[startblock..endblock]));
                 }
             }
-
+            
             return mapEntities;
         }
 
-        public static List<string> GetEntitiesList(string mapName)
-        {
-            List<string> mapEntities = new List<string>();
-
-            using (FileStream fs = File.Open(GlobalVars.mapsFolder + mapName + ".POG", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                ushort blocks = BitConverter.ToUInt16(mapdata, 0); //get number of map objects
-
-                for (int i = 1; i <= blocks; i++)
-                {
-                    int endblock = i * 94 + 2;
-                    int startblock = endblock - 94; //a map object is 94 bytes, so every 94 bytes, cut and create a mapobject
-
-                    if (endblock < mapdata.Length)  //if this is not the end of file
-                    {
-                        mapEntities.Add(Encoding.UTF8.GetString(mapdata[startblock..(startblock + 16)]).Trim('\0'));
-                    }
-                }
-            }
-
-            return mapEntities;
-        }
 
         public static void ExportMapPOG(List<POG> mapEntities,string mapName)
         {

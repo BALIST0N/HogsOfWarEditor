@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Windows.System;
 using Xceed.Wpf.Toolkit.PropertyGrid;
 
 
@@ -582,7 +583,7 @@ namespace hogs_gameManager_wpf
         {
             if (this.mapListComboBox.SelectedIndex != -1)
             {
-                if (MessageBox.Show("You gonna export all models and textures of this map !,are you sure ? \n\r (Charaters are no exported) ", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show("You gonna export all models and textures of this map !,are you sure ? \n\r (Charaters are not exported) ", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     buttonMapExport_Click(null, null);
                     
@@ -641,12 +642,16 @@ namespace hogs_gameManager_wpf
                 {
                     //open a window with export status ...
 
-                    //GlobalVars.ConvertFontsToTTF();
-                    //GlobalVars.ExportSkyboxes();
+                    
+
                     //GlobalVars.ExportMapsAndModels();
                     //GlobalVars.ExportCharsFolder();
-
                     
+                    //GlobalVars.ConvertFontsToTTF(); 
+                    //GlobalVars.ExportSkyboxes();
+                    //GlobalVars.ExportLanguages();
+                    //GlobalVars.ExportAudioAndSounds();
+                    //GlobalVars.Export_FEBmps();
                 }
                 
 

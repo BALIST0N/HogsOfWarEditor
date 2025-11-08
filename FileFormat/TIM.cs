@@ -221,7 +221,7 @@ namespace hogs_gameEditor_wpf.FileFormat
             using (var ms = new MemoryStream())
             using (var writer = new BinaryWriter(ms))
             {
-                // --- En-tête ---
+                // --- Headers ---
                 writer.Write(this.ID);             // 1 byte
                 writer.Write(this.version);        // 1 byte
                 writer.Write(this.reserved);       // 2 bytes
@@ -252,7 +252,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                 if (this.pixelData != null)
                     writer.Write(this.pixelData);
 
-                // Retourner le tableau complet
+                // Result
                 return ms.ToArray();
             }
 

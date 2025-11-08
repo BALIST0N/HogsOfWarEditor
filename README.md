@@ -8,6 +8,9 @@ customizing the game with modifing stuff and even adding new ones
 
 
 done : 
+- mega exporter, read all gamefiles and convert them 
+- HIR & MCAP to JSON 
+- remove forced passing "extension" on PMG,PTG,etcc.. classes (use memorystream + FileReadallbyte instead of filestream)
 - revamp the editor primary functions : rewrite "Additem" and save function 
 - modding mode : build a verified working MAD + mtd with correct fac indexes, one for normal maps, one for snow maps 
 - pigs are displayed with cross instead of squares
@@ -19,10 +22,8 @@ done :
 
 TODO : 
 the tool : 
-- mega exporter, read all gamefiles and convert them 
-- HIR & MCAP to JSON ? (should be easywith c# JsonSerialiser)
-- remove forced passing "extension" on PMG,PTG,etcc.. classes (use memorystream + FileReadallbyte instead of filestream)
 - export 1 model with multiple skins 
+- export FEBmps
 - export 1 charater with multiple skins colors
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with animations/motionCapture (mcap)
@@ -40,7 +41,7 @@ todo for PC version (need to decompile code):
 - game fixed resolution / borderless window
 - extra classes
 - modifiable progression tree 
-- machine gun behavior (manual direction wwhile autoshooting + recoil , -4hp & -8hp)
+- machine gun behavior (manual direction while autoshooting + recoil , -4hp & -8hp)
 - extra weapons 
 - new campaigns
 - defense mode

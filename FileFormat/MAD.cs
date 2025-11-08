@@ -50,57 +50,54 @@ namespace hogs_gameEditor_wpf.FileFormat
             MAD model = new MAD();
             model.DataSizes = new int[3];
 
-            using (FileStream fs = File.Open(fldr, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mapdata = File.ReadAllBytes(fldr);
+            int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+                int endblockContentTable = i + 24;
 
-                for (int i = 0; i <= endContenTable; i++)
+                if (endblockContentTable <= endContenTable)
                 {
-                    int endblockContentTable = i + 24;
-
-                    if (endblockContentTable <= endContenTable)
+                    string nameInsideMad = Encoding.ASCII.GetString(mapdata[i..(i + 16)]).TrimEnd();
+                    if (nameInsideMad.Contains(modelToFind))
                     {
-                        string nameInsideMad = Encoding.ASCII.GetString(mapdata[i..(i + 16)]).TrimEnd();
-                        if (nameInsideMad.Contains(modelToFind))
+                        model.Name = modelToFind;
+
+                        int DataOffset = BitConverter.ToInt32(mapdata[(i + 16)..(i + 20)]);
+                        int DataSize = BitConverter.ToInt32(mapdata[(i + 20)..(i + 24)]);
+
+                        int endDataBlock = DataOffset + DataSize;
+
+                        switch (nameInsideMad)
                         {
-                            model.Name = modelToFind;
+                            case string a when a.Contains(".FAC"):
+                                try
+                                {
+                                    model.facData = new FAC(mapdata[DataOffset..endDataBlock]);
+                                    model.DataSizes[2] = DataSize;
+                                }
+                                catch { }
+                                break;
 
-                            int DataOffset = BitConverter.ToInt32(mapdata[(i + 16)..(i + 20)]);
-                            int DataSize = BitConverter.ToInt32(mapdata[(i + 20)..(i + 24)]);
+                            case string b when b.Contains(".VTX"):
+                                model.vtxData = new VTX(mapdata[DataOffset..endDataBlock]);
+                                model.DataSizes[0] = DataSize;
+                                break;
 
-                            int endDataBlock = DataOffset + DataSize;
-
-                            switch (nameInsideMad)
-                            {
-                                case string a when a.Contains(".FAC"):
-                                    try
-                                    {
-                                        model.facData = new FAC(mapdata[DataOffset..endDataBlock]);
-                                        model.DataSizes[2] = DataSize;
-                                    }
-                                    catch { }
-                                    break;
-
-                                case string b when b.Contains(".VTX"):
-                                    model.vtxData = new VTX(mapdata[DataOffset..endDataBlock]);
-                                    model.DataSizes[0] = DataSize;
-                                    break;
-
-                                case string c when c.Contains(".NO2"):
-                                    model.no2Data = new NO2(mapdata[DataOffset..endDataBlock]);
-                                    model.DataSizes[1] = DataSize;
-                                    break;
-                            }
+                            case string c when c.Contains(".NO2"):
+                                model.no2Data = new NO2(mapdata[DataOffset..endDataBlock]);
+                                model.DataSizes[1] = DataSize;
+                                break;
                         }
-
                     }
-                    i += 23;
-                }
 
-                return model;
+                }
+                i += 23;
             }
+
+            return model;
+            
         }
 
         public static MAD GetCharacter(string team,List<HIR> skeleton, List<MotionCapture> anims)
@@ -130,31 +127,26 @@ namespace hogs_gameEditor_wpf.FileFormat
             string fldr = GlobalVars.mapsFolder + mapName + ".MAD";
             List<string> entities = new List<string>();
 
-            using (FileStream fs = File.Open(fldr, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mapdata = File.ReadAllBytes(fldr);
+            int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+                int endblockContentTable = i + 24;
 
-                for (int i = 0; i <= endContenTable; i++)
+                if (endblockContentTable <= endContenTable)
                 {
-                    int endblockContentTable = i + 24;
-
-                    if (endblockContentTable <= endContenTable)
+                    string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
+                    a = a.Substring(0, a.Length - 4);
+                    if(entities.Contains(a) == false && GlobalVars.entityFilterList.Contains(a) == false) 
                     {
-                        string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                        a = a.Substring(0, a.Length - 4);
-                        if(entities.Contains(a) == false && GlobalVars.entityFilterList.Contains(a) == false) 
-                        {
-                            entities.Add(a);
-                        }
-                        
+                        entities.Add(a);
                     }
-                    i += 23;
+                        
                 }
-
-                
+                i += 23;
             }
+            
             //need to apply a filter to remove dupplicates
             return entities;
         }
@@ -164,31 +156,26 @@ namespace hogs_gameEditor_wpf.FileFormat
             string fldr = GlobalVars.mapsFolder + mapName + ".MAD";
             List<string> entities = new List<string>();
 
-            using (FileStream fs = File.Open(fldr, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mapdata = File.ReadAllBytes(fldr);
+            int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+                int endblockContentTable = i + 24;
 
-                for (int i = 0; i <= endContenTable; i++)
+                if (endblockContentTable <= endContenTable)
                 {
-                    int endblockContentTable = i + 24;
-
-                    if (endblockContentTable <= endContenTable)
+                    string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
+                    a = a.Substring(0, a.Length - 4);
+                    if (entities.Contains(a) == false )
                     {
-                        string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                        a = a.Substring(0, a.Length - 4);
-                        if (entities.Contains(a) == false )
-                        {
-                            entities.Add(a);
-                        }
-
+                        entities.Add(a);
                     }
-                    i += 23;
+
                 }
-
-
+                i += 23;
             }
+            
             //need to apply a filter to remove dupplicates
             return entities;
         }
@@ -198,30 +185,24 @@ namespace hogs_gameEditor_wpf.FileFormat
 
             List<string> entities = new List<string>();
 
-            using (FileStream fs = File.Open(fldr, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mapdata = File.ReadAllBytes(fldr);
+            int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+                int endblockContentTable = i + 24;
 
-                for (int i = 0; i <= endContenTable; i++)
+                if (endblockContentTable <= endContenTable)
                 {
-                    int endblockContentTable = i + 24;
-
-                    if (endblockContentTable <= endContenTable)
+                    string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
+                    a = a.Substring(0, a.Length - 4);
+                    if (entities.Contains(a) == false)
                     {
-                        string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                        a = a.Substring(0, a.Length - 4);
-                        if (entities.Contains(a) == false)
-                        {
-                            entities.Add(a);
-                        }
-
+                        entities.Add(a);
                     }
-                    i += 23;
+
                 }
-
-
+                i += 23;
             }
 
             return entities;
@@ -231,57 +212,55 @@ namespace hogs_gameEditor_wpf.FileFormat
         {
             MAD model = new MAD();
 
-            using (FileStream fs = File.Open(fldr, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            byte[] mapdata = File.ReadAllBytes(fldr);
+
+            int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+
+            for (int i = 0; i <= endContenTable; i++)
             {
-                byte[] mapdata = new byte[fs.Length];
-                fs.Read(mapdata, 0, Convert.ToInt32(fs.Length));
-                int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
+                int endblockContentTable = i + 24;
 
-                for (int i = 0; i <= endContenTable; i++)
+                if (endblockContentTable <= endContenTable)
                 {
-                    int endblockContentTable = i + 24;
-
-                    if (endblockContentTable <= endContenTable)
+                    string nameInsideMad = Encoding.ASCII.GetString(mapdata[i..(i + 16)]).TrimEnd();
+                    if (nameInsideMad.Contains(modelToFind))
                     {
-                        string nameInsideMad = Encoding.ASCII.GetString(mapdata[i..(i + 16)]).TrimEnd();
-                        if (nameInsideMad.Contains(modelToFind))
+                        model.Name = modelToFind;
+
+                        int DataOffset = BitConverter.ToInt32(mapdata[(i + 16)..(i + 20)]);
+                        int DataSize = BitConverter.ToInt32(mapdata[(i + 20)..(i + 24)]);
+
+                        int endDataBlock = DataOffset + DataSize;
+
+                        switch (nameInsideMad)
                         {
-                            model.Name = modelToFind;
+                            case string a when a.Contains(".FAC"):
+                            case string a2 when a2.Contains(".fac"):
+                                try
+                                {
+                                    model.facData = new FAC(mapdata[DataOffset..endDataBlock]);
+                                }
+                                catch { }
+                                break;
 
-                            int DataOffset = BitConverter.ToInt32(mapdata[(i + 16)..(i + 20)]);
-                            int DataSize = BitConverter.ToInt32(mapdata[(i + 20)..(i + 24)]);
+                            case string b when b.Contains(".VTX"):
+                            case string b2 when b2.Contains(".vtx"):
+                                model.vtxData = new VTX(mapdata[DataOffset..endDataBlock]);
+                                break;
 
-                            int endDataBlock = DataOffset + DataSize;
-
-                            switch (nameInsideMad)
-                            {
-                                case string a when a.Contains(".FAC"):
-                                case string a2 when a2.Contains(".fac"):
-                                    try
-                                    {
-                                        model.facData = new FAC(mapdata[DataOffset..endDataBlock]);
-                                    }
-                                    catch { }
-                                    break;
-
-                                case string b when b.Contains(".VTX"):
-                                case string b2 when b2.Contains(".vtx"):
-                                    model.vtxData = new VTX(mapdata[DataOffset..endDataBlock]);
-                                    break;
-
-                                case string c when c.Contains(".NO2"):
-                                case string c2 when c2.Contains(".no2"):
-                                    model.no2Data = new NO2(mapdata[DataOffset..endDataBlock]);
-                                    break;
-                            }
+                            case string c when c.Contains(".NO2"):
+                            case string c2 when c2.Contains(".no2"):
+                                model.no2Data = new NO2(mapdata[DataOffset..endDataBlock]);
+                                break;
                         }
-
                     }
-                    i += 23;
-                }
 
-                return model;
+                }
+                i += 23;
             }
+
+            return model;
+            
         }
 
 
