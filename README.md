@@ -8,7 +8,7 @@ customizing the game with modifing stuff and even adding new ones
 
 
 done : 
-- mega exporter, read all gamefiles and convert them 
+- mega exporter, read all gamefiles and convert them (audio with ffmpeg, maps, skys & skyboxes, models,textures, some ui hats )
 - HIR & MCAP to JSON 
 - remove forced passing "extension" on PMG,PTG,etcc.. classes (use memorystream + FileReadallbyte instead of filestream)
 - revamp the editor primary functions : rewrite "Additem" and save function 
@@ -23,7 +23,7 @@ done :
 TODO : 
 the tool : 
 - export 1 model with multiple skins 
-- export FEBmps
+- export FEBmps (ui)
 - export 1 charater with multiple skins colors
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with animations/motionCapture (mcap)
@@ -31,6 +31,7 @@ the tool :
 - 3d viewer : parse objects and place characters/entities
 - 3d viewer : load all models and export then load 3d view with exported models
 - 3d viewer : migrate to helixtoolkit.wpf.sharpDX (or some wpf DX12 library)
+- export fonts , implement a way to transform vectors to ttf 
 
 _________________________________________________________
 
