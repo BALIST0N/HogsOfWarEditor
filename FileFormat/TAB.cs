@@ -19,12 +19,18 @@ namespace hogs_gameEditor_wpf.FileFormat
             using (MemoryStream ms = new MemoryStream(file))
             using (BinaryReader reader = new BinaryReader(ms))
             {
-                Letter l = new Letter();
-                l.XOffset = reader.ReadUInt16();
-                l.YOffset = reader.ReadUInt16();    
-                l.Width = reader.ReadUInt16();
-                l.Height = reader.ReadUInt16();
-                all_letters.Add(l);
+                reader.BaseStream.Position += 16;
+
+                while (ms.Position < ms.Length)
+                {
+                    Letter l = new Letter();
+                    l.XOffset = reader.ReadUInt16();
+                    l.YOffset = reader.ReadUInt16();
+                    l.Width = reader.ReadUInt16();
+                    l.Height = reader.ReadUInt16();
+                    this.all_letters.Add(l);
+                }
+
             }
         }
 

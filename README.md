@@ -8,6 +8,7 @@ customizing the game with modifing stuff and even adding new ones
 
 
 done : 
+- export window with option + multithreading on exports processes (wasn't planned but still cool tho) 
 - mega exporter, read all gamefiles and convert them (audio with ffmpeg, maps, skys & skyboxes, models,textures, some ui hats )
 - HIR & MCAP to JSON 
 - remove forced passing "extension" on PMG,PTG,etcc.. classes (use memorystream + FileReadallbyte instead of filestream)
@@ -22,23 +23,30 @@ done :
 
 TODO : 
 the tool : 
-- export 1 model with multiple skins 
-- export FEBmps (ui)
-- export 1 charater with multiple skins colors
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with animations/motionCapture (mcap)
+- manage to export character model with a hat (combine two models)
+- export 1 model with multiple skins (tents, shelter) 
+- export 1 model with multiple skins and attached barrels (pillbox, artillery, tank...) 
+- export FEBmps (ui)
+- export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 
+- compress entire export folder with Zstd (or 7z/whatever)
 - class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
 - 3d viewer : parse objects and place characters/entities
 - 3d viewer : load all models and export then load 3d view with exported models
 - 3d viewer : migrate to helixtoolkit.wpf.sharpDX (or some wpf DX12 library)
-- export fonts , implement a way to transform vectors to ttf 
+- export fonts, implement a way to transform vectors to ttf 
+
+
+Scrapped/ cancelled : 
+- converting fonts images to TTF (no library available, too complex, useless)
 
 _________________________________________________________
 
 
 todo for PC version (need to decompile code): 
 
-- AI behavior
+- AI behavior 
 - game fixed resolution / borderless window
 - extra classes
 - modifiable progression tree 

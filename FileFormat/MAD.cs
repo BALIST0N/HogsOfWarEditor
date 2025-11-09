@@ -100,24 +100,61 @@ namespace hogs_gameEditor_wpf.FileFormat
             
         }
 
-        public static MAD GetCharacter(string team,List<HIR> skeleton, List<MotionCapture> anims)
+        public static MAD GetCharacter(string type,string team,List<HIR> skeleton, List<MotionCapture> anims)
         {
-            string openHOW_data = GlobalVars.gameFolder + "/devtools/EXTRACTED/chars/";
+            //LE_ME = hero
+            //AC_ME = legend
 
-            string charFile = openHOW_data+ "pigs/pcgru_me";
-            string charTextures = openHOW_data + "pigs/teamlard/";
+            //var list = GetModelListFromMad(GlobalVars.gameFolder + "Chars/british.mad");
 
 
-            MAD mad = new MAD
+            switch(type) //wtf is this mess the names are wong inside the game 
             {
-                Name = "pcgru_me",
-                facData = new FAC(File.ReadAllBytes(charFile + ".fac")),
-                vtxData = new VTX(File.ReadAllBytes(charFile + ".vtx")),
-                no2Data = new NO2(File.ReadAllBytes(charFile + ".no2")),
-                skeleton = skeleton,
-                animations = anims
-                
-            };
+                case "AC_ME":
+                    type = "pcace_hi";
+                    break;
+
+                case "CO_ME":
+                    type = "pcsab_hi";
+                    break;
+
+                case "GR_ME":
+                    type = "pcgru_hi";
+                    break;
+
+                case "HV_ME":
+                    type = "pchvy_hi";
+                    break;
+
+                case "LE_ME":
+                    type = "pcleg_hi";
+                    break;
+
+                case "ME_ME":
+                    type = "pcmed_hi";
+                    break;
+
+                case "SA_ME":
+                    type = "pcsap_hi";  
+                    break;
+
+                case "SN_ME":
+                    type = "pcgru_hi";
+                    break;
+
+                case "SP_ME":
+                    type = "pcsni_hi";
+                    break;
+
+                case "SB_ME":
+                    type = "pcspy_hi";
+                    break;
+            }
+
+            MAD mad = GetModelFromFullMAD(type, GlobalVars.gameFolder + "Chars/british.mad");
+
+            mad.skeleton = skeleton;
+            mad.animations = anims;
             return mad;
         }
 

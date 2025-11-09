@@ -1,4 +1,5 @@
-﻿using BitmapToVector;
+﻿using ABI.System;
+using BitmapToVector;
 using hogs_gameEditor_wpf.FileFormat;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
@@ -16,7 +17,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
-using Windows.Devices.Radios;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using Windows.UI;
 using Path = System.IO.Path;
 
 
@@ -397,27 +401,23 @@ namespace hogs_gameEditor_wpf
 
         public static void ExportCharacterWithTexture_GLB(MAD charModel, List<Mtd> pngs)
         {
-
-            string outputPath = gameFolder + "devtools/EXPORT/" + charModel.GetName();
+            Directory.CreateDirectory(gameFolder + "devtools/EXPORT/characters/");
+            string outputPath = gameFolder + "devtools/EXPORT/characters/" + charModel.GetName();
             ModelRoot model = ModelRoot.CreateModel();
             List<MaterialBuilder> texList = new List<MaterialBuilder>();
             Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new Dictionary<int, (MaterialBuilder Material, int Width, int Height)>();
             var meshDict = new Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>>();
-            Dictionary<int, NodeBuilder> boneNodes = new Dictionary<int, NodeBuilder>();
             SceneBuilder scene = new SceneBuilder();
-
 
             //materials
             foreach (Mtd texture in pngs)
             {
-                texture.textureTim = new TIM(texture.textureData);
-
                 var png = texture.textureTim.ToPngBytes();
                 texture.width = png.Item1;
                 texture.height = png.Item2;
 
                 MaterialBuilder mat = new MaterialBuilder()
-                    .WithChannelImage(KnownChannel.BaseColor, png.Item3 )
+                    .WithChannelImage(KnownChannel.BaseColor, png.Item3)
                     .WithAlpha(SharpGLTF.Materials.AlphaMode.BLEND);
 
                 materialDict[texture.indexNumber] = (mat, texture.width, texture.height);
@@ -427,45 +427,6 @@ namespace hogs_gameEditor_wpf
             foreach (var texIdx in materialDict.Keys)
             {
                 meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>($"Mesh_{texIdx}");
-            }
-
-            //bones creation
-            for (int i = 0; i < charModel.skeleton.Count; i++)
-            {
-                HIR bone = charModel.skeleton[i];
-
-                // Crée une transformation locale
-                var localTranslation = new Vector3(bone.TransformX, bone.TransformY, bone.TransformZ);
-
-                Quaternion quat;
-
-                if (bone.RotationX == 0 && bone.RotationY == 0 && bone.RotationZ == 0 && bone.RotationW == 0)
-                {
-                    quat = Quaternion.Identity;
-                }
-                else
-                {
-                    quat = Quaternion.Normalize(new Quaternion( bone.RotationX,bone.RotationY,bone.RotationZ,bone.RotationW ));
-                }
-
-
-                // Crée le node dans la hiérarchie
-                NodeBuilder node = new NodeBuilder(BoneNames[i]);
-                node.LocalMatrix = Matrix4x4.CreateFromQuaternion(quat) * Matrix4x4.CreateTranslation(localTranslation); ;              
-                boneNodes[i] = node;
-            }
-
-            //bone hierarchy 
-            for (int i = 0; i < charModel.skeleton.Count; i++)
-            {
-                int parentIndex = charModel.skeleton[i].boneParentIndex;
-
-                if (parentIndex > 0)
-                {
-                    boneNodes[parentIndex].AddNode(boneNodes[i]); // Ajoute comme enfant
-                }
-
-
             }
 
 
@@ -499,17 +460,17 @@ namespace hogs_gameEditor_wpf
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pA, normal),
                         new VertexTexture1(uvA),
-                        new VertexJoints4(vA.BoneIndex) ),
+                        new VertexJoints4(vA.BoneIndex)),
 
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pB, normal),
                         new VertexTexture1(uvB),
-                        new VertexJoints4(vB.BoneIndex) ),
+                        new VertexJoints4(vB.BoneIndex)),
 
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pC, normal),
                         new VertexTexture1(uvC),
-                        new VertexJoints4(vC.BoneIndex) )
+                        new VertexJoints4(vC.BoneIndex))
                 );
 
             }
@@ -545,22 +506,22 @@ namespace hogs_gameEditor_wpf
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pA, normal2),
                         new VertexTexture1(uvA),
-                        new VertexJoints4(vA.BoneIndex) ),
+                        new VertexJoints4(vA.BoneIndex)),
 
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pB, normal),
                         new VertexTexture1(uvB),
-                        new VertexJoints4(vB.BoneIndex) ),
+                        new VertexJoints4(vB.BoneIndex)),
 
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pC, normal),
                         new VertexTexture1(uvC),
-                        new VertexJoints4(vC.BoneIndex) ),
+                        new VertexJoints4(vC.BoneIndex)),
 
                     new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                         new VertexPositionNormal(pD, normal),
                         new VertexTexture1(uvD),
-                        new VertexJoints4(vD.BoneIndex) )
+                        new VertexJoints4(vD.BoneIndex))
                 );
 
             }
@@ -568,27 +529,15 @@ namespace hogs_gameEditor_wpf
 
             foreach (var kvp in meshDict)
             {
-                //find the bone number in the mesh ? 
-                int boneindex = 0;
-                scene.AddSkinnedMesh(kvp.Value, Matrix4x4.CreateScale(1, -1, 1), boneNodes[boneindex] );
-            }
-            
-
-            /*
-            // Créer la scène
-            foreach (var kvp in meshDict)
-            {
                 scene.AddRigidMesh(kvp.Value, Matrix4x4.CreateScale(1, -1, 1));
             }
-
-            */
 
             //export
             scene.ToGltf2().SaveGLB(outputPath);
 
         }
 
-       
+
         //to do : add vertexColor1 for lighting but not mandatory ...
         public static void ExportTerrain_GLB(PMG mapTerrain, PTG mapTextures, string filepath)
         {
@@ -612,7 +561,7 @@ namespace hogs_gameEditor_wpf
                     int invBx = 15 - bx;
                     int invBy = 15 - by;
 
-                    FileFormat.Block block = mapTerrain.blocks[invBx, invBy];
+                    Block block = mapTerrain.blocks[invBx, invBy];
 
                     for (int tx = 0; tx < 4; tx++)
                     {
@@ -672,6 +621,13 @@ namespace hogs_gameEditor_wpf
             var filesList = Directory.GetFiles(gameFolder + "Skys/", "*", SearchOption.TopDirectoryOnly);
             Directory.CreateDirectory(exportFolder + "skys");
 
+            ExporterWindow window = null;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                window = Application.Current.Windows.OfType<ExporterWindow>().FirstOrDefault();
+            });
+
+
             foreach (string fichier in filesList)
             {
                 string dest = exportFolder + "skys/" + Path.GetFileNameWithoutExtension(fichier) + ".png";
@@ -692,6 +648,7 @@ namespace hogs_gameEditor_wpf
                         //File.WriteAllBytes( exportFolder + Path.GetFileNameWithoutExtension(fichier2) + ".glb", ExportSkybox_GLB(pmg, ptg));
 
                         ptg.CreateSkybox(pmg).Save(dest, ImageFormat.Png);
+                        window.IncrementProgress();
                     }
                 }
 
@@ -760,7 +717,12 @@ namespace hogs_gameEditor_wpf
             */
 
             var list = Directory.EnumerateFiles(gameFolder + "Chars/", "*", SearchOption.AllDirectories);
-            
+            ExporterWindow window = null;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                window = Application.Current.Windows.OfType<ExporterWindow>().FirstOrDefault();
+            });
+
             List<MAD> models = new List<MAD>();
 
             MAD skydome = new MAD();
@@ -797,10 +759,12 @@ namespace hogs_gameEditor_wpf
 
                     case "pig.HIR":
                         File.WriteAllText(exportFolder + "/characters/Pig.HIR.json",JsonSerializer.Serialize( HIR.GetSkeletonList(fichier) , new JsonSerializerOptions { WriteIndented = true } ));  ;
+                        window.IncrementProgress();
                         break;
 
                     case "mcap.mad":
-                        File.WriteAllText(exportFolder + "/characters/motioncapture.json",JsonSerializer.Serialize( MotionCapture.GetMotionCaptureAnimations(fichier) , new JsonSerializerOptions { WriteIndented = true } ));  ;
+                        File.WriteAllText(exportFolder + "/characters/motioncapture.json",JsonSerializer.Serialize( MotionCapture.GetMotionCaptureAnimations(fichier) , new JsonSerializerOptions { WriteIndented = true } ));
+                        window.IncrementProgress();
                         break;
 
                     case "BRITHATS.MAD": //contains various classes hats without color 
@@ -818,6 +782,7 @@ namespace hogs_gameEditor_wpf
                             m.textures = Mtd.LoadTexturesFromMTD(m.facData, hatsMtd, true);
 
                             ExportModelWithOutTexture_GLB(m, destHats2);
+                            window.IncrementProgress();
                         }
 
                         continue;
@@ -835,7 +800,7 @@ namespace hogs_gameEditor_wpf
                             m.textures = Mtd.LoadTexturesFromMTD(m.facData, hatsMtd, true);
 
                             ExportModelWithTexture_GLB(m, destHats2);
-
+                            window.IncrementProgress();
                         }
                         break;
 
@@ -861,6 +826,7 @@ namespace hogs_gameEditor_wpf
                                 };
                                 tempTex.textureTim = new TIM(mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)]);
                                 tempTex.textureTim.ToBitmap().Save(faceFldr + tempTex.Name+".png",ImageFormat.Png);
+                                window.IncrementProgress();
                             }
                             i += 23;
                         }
@@ -887,7 +853,9 @@ namespace hogs_gameEditor_wpf
                             skydome.textures = Mtd.LoadTexturesFromMTD(skydome.facData, fichier, true);
                             skydomeU.textures = Mtd.LoadTexturesFromMTD(skydomeU.facData, fichier, true);
                             ExportModelWithTexture_GLB(skydome, destDome);
+                            window.IncrementProgress();
                             ExportModelWithTexture_GLB(skydomeU, destDome.Replace("skydome_", "skydomeu_") );
+                            window.IncrementProgress();
                         }
                         continue;
 
@@ -908,6 +876,7 @@ namespace hogs_gameEditor_wpf
                                 m.textures = Mtd.LoadTexturesFromMTD(m.facData, weaponsMtd, true);
 
                                 ExportModelWithTexture_GLB(m, dest2 );
+                                window.IncrementProgress();
                             }
 
                         }
@@ -932,6 +901,7 @@ namespace hogs_gameEditor_wpf
                             m.textures = Mtd.LoadTexturesFromMTD(m.facData, tg, true);
 
                             ExportModelWithTexture_GLB(m, destFolder + ".glb");
+                            window.IncrementProgress();
                         }
                         break;
 
@@ -942,92 +912,97 @@ namespace hogs_gameEditor_wpf
         }
 
 
-        public static void ExportAudioAndSounds()
+        public static async void ExportAudioAndSounds()
         {
-            string dest = exportFolder + "Audio/";
-            Directory.CreateDirectory(dest);
-            
-            foreach (string fileName in Directory.GetFiles(gameFolder+"Audio", "*.wav"))
+            ExporterWindow window = null;
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                string dest2 = dest + Path.GetFileNameWithoutExtension(fileName) + ".opus";
+                window = Application.Current.Windows.OfType<ExporterWindow>().FirstOrDefault();
+            });
 
-                ProcessStartInfo psi = new ProcessStartInfo
-                {
-                    FileName = "D:\\projects devs\\hogs_gameManager_wpf/ffmpeg.exe",
-                    Arguments = $"-y -i \"{fileName}\"  -c:a libopus -b:a 48k -ac 1  \"{dest2}\"",
-                    UseShellExecute = false,     // obligatoire pour rediriger ou cacher
-                    CreateNoWindow = true,       // aucune fenêtre cmd
-                    RedirectStandardOutput = false,
-                    RedirectStandardError = false
-                };
+            // ---- Première boucle ----
+            string destaudio = exportFolder + "Audio/";
+            Directory.CreateDirectory(destaudio);
 
-                using (Process ffmpeg = Process.Start(psi))
-                {
-                    ffmpeg.WaitForExit(); // attend la fin de la conversion
-                }
+            var tasks = new List<Task>();
+            foreach (string fileName in Directory.GetFiles(gameFolder + "Audio/", "*.wav"))
+            {
+                string dest2 = destaudio + Path.GetFileNameWithoutExtension(fileName) + ".opus";
+
+                tasks.Add(RunFfmpegAsync(fileName, dest2, window));
             }
 
+            // ---- Deuxième boucle ----
+            string destUI = exportFolder + "Audio/ui/";
+            Directory.CreateDirectory(destUI);
 
-            dest = exportFolder + "/Audio/ui/";
-            Directory.CreateDirectory(dest);
-
+            tasks.Clear();
             foreach (string fileName in Directory.GetFiles(gameFolder + "FESounds/", "*.wav"))
             {
-                string dest2 = dest + Path.GetFileNameWithoutExtension(fileName) + ".opus";
+                string dest2 = destUI + Path.GetFileNameWithoutExtension(fileName) + ".opus";
 
-                ProcessStartInfo psi = new ProcessStartInfo
-                {
-                    FileName = "D:\\projects devs\\hogs_gameManager_wpf/ffmpeg.exe",
-                    Arguments = $"-y -i \"{fileName}\"  -c:a libopus -b:a 48k -ac 1  \"{dest2}\"",
-                    UseShellExecute = false,     // obligatoire pour rediriger ou cacher
-                    CreateNoWindow = true,       // aucune fenêtre cmd
-                    RedirectStandardOutput = false,
-                    RedirectStandardError = false
-                };
-
-                using (Process ffmpeg = Process.Start(psi))
-                {
-                    ffmpeg.WaitForExit(); // attend la fin de la conversion
-                }
+                tasks.Add(RunFfmpegAsync(fileName, dest2, window));
             }
-            
-            dest = exportFolder + "/Audio/speech/";
-            Directory.CreateDirectory(dest);
 
+            await Task.WhenAll(tasks); // wait for all ffmpeg loops are done and dispatched 
 
+            // ---- Troisième boucle ----
+            string destSpeech = exportFolder + "Audio/speech/";
+            Directory.CreateDirectory(destSpeech);
+
+            tasks.Clear();
             foreach (string dir in Directory.GetDirectories(gameFolder + "Speech/Sku1/"))
             {
-                string dirToCreate = exportFolder + "/Audio/speech/" + Path.GetFileNameWithoutExtension(dir);
+                string dirToCreate = Path.Combine(destSpeech, Path.GetFileName(dir));
                 Directory.CreateDirectory(dirToCreate);
 
                 foreach (string fileName in Directory.GetFiles(dir, "*.wav"))
                 {
-                    string dest2 = dirToCreate + "/"  + Path.GetFileNameWithoutExtension(fileName) + ".opus";
-
-                    ProcessStartInfo psi = new ProcessStartInfo
-                    {
-                        FileName = "D:\\projects devs\\hogs_gameManager_wpf/ffmpeg.exe",
-                        Arguments = $"-y -i \"{fileName}\"  -c:a libopus -b:a 48k -ac 1  \"{dest2}\"",
-                        UseShellExecute = false,     // obligatoire pour rediriger ou cacher
-                        CreateNoWindow = true,       // aucune fenêtre cmd
-                        RedirectStandardOutput = false,
-                        RedirectStandardError = false
-                    };
-
-                    using (Process ffmpeg = Process.Start(psi))
-                    {
-                        ffmpeg.WaitForExit(); // attend la fin de la conversion
-                    }
+                    string dest2 = Path.Combine(dirToCreate, Path.GetFileNameWithoutExtension(fileName) + ".opus");
+                    tasks.Add(RunFfmpegAsync(fileName, dest2, window));
                 }
-
             }
 
+            await Task.WhenAll(tasks); // heavyest stuff there ... about 1800 .wav files 
+        }
 
+        // Fonction utilitaire qui lance ffmpeg et notifie la fenêtre
+        private static Task RunFfmpegAsync(string inputFile, string outputFile, ExporterWindow window)
+        {
+            var tcs = new TaskCompletionSource<bool>();
 
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "D:\\projects devs\\hogs_gameManager_wpf/ffmpeg.exe",
+                Arguments = $"-y -i \"{inputFile}\" -c:a libopus -b:a 48k -ac 1 \"{outputFile}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false
+            };
+
+            Process ffmpeg = new Process();
+            ffmpeg.StartInfo = psi;
+            ffmpeg.EnableRaisingEvents = true;
+            ffmpeg.Exited += (s, e) =>
+            {
+                ffmpeg.Dispose();
+                Application.Current.Dispatcher.Invoke(() => window.IncrementProgress());
+                tcs.SetResult(true);
+            };
+
+            ffmpeg.Start();
+            return tcs.Task;
         }
 
         public static void ExportMapsAndModels()
         {
+            ExporterWindow window = null;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                window = Application.Current.Windows.OfType<ExporterWindow>().FirstOrDefault();
+            });
+
             Directory.CreateDirectory(exportFolder + "models");
             Directory.CreateDirectory(exportFolder + "maps");
             //export every map 
@@ -1059,6 +1034,7 @@ namespace hogs_gameEditor_wpf
                         {
                             model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
                             ExportModelWithTexture_GLB(model, loc);
+                            window.IncrementProgress();
                         }
                     }
                 });
@@ -1072,56 +1048,23 @@ namespace hogs_gameEditor_wpf
                     PTG ptg = new PTG(mapsFolder + fileNameB);
 
                     ExportTerrain_GLB(pmg, ptg, loc+".glb");
-
+                    window.IncrementProgress();
                     File.WriteAllText(loc + ".json", JsonSerializer.Serialize(pogs.Select(p => p.POG2JSON()), new JsonSerializerOptions { WriteIndented = true }));
+                    window.IncrementProgress();
 
-                    ptg.CreateIMG(pmg).Save(loc + ".png", ImageFormat.Png);
-                    
-                }
-            }
-        }
-
-        public static void ConvertFontsToTTF() //apparently i am stuck here forever, there is no library that convert vectors to TTF ... 
-        {
-
-            Directory.CreateDirectory(exportFolder + "fonts");
-            string loc = gameFolder + "FEText/";
-
-            foreach (string fileName in Directory.GetFiles(loc, "*.tim")) 
-            {
-                Bitmap font = new TIM(File.ReadAllBytes(fileName) ).ToBitmap();
-                TAB tab = new TAB(File.ReadAllBytes( fileName.Replace(".tim",".tab") ));
-
-                int charcode = 65;
-                foreach (var letter in tab.all_letters)
-                {
-                    using (Bitmap glyphBitmap = font.Clone(new Rectangle(letter.XOffset, letter.YOffset, letter.Width, letter.Height), font.PixelFormat))
-                    {
-                        var potraceBitmap = PotraceBitmap.Create(letter.Width, letter.Height);
-
-                        // Remplissez le PotraceBitmap avec les données de votre lettre
-                        for (int y = 0; y < letter.Height; y++)
-                        {
-                            for (int x = 0; x < letter.Width; x++)
-                            {
-                                potraceBitmap.SetColor(x, y, glyphBitmap.GetPixel(x, y).R < 128 ? true : false);
-                                PotraceState trace = Potrace.Trace(new PotraceParam(), potraceBitmap);
-                            }
-                        }
-
-
-                    }
 
                 }
             }
-
-
-
         }
 
 
         public static void ExportLanguages()
         {
+            ExporterWindow window = null;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                window = Application.Current.Windows.OfType<ExporterWindow>().FirstOrDefault();
+            });
 
             string loc = exportFolder + "ui/";
             Directory.CreateDirectory(loc);
@@ -1153,10 +1096,12 @@ namespace hogs_gameEditor_wpf
                         {
                             tempTex.textureTim = new TIM(mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)]);
                             tempTex.textureTim.ToBitmap().Save(loc + tempTex.Name + ".png", ImageFormat.Png);
+                            window.IncrementProgress();
                         }
                         else if (tempTex.Name.Contains(".bmp") || tempTex.Name.Contains(".TIM"))
                         {
                             new Bitmap(new MemoryStream(mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)])).Save(loc + tempTex.Name, ImageFormat.Bmp);
+                            window.IncrementProgress();
                         }
 
                     }
@@ -1171,6 +1116,7 @@ namespace hogs_gameEditor_wpf
             foreach (string fileName in fichiers )
             {
                 new TIM(File.ReadAllBytes(fileName)).ToBitmap().Save(loc+Path.GetFileNameWithoutExtension(fileName) + ".png",ImageFormat.Png);
+                window.IncrementProgress();
             }
 
         }

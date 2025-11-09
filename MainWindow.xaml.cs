@@ -2,11 +2,14 @@
 using hogs_gameEditor_wpf.FileFormat;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -540,7 +543,9 @@ namespace hogs_gameManager_wpf
         {
             if (this.mapListComboBox.SelectedIndex != -1 && this.MapObjectsListView.SelectedIndex != -1)
             {
-                string entityName = GlobalVars.Name_Converter(CurrentMap[this.MapObjectsListView.SelectedIndex].name);
+                POG pog = CurrentMap[this.MapObjectsListView.SelectedIndex];
+
+                string entityName = pog.GetName();
 
                 var tg = new string[] { "AC_ME","CO_ME","GR_ME","HV_ME","LE_ME","ME_ME","SA_ME","SB_ME","SN_ME","SP_ME" };
 
@@ -548,8 +553,8 @@ namespace hogs_gameManager_wpf
                 {
                     //its a character
                     
-                    MAD characterModel = MAD.GetCharacter("british", HIR.GetSkeletonList(), MotionCapture.GetMotionCaptureAnimations() );
-
+                    MAD characterModel = MAD.GetCharacter(entityName, "british" , HIR.GetSkeletonList(), MotionCapture.GetMotionCaptureAnimations() );
+                    characterModel.Name = entityName; //replace the wrong name with current entity name
                     GlobalVars.ExportCharacterWithTexture_GLB( characterModel, Mtd.LoadTexturesFromMTD(characterModel.facData,  GlobalVars.gameFolder + "Chars/TEAMLARD.MTD", true) );
                 }
                 else
@@ -579,7 +584,7 @@ namespace hogs_gameManager_wpf
             GlobalVars.ExportTerrain_GLB(mapTerrain,mapTiles,loc+".glb");
         }
 
-        private void buttonMapExportALL_Click(object sender, RoutedEventArgs e)
+        private async void buttonMapExportALL_Click(object sender, RoutedEventArgs e)
         {
             if (this.mapListComboBox.SelectedIndex != -1)
             {
@@ -641,17 +646,9 @@ namespace hogs_gameManager_wpf
                 if (MessageBox.Show("STOP ! YOU GONNA EXPORT EVERYTHING !!! , PLEASE CONFIRM ?", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     //open a window with export status ...
-
                     
+                    new ExporterWindow().Show();
 
-                    //GlobalVars.ExportMapsAndModels();
-                    //GlobalVars.ExportCharsFolder();
-                    
-                    //GlobalVars.ConvertFontsToTTF(); 
-                    //GlobalVars.ExportSkyboxes();
-                    //GlobalVars.ExportLanguages();
-                    //GlobalVars.ExportAudioAndSounds();
-                    //GlobalVars.Export_FEBmps();
                 }
                 
 
