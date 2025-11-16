@@ -1,0 +1,85 @@
+﻿<Window x:Class="hogs_gameEditor_wpf.AddObjectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:hogs_gameEditor_wpf"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="Add New Object To the  Map" Height="500" Width="800" Loaded="Window_Loaded" ResizeMode="NoResize" WindowStyle="ToolWindow">
+    <Grid Background="AntiqueWhite" >
+        <Label x:Name="label_Copy0" Content="Position" Margin="515,265,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label x:Name="label_Copy3" Content="Rotation" Margin="515,300,0,0" Width="60" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+        <Image x:Name="mapImage" Margin="0,10,10,0" Height="256" Width="256" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+        <Canvas x:Name="mapCanvas"  Margin="0,10,10,0" Height="256" Width="256" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Transparent" />
+        <Slider x:Name="rotationSlider" Height="20" Width="180" VerticalAlignment="Top" HorizontalAlignment="Right"  Margin="0,305,20,0" AutoToolTipPlacement="TopLeft" Maximum="360" SmallChange="1" />
+        <Button x:Name="saveButton" Content="S A V E" HorizontalAlignment="Left" Margin="550,350,0,0" VerticalAlignment="Top" Width="200" Height="30" Click="saveButton_Click"/>
+        <ListView x:Name="EntityListView"  Margin="0,40,530,0" Height="410" Width="250" BorderBrush="Black" Foreground="black" Background="#DDDDDD" SelectionChanged="EntityListView_SelectionChanged" >
+            <ListView.Resources>
+                <Style TargetType="GridViewColumnHeader">
+                    <Setter Property="Height" Value="0"/>
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Style>
+            </ListView.Resources>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="BorderBrush" Value="silver"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Style.Triggers>
+                        <!-- Couleur au survol -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="Black" />
+                        </Trigger>
+                        <!-- Couleur pour l'élément sélectionné -->
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="LawnGreen"/>
+                            <Setter Property="Foreground" Value="black"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="" Width="90">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding img}" Width="90" Height="90" Margin="-7"  />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="" Width="130" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding name}" FontSize="16" FontWeight="Bold" FontFamily="Arial"  VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="" Width="5" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding type}" FontSize="9" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+
+        </ListView>
+        <ComboBox x:Name="objectTypeToAddComboBox" HorizontalAlignment="Left" Margin="70,10,0,0" VerticalAlignment="Top" Width="180" FontSize="14" Background="White" SelectionChanged="objectTypeToAddComboBox_SelectionChanged"/>
+        <ComboBox x:Name="weaponComboBox" HorizontalAlignment="Left" Margin="337,13,0,0" VerticalAlignment="Top" Width="123" FontSize="14" SelectionChanged="objectTypeToAddComboBox_SelectionChanged"/>
+        <Label Content="Weapon :" HorizontalAlignment="Left" Margin="265,9,0,0" VerticalAlignment="Top" Width="67" FontSize="14"/>
+        <xctk:ByteUpDown Name="amountUpDown"  Height="20" Width="120" FlowDirection="RightToLeft" Margin="10,0,0,325"  />
+        <Label Content="Amount :" HorizontalAlignment="Left" Margin="265,51,0,0" VerticalAlignment="Top" Width="67" FontSize="14"/>
+        <CheckBox x:Name="isPlayerCheckBox" Content="" HorizontalAlignment="Left" Margin="342,98,0,0" VerticalAlignment="Top" Width="18" FlowDirection="RightToLeft" Height="21"/>
+        <Label Content="is Player ? :" HorizontalAlignment="Left" Margin="265,90,0,0" VerticalAlignment="Top" Width="77" FontSize="14"/>
+        <Label Content="Types : " HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="52" FontSize="14"/>
+    </Grid>
+</Window>

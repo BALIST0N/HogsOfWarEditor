@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.js"></script>
+    <style>
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        canvas { width: 100%; height: 100%; touch-action: none; }
+    </style>
+</head>
+<body>
+<canvas id="renderCanvas"></canvas>
+<script>
+    const canvas = document.getElementById("renderCanvas");
+    const engine = new BABYLON.Engine(canvas, true);
+    const scene = new BABYLON.Scene(engine);
+    scene.useRightHandedSystem = true;
+
+    // -----------------------------------------------------
+    // CAMERA
+    // -----------------------------------------------------
+    const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(10000, 5000, 10000), scene);
+
+    camera.setTarget(new BABYLON.Vector3(5000,2000,5000));
+    camera.attachControl(canvas, true);
+
+    camera.speed = 550;
+    camera.inertia = 0.8;
+    camera.angularSensibility = 500;
+
+    camera.keysUp = [38];
+    camera.keysDown = [40];
+    camera.keysLeft = [37];
+    camera.keysRight = [39];
+
+    camera.fov = BABYLON.Angle.FromDegrees(75).radians();
+    camera.minZ = 1;
+    camera.maxZ = 65556;
+
+    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+    light.intensity = 8;
+
+    const light2 = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(0, 1, 0), scene);
+    light2.intensity = 5;
+    // MODEL CACHE
+
+    const modelCache = {};
+
+    // -----------------------------------------------------
+    // CLONAGE 
+    // -----------------------------------------------------
+    function cloneModel(original, Id, x, y, z, rx = 0, ry = 0, rz = 0) 
+    {
+        const cloneRoot = original.clone(`${original.name}_${Id}`);
+
+
+        cloneRoot.position = new BABYLON.Vector3(x, y, -z);
+        cloneRoot.rotation = new BABYLON.Vector3(rx, ry, rz);
+
+        cloneRoot.getChildMeshes().forEach((m, i) => {
+            const originalChild = original.getChildMeshes()[i];
+            if (originalChild.material) m.material = originalChild.material;
+            m.metadata = { parentId: Id };
+        });
+
+        cloneRoot.metadata = { id: Id, source: original.name };
+        return cloneRoot;
+    }
+
+    // -----------------------------------------------------
+    // LOAD MODEL 
+    // -----------------------------------------------------
+    async function loadModel(path, Id, x, y, z, rx = 0, ry = 0, rz = 0) 
+    {
+        rx =  BABYLON.Tools.ToRadians(rx);
+        ry =  BABYLON.Tools.ToRadians(ry) + BABYLON.Tools.ToRadians(270);
+        rz =  BABYLON.Tools.ToRadians(rz);
+
+
+        // Décomposer l'URL correctement (fix babylon requirement)
+        const url = path.substring(0, path.lastIndexOf("/") + 1);
+        const file = path.substring(path.lastIndexOf("/") + 1);
+
+        // Cache
+        if (modelCache[path]) 
+        {
+            return cloneModel(modelCache[path], Id, x, y, z, rx, ry, rz);
+        }
+
+        // Charger le modèle
+        const result = await BABYLON.SceneLoader.ImportMeshAsync("", url, file, scene);
+
+        // Créer un root parent
+        const root = new BABYLON.TransformNode(`root_${Id}_${file}`, scene);
+        root.metadata = { id: Id, source: path };
+
+        let minY = Infinity;
+
+        // Attacher les meshes au root
+        result.meshes.forEach(mesh => 
+        {
+            mesh.parent = root;
+            if(Id != 999 && Id != 998)
+            {
+                mesh.scaling = mesh.scaling.multiplyByFloats(0.5,0.5,0.5);
+            }
+            if (mesh.material) 
+            {
+                mesh.material.backFaceCulling = false;
+                mesh.material.forceNormalForward = true;
+            }
+
+            // RESET ABSOLU POUR PERMETTRE LA ROTATION DU ROOT
+            if (Id !== 999) 
+            {
+                mesh.position = BABYLON.Vector3.Zero();
+                mesh.rotation = BABYLON.Vector3.Zero();
+
+            }
+        });
+
+
+        // Position + rotation
+        root.position = new BABYLON.Vector3(x, y , -z);
+        root.rotation = new BABYLON.Vector3(rx,ry,rz);
+
+
+        // World map
+        if (Id === 999) 
+        {
+            root.position = new BABYLON.Vector3(-16384, 0, 16384);
+            root.setPivotPoint(new BABYLON.Vector3(16384, 0, -16384)); // centre de la carte
+            root.rotation.y = BABYLON.Tools.ToRadians(270);
+        }
+
+        // Sky dome special case
+        if (Id === 998) 
+        {
+            root.scaling = new BABYLON.Vector3(2,2,2);
+            const clone = cloneModel(root, Id, x, y, z, rx + Math.PI, ry, rz);
+            clone.name = `${root.name}_mirror`;
+        }
+
+        // Mettre dans le cache
+        modelCache[path] = root;
+        return root;
+    }
+
+
+    // RENDER LOOP
+    engine.runRenderLoop(() => scene.render());
+    window.addEventListener("resize", () => engine.resize());
+</script>
+
+</body>
+</html>

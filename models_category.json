@@ -1,0 +1,213 @@
+{
+	"Characters":
+	[
+	 "AC_ME","CO_ME","GR_ME","HV_ME","LE_ME","ME_ME","SA_ME","SB_ME","SN_ME","SP_ME" 
+	],
+
+	 
+	"Barrels":
+	[
+		"DRUM",
+		"DRUM2"
+	],
+
+	"Crates":
+	[
+		"CRATE1",
+		"CRATE2",
+		"CRATE3",
+		"CRATE4"
+	],
+
+	"Vehicles & Defense":
+	[
+		"AMLAUNCH",
+		"CARRY",
+		"AM_TANK",
+		"BIG_GUN",
+		"TANK",
+		"PILLBOX"
+	],
+
+	"Shelers & Tents":
+	[
+		"M_TENT1",
+		"M_TENT2",
+		"TENT_S",
+		"SHELTER"
+	],
+
+
+	"Bridges":
+	[
+		"BRID2C3",
+		"BRID2_C",
+		"BRID2_C1",
+		"BRID2_S",
+		"BRID2_S2",
+		"BRIDGE_C",
+		"BRIDGE_S",
+		"BRIDG_C2"
+	],
+
+
+	"Constructions":
+	[
+		"BIGLOONY",
+		"BRF01PPP",
+		"BRR02PPP",
+		"BRW01PPP",
+		"BRW04_D_",
+		"BRW04_W_",
+		"BRW06DW_",
+		"BRW06_W_",
+		"D_BRID",
+		"CHIM",
+		"GATE",
+		"GATES",
+		"IRONGATE",
+		"LU_B_SU",
+		"M1F01PPP",
+		"M1F02PPP",
+		"M1F03PPP",
+		"M1F05PPP",
+		"M1S_ST01",
+		"M1S_SU02",
+		"M1S_SU03",
+		"M1S_WD01",
+		"M1S_WPP",
+		"M1W03PPP",
+		"M1W04PPP",
+		"M1W04_W_",
+		"M1W05PPP",
+		"M1W05_W_",
+		"M1W06DW_",
+		"M1W06PPP",
+		"M1W06_W_",
+		"M1W07PPP",
+		"M1W07PWW",
+		"S1S_SU02",
+		"S1S_SU03",
+		"S1S_SU04",
+		"S1W01PPP",
+		"SAND_B",
+		"SNR05PPP",
+		"STF01PPP",
+		"STF02PPP",
+		"STF03PPP",
+		"STF04PPP",
+		"STF05PPP",
+		"STR06PPP",
+		"STS_ST01",
+		"STS_SU02",
+		"STW04PP2",
+		"STW04PPP",
+		"STW04_D2",
+		"STW04_W2",
+		"STW04_W_",
+		"STW05PPP",
+		"STW05_W_",
+		"STW06DW_",
+		"STW06PPP",
+		"STW06_W_",
+		"STW07PPP",
+		"STW07PWW",
+		"W1R06PPP",
+		"W1W06DW_",
+		"W1W06_W_",
+		"W1W07PWW"
+	],
+
+	"Towers":
+	[
+		"PIST",
+		"RADAR",
+		"RADAR1",
+		"WIND2",
+		"WIND2H",
+		"WIND2V",
+		"WINDM",
+		"WIN_SH",
+		"WIN_SV"
+	
+	],
+
+	"Flowers":
+	[
+		"FLOWERS",
+		"FLOWERS2",
+		"FLOWERS3",
+		"GRASS",
+		"GRASS1",
+		"GRASS2",
+		"BUSH1",
+		"BUSH2",
+		"BUSH2H",
+		"BUSH3"
+	],
+	"Trees":
+	[
+		"CACT2",
+		"CACTUS",
+		"BUSH1",
+		"BUSH2",
+		"BUSH2H",
+		"BUSH3",
+		"STUMP1",
+		"STUMP2",
+		"TREEB",
+		"TREEBH",
+		"TREEBH1",
+		"TREEG",
+		"TREEGH",
+		"TREEGH1",
+		"TREEGH2",
+		"TREEP",
+		"TREEPA",
+		"TREEPAH",
+		"TREEPAH1",
+		"TREEPAH2",
+		"TREEPH",
+		"TREEPH1",
+		"TREEPH2",
+		"TREEW"
+	],
+
+
+
+
+	"Lyfe":
+	[
+		"BUTTFLY",
+		"BUTTFLY1",
+		"BYRD",
+		"BYRD2",
+		"BYRD21",
+		"BYRD22",
+		"BYRD3",
+		"BEE",
+		"SHEEP1",
+		"FISH"
+	],
+
+	"Others":
+	[
+		"BARBWIR2",
+		"BARBWIRE",
+		"BARREL",
+		"DUMMY",
+		"LAMP",
+		"TV",
+		"BOOTS",
+		"MONO",
+		"MOONS",
+		"SIGN",
+		"SNOWB",
+	    "SNOWH",
+	    "SW2ARM",
+		"SWILL2",
+		"AIRSHIP1",
+		"RELAX1"
+	]
+
+}

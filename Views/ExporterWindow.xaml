@@ -1,0 +1,31 @@
+﻿<Window x:Class="hogs_gameEditor_wpf.ExporterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:hogs_gameEditor_wpf"
+        mc:Ignorable="d"
+        Title="The Exporter de ses grand morts " Height="350" Width="400" WindowStyle="ToolWindow">
+
+    <Window.Resources>
+        <Style TargetType="CheckBox" x:Key="BigCheckBox">
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="AntiqueWhite">
+        <CheckBox x:Name="exportmaps_checkbox" Content="Export Maps And Models" HorizontalAlignment="Left" Margin="37,8,0,0" VerticalAlignment="Top" Style="{StaticResource BigCheckBox}" />
+        <CheckBox x:Name="exportchars_checkbox" Content="Export Chars Folder" HorizontalAlignment="Left" Margin="37,43,0,0" VerticalAlignment="Top"  Style="{StaticResource BigCheckBox}"/>
+        <CheckBox x:Name="exportskybox_checkbox" Content="Export Skyboxes" HorizontalAlignment="Left" Margin="37,78,0,0" VerticalAlignment="Top"  Style="{StaticResource BigCheckBox}" />
+        <CheckBox x:Name="exportlanguages_checkbox" Content="Export Languages" HorizontalAlignment="Left" Margin="37,113,0,0" VerticalAlignment="Top"  Style="{StaticResource BigCheckBox}" />
+        <CheckBox x:Name="exportmoddedmad_checkbox" Content="Create modfied Mad + Mtd " HorizontalAlignment="Left" Margin="37,147,0,0" VerticalAlignment="Top"  Style="{StaticResource BigCheckBox}" />
+        <CheckBox x:Name="exportaudio_checkbox" Content="Export Audio, Sounds and Speech" HorizontalAlignment="Left" Margin="37,0,0,108" VerticalAlignment="Bottom"  Style="{StaticResource BigCheckBox}" Foreground="#FFE20000" FontStyle="Italic" ToolTip="FFmpeg needed, runs heavy on your pc, be carefull ! "/>
+        <Button x:Name="letsgo_button" Content="LEYTSEGOO" HorizontalAlignment="Center" Margin="0,232,0,0" VerticalAlignment="Top" Width="326" Height="50" Background="#CC8500C8" Foreground="White" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="letsgo_button_Click"/>
+        <ProgressBar x:Name="status_progress_bar" HorizontalAlignment="Center" Height="41" Margin="0,241,0,0" VerticalAlignment="Top" Width="326"/>
+
+    </Grid>
+</Window>

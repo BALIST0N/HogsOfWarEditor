@@ -22,7 +22,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public char[] name { get; set; }    // entity name [16]
         public char[] unused0 { get; set; }    //NULL[16]
-        public short[] position { get; set; }    // position in the world (0 = x, 1 = z, 2 = y) [3]
+        public short[] position { get; set; }    // position in the world (0 = x, 1 = y, 2 = z) [3]
         public short index { get; set; }    // Id of the object on the map 
         public short[] angles { get; set; }    // angles in the world , expressed in & 2^12 (4096 = 360°) [3]
         public short type { get; set; }    //looks like its the skin/model number , also related to rank (a hv_me with type 3 = pyrotech)
@@ -31,7 +31,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         public short short0 { get; set; }    // bit14 is a "isIndestructible" flag and ignore byte0 value,
                                              // very rare times there is bit 10,11 and 12 that are unchecked 
                                              // bits 1 to 8 are never used (always 0)
-        public byte byte0 { get; set; }    //health of the entity, 255 = 100% , otherwise 100 = 100hp (works wor walls, bridge buildings)
+        public byte byte0 { get; set; }    //health of the entity, 255 = default , otherwise 100 = 100hp (works wor walls, bridge buildings)
         public PigTeam team { get; set; }    // uk, usa, german, french, japanese, soviet
         public ScriptType objective { get; set; }
         public byte ScriptGroup { get; set; }    //script unique id (nothing related with this.index)
@@ -157,7 +157,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public static void ExportMapPOG(List<POG> mapEntities,string mapName)
         {
-            string path = GlobalVars.mapsFolder + mapName + "_edited.POG";
+            string path = GlobalVars.mapsFolder + mapName + ".POG";
 
             using var ms = new MemoryStream();
             using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
@@ -286,7 +286,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         }
 
         [Flags]
-        public enum objectiveFlagEnum : short
+        public enum objectiveFlagEnum 
         {
             Player = 1 << 0,    // 0000 0001
             Bit1 = 1 << 1,      // 0000 0010

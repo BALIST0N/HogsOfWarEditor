@@ -1,6 +1,4 @@
-﻿using ABI.System;
-using BitmapToVector;
-using hogs_gameEditor_wpf.FileFormat;
+﻿using hogs_gameEditor_wpf.FileFormat;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
@@ -17,12 +15,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Windows.UI;
-using Path = System.IO.Path;
 
+using Windows.Devices.Gpio.Provider;
+using Path = System.IO.Path;
 
 
 namespace hogs_gameEditor_wpf
@@ -36,7 +33,14 @@ namespace hogs_gameEditor_wpf
         public static string mapsFolder = gameFolder + "Maps/";
         public static string mapsViewsFolder = gameFolder + "devtools/mapview/";
         public static string exportFolder = gameFolder + "devtools/EXPORT/";
-            
+
+
+        public static Dictionary<string, List<int>> modelsWithMultipleSkins = JsonSerializer.Deserialize< Dictionary<string, List<int>> >(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_multipleIds.json"));
+
+        public static Dictionary<string, List<string>> models_category = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"));
+
+        public static Dictionary<string, short> models_uniqueids = JsonSerializer.Deserialize<Dictionary<string, short>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_uniqueIds.json"));
+
         public static string[] BoneNames =
         {
            "Hip",
@@ -76,7 +80,22 @@ namespace hogs_gameEditor_wpf
             "WE_BANG",
             "WE_BALL",
             "WE_ROCKT",
-            "PROPOINT" };
+        };
+
+        public static string[] SnowMaps =
+        {
+            "CAMP",
+            "TWIN",
+            "FJORDS",
+            "SNAKE",
+            "KEEP",
+            "LECPROD",
+            "ICE",
+            "HILLBASE",
+            "MLAKE",
+            "ICEFLOW",
+            "DEMO2",
+        };
 
         public static Dictionary<string,string> modelsWithChilds = new Dictionary<string,string>()
         {
@@ -84,22 +103,9 @@ namespace hogs_gameEditor_wpf
             {"PILLBOX","PILLBAR"},
             {"AM_TANK","AMPHGUN"},
             {"BIG_GUN","BIGBAR"},
-            {"TANK","TANBAR"}  ,
-            //{"WINDM","WIN_SH" }
+            {"TANK","TANBAR"},
         };
 
-
-        public static List<string> modelsWithMultipleSkins = new List<string>()
-        {
-            {"PILLBOX"},
-            {"AM_TANK"},
-            {"BIG_GUN"},
-            {"TANK"},
-            {"TENT_S"},
-            {"M_TENT2"},
-            {"M_TENT1"},
-            {"SHELTER"}
-        };
 
 
         public static double ScaleDownAngles(short value4096)
@@ -134,7 +140,6 @@ namespace hogs_gameEditor_wpf
             {
                 meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>($"Mesh_{texIdx}");
             }
-
 
             foreach (var tri in model.facData.triangleList)
             {
@@ -261,7 +266,7 @@ namespace hogs_gameEditor_wpf
 
                     var mat = new MaterialBuilder()
                         .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(texture.textureData)))
-                        .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK);
+                        .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK).WithDoubleSide(true);
                     mat.AlphaCutoff = 0.5f;
                     materialDict[texture.indexNumber] = (mat, texture.width, texture.height);
                 }
@@ -273,7 +278,7 @@ namespace hogs_gameEditor_wpf
 
                     var mat = new MaterialBuilder()
                         .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage( t.Item3 )))
-                        .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK);
+                        .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK).WithDoubleSide(true);
                     mat.AlphaCutoff = 0.5f;
 
                     materialDict[texture.indexNumber] = (mat, texture.width, texture.height);
@@ -751,8 +756,6 @@ namespace hogs_gameEditor_wpf
                 {
                     case "SKYDOME.MAD": //already added
                     case "british.mad": //character
-                    
-                    
                         //ignore for the moment
                         continue;
 
@@ -1005,6 +1008,7 @@ namespace hogs_gameEditor_wpf
 
             Directory.CreateDirectory(exportFolder + "models");
             Directory.CreateDirectory(exportFolder + "maps");
+
             //export every map 
             foreach (string fileName in Directory.GetFiles(mapsFolder, "*.MAD"))
             {
@@ -1014,30 +1018,64 @@ namespace hogs_gameEditor_wpf
                 string loc;
 
                 //exporting models of a map
-                MAD.GetMapEntitiesList(fileNameB).ForEach(entityName =>
+                foreach(string entityName in MAD.GetMapEntitiesList(fileNameB) )
                 {
                     loc = exportFolder + "models/" + entityName + ".glb";
 
                     if (File.Exists(loc) == false)
                     {
-                        if (modelsWithMultipleSkins.Contains(entityName) == true )
+                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true )
                         {
                             POG pog = pogs.Find(x => x.GetName() == entityName);
                             if(pog != null)
                             {
                                 loc = exportFolder + "models/" + pog.GetName() + "_" + pog.type + ".glb";
                             }
+                            else
+                            { 
+                                continue;
+                            }
                         }
-                    
-                        MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
-                        if (model.facData != null)
+
+                        if(File.Exists(loc) == false)
                         {
-                            model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
-                            ExportModelWithTexture_GLB(model, loc);
-                            window.IncrementProgress();
+                            MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+                            if (model.facData != null)
+                            {
+                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
+                                ExportModelWithTexture_GLB(model, loc);
+                                window.IncrementProgress();
+                            }
                         }
+
                     }
-                });
+                };
+
+                foreach( POG pog in pogs)
+                {
+                    string entityName = pog.GetName();
+
+                    if (entityFilterList.Contains(entityName) == false && models_category["Characters"].Contains(entityName) == false )
+                    {
+                        loc = exportFolder + "models/" + entityName + ".glb";
+                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true)
+                        {
+                            loc = exportFolder + "models/" + entityName + "_" + pog.type + ".glb";
+                        }
+
+                        if(File.Exists(loc) == false)
+                        {
+                            MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+                            if (model.facData != null)
+                            {
+                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
+                                ExportModelWithTexture_GLB(model, loc);
+                                window.IncrementProgress();
+                            }
+                        }
+
+                    }
+                }
 
                 //exporting maps
                 if (fileNameB.Substring(0, 3) != "GEN") //ignore multiplayer generator maps they are not supported
@@ -1055,6 +1093,7 @@ namespace hogs_gameEditor_wpf
 
                 }
             }
+
         }
 
 
@@ -1147,7 +1186,7 @@ namespace hogs_gameEditor_wpf
             }
         }
 
-        public static void MadMtdModdingTool()
+        public static void MadMtdModdingTool(bool snow = false)
         {
             /**
              * i have a theory, what happens if i replace every Mad+mtd file of each map by  
@@ -1179,21 +1218,38 @@ namespace hogs_gameEditor_wpf
             foreach (string fileName in Directory.GetFiles(mapsFolder, "*.MAD"))
             {
                 string fileNameB = Path.GetFileNameWithoutExtension(fileName);
-
+               
                 MAD.GetMapEntitiesList(fileNameB,false).ForEach(entityName =>
                 {
-                    MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
-                    if( allModelsOfTheGame.Exists( x=> x.Name == model.Name) ==false )
+                    if(modelsWithMultipleSkins.ContainsKey(entityName) == false )
                     {
-                        if (model.facData != null)
+                        MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+                        if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
                         {
-                            model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
-                            model.ReIndexFacWithTextures();
+                            if (model.facData != null)
+                            {
+                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
+                                model.ReIndexFacWithTextures();
 
-                            allModelsOfTheGame.Add(model);
+                                allModelsOfTheGame.Add(model);
+                            }
                         }
                     }
+                    else if(SnowMaps.Contains(fileNameB) == snow)
+                    {
+                        MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+                        if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
+                        {
+                            if (model.facData != null)
+                            {
+                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
+                                model.ReIndexFacWithTextures();
 
+                                allModelsOfTheGame.Add(model);
+                            }
+                        }
+                    }
+                    
                 });
             }
             //every model is now loaded in a list
@@ -1283,8 +1339,17 @@ namespace hogs_gameEditor_wpf
 
             }
 
-            File.WriteAllBytes(exportFolder + "all.MAD", finalMadBytes);
-            File.WriteAllBytes(exportFolder + "all.MTD", finalMtdBytes);
+            if(snow == true)
+            {
+                File.WriteAllBytes(exportFolder + "all_snow.MAD", finalMadBytes);
+                File.WriteAllBytes(exportFolder + "all_snow.MTD", finalMtdBytes);
+            }
+            else
+            {
+                File.WriteAllBytes(exportFolder + "all.MAD", finalMadBytes);
+                File.WriteAllBytes(exportFolder + "all.MTD", finalMtdBytes);
+            }
+
 
         }
 

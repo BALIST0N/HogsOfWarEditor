@@ -107,7 +107,6 @@ namespace hogs_gameEditor_wpf.FileFormat
 
             //var list = GetModelListFromMad(GlobalVars.gameFolder + "Chars/british.mad");
 
-
             switch(type) //wtf is this mess the names are wong inside the game 
             {
                 case "AC_ME":
@@ -213,7 +212,6 @@ namespace hogs_gameEditor_wpf.FileFormat
                 i += 23;
             }
             
-            //need to apply a filter to remove dupplicates
             return entities;
         }
 
