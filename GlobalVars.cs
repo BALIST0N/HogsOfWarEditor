@@ -17,8 +17,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
-
-using Windows.Devices.Gpio.Provider;
 using Path = System.IO.Path;
 
 
@@ -35,7 +33,7 @@ namespace hogs_gameEditor_wpf
         public static string exportFolder = gameFolder + "devtools/EXPORT/";
 
 
-        public static Dictionary<string, List<int>> modelsWithMultipleSkins = JsonSerializer.Deserialize< Dictionary<string, List<int>> >(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_multipleIds.json"));
+        public static Dictionary<string, List<int>> modelsWithMultipleSkins = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_multipleIds.json"));
 
         public static Dictionary<string, List<string>> models_category = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"));
 
@@ -97,7 +95,7 @@ namespace hogs_gameEditor_wpf
             "DEMO2",
         };
 
-        public static Dictionary<string,string> modelsWithChilds = new Dictionary<string,string>()
+        public static Dictionary<string, string> modelsWithChilds = new()
         {
             {"SWILL2","SW2ARM"},
             {"PILLBOX","PILLBAR"},
@@ -110,131 +108,103 @@ namespace hogs_gameEditor_wpf
 
         public static double ScaleDownAngles(short value4096)
         {
-            return (Convert.ToDouble(value4096) / 4096.0) * 360.0;
+            return Convert.ToDouble(value4096) / 4096.0 * 360.0;
         }
 
         public static double ScaleUpAngles(double value360)
         {
-            return (value360 / 360.0) * 4096.0;
+            return value360 / 360.0 * 4096.0;
         }
 
         public static string Name_Converter(char[] arreteTonChar)
         {
-            return new String(arreteTonChar).Trim('\0');
+            return new string(arreteTonChar).Trim('\0');
         }
 
         public static void ExportModelWithOutTexture_GLB(MAD model, string path = null)
         {
 
             // Création des matériaux correspondant à chaque texture
-            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new Dictionary<int, (MaterialBuilder Material, int Width, int Height)>();
+            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new()
+            {
+                [0] = (new MaterialBuilder().WithBaseColor(new Vector4(1, 1, 1, 1)), 64, 64)
+            };
 
-            materialDict[0] = (new MaterialBuilder().WithBaseColor(new Vector4(1, 1, 1, 1)) , 64, 64);
 
-            
 
             // 2. Crée un MeshBuilder
-            Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> meshDict = new Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>>();
+            Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> meshDict = [];
 
-            foreach (var texIdx in materialDict.Keys)
+            foreach (int texIdx in materialDict.Keys)
             {
                 meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>($"Mesh_{texIdx}");
             }
 
-            foreach (var tri in model.facData.triangleList)
+            foreach (FAC.Triangle tri in model.facData.triangleList)
             {
-                var mesh = meshDict[0];
-                var prim = mesh.UsePrimitive(materialDict[0].Material);
+                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty> mesh = meshDict[0];
+                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexEmpty> prim = mesh.UsePrimitive(materialDict[0].Material);
 
                 Vertice vA = model.vtxData.verticesList[tri.Vertex_A];
                 Vertice vB = model.vtxData.verticesList[tri.Vertex_B];
                 Vertice vC = model.vtxData.verticesList[tri.Vertex_C];
 
                 // Construction des positions des sommets
-                Vector3 pA = new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
 
                 // Calcul des vecteurs de bord pour la normale du triangle
                 Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
 
                 // Construction des UVs (à normaliser si nécessaire !)
-                float textureWidth = (float)materialDict[0].Width;
-                float textureHeight = (float)materialDict[0].Height;
+                float textureWidth = materialDict[0].Width;
+                float textureHeight = materialDict[0].Height;
 
-                Vector2 uvA = new Vector2(tri.U_A / textureWidth, tri.V_A / textureHeight);
-                Vector2 uvB = new Vector2(tri.U_B / textureWidth, tri.V_B / textureHeight);
-                Vector2 uvC = new Vector2(tri.U_C / textureWidth, tri.V_C / textureHeight);
+                Vector2 uvA = new(tri.U_A / textureWidth, tri.V_A / textureHeight);
+                Vector2 uvB = new(tri.U_B / textureWidth, tri.V_B / textureHeight);
+                Vector2 uvC = new(tri.U_C / textureWidth, tri.V_C / textureHeight);
 
-                prim.AddTriangle(
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pA, normal),
-                        new VertexTexture1(uvA)
-                        ),
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pB, normal),
-                        new VertexTexture1(uvB)
-                        ),
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pC, normal),
-                        new VertexTexture1(uvC)
-                        )
-                );
+                prim.AddTriangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC)));
 
             }
 
-            foreach (var quad in model.facData.planeList)
+            foreach (FAC.Plane quad in model.facData.planeList)
             {
-                var mesh = meshDict[0];
-                var prim = mesh.UsePrimitive(materialDict[0].Material);
+                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty> mesh = meshDict[0];
+                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexEmpty> prim = mesh.UsePrimitive(materialDict[0].Material);
 
                 Vertice vA = model.vtxData.verticesList[quad.Vertex_A];
                 Vertice vB = model.vtxData.verticesList[quad.Vertex_B];
                 Vertice vC = model.vtxData.verticesList[quad.Vertex_C];
                 Vertice vD = model.vtxData.verticesList[quad.Vertex_D];
 
-                Vector3 pA = new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset);
-                Vector3 pD = new Vector3(vD.XOffset, vD.YOffset, vD.ZOffset);
+                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Vector3 pD = new(vD.XOffset, vD.YOffset, vD.ZOffset);
 
-                float textureWidth = (float)materialDict[0].Width;
-                float textureHeight = (float)materialDict[0].Height;
+                float textureWidth = materialDict[0].Width;
+                float textureHeight = materialDict[0].Height;
 
-                Vector2 uvA = new Vector2(quad.U_A / textureWidth, quad.V_A / textureHeight);
-                Vector2 uvB = new Vector2(quad.U_B / textureWidth, quad.V_B / textureHeight);
-                Vector2 uvC = new Vector2(quad.U_C / textureWidth, quad.V_C / textureHeight);
-                Vector2 uvD = new Vector2(quad.U_D / textureWidth, quad.V_D / textureHeight);
+                Vector2 uvA = new(quad.U_A / textureWidth, quad.V_A / textureHeight);
+                Vector2 uvB = new(quad.U_B / textureWidth, quad.V_B / textureHeight);
+                Vector2 uvC = new(quad.U_C / textureWidth, quad.V_C / textureHeight);
+                Vector2 uvD = new(quad.U_D / textureWidth, quad.V_D / textureHeight);
 
                 // Calcul des vecteurs de bord
                 Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
                 Vector3 normal2 = Vector3.Normalize(Vector3.Cross(pC - pA, pD - pA));
 
 
-                prim.AddQuadrangle(
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pA, normal),
-                        new VertexTexture1(uvA)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pB, normal),
-                        new VertexTexture1(uvB)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pC, normal),
-                        new VertexTexture1(uvC)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pD, normal2),
-                        new VertexTexture1(uvD))
-                );
+                prim.AddQuadrangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pD, normal2), new VertexTexture1(uvD)));
             }
 
 
             // 5. Créer la scène
-            var scene = new SceneBuilder();
+            SceneBuilder scene = new();
 
-            foreach (var kvp in meshDict)
+            foreach (KeyValuePair<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> kvp in meshDict)
             {
                 scene.AddRigidMesh(kvp.Value, Matrix4x4.CreateScale(1, -1, 1));
             }
@@ -250,21 +220,21 @@ namespace hogs_gameEditor_wpf
             }
         }
 
-        public static void ExportModelWithTexture_GLB(MAD model,string path = null)
+        public static void ExportModelWithTexture_GLB(MAD model, string path = null)
         {
 
             // Création des matériaux correspondant à chaque texture
-            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new Dictionary<int, (MaterialBuilder Material, int Width, int Height)>();
+            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = [];
 
             foreach (Mtd texture in model.textures)
             {
-                if(texture.textureData  != null)
+                if (texture.textureData != null)
                 {
-                    using var img = System.Drawing.Image.FromStream(new MemoryStream(texture.textureData));
+                    using System.Drawing.Image img = System.Drawing.Image.FromStream(new MemoryStream(texture.textureData));
                     texture.width = img.Width;
                     texture.height = img.Height;
 
-                    var mat = new MaterialBuilder()
+                    MaterialBuilder mat = new MaterialBuilder()
                         .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(texture.textureData)))
                         .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK).WithDoubleSide(true);
                     mat.AlphaCutoff = 0.5f;
@@ -272,12 +242,12 @@ namespace hogs_gameEditor_wpf
                 }
                 else
                 {
-                    var t = texture.textureTim.ToPngBytes();
+                    (int, int, byte[]) t = texture.textureTim.ToPngBytes();
                     texture.width = t.Item1;
                     texture.height = t.Item2;
 
-                    var mat = new MaterialBuilder()
-                        .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage( t.Item3 )))
+                    MaterialBuilder mat = new MaterialBuilder()
+                        .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(t.Item3)))
                         .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK).WithDoubleSide(true);
                     mat.AlphaCutoff = 0.5f;
 
@@ -287,116 +257,87 @@ namespace hogs_gameEditor_wpf
             }
 
             // 2. Crée un MeshBuilder
-            Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> meshDict = new Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>>();
+            Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> meshDict = [];
 
-            foreach (var texIdx in materialDict.Keys)
+            foreach (int texIdx in materialDict.Keys)
             {
                 meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>($"Mesh_{texIdx}");
             }
 
 
-            foreach (var tri in model.facData.triangleList)
+            foreach (FAC.Triangle tri in model.facData.triangleList)
             {
-                var mesh = meshDict[tri.TextureIndex];
-                var prim = mesh.UsePrimitive(materialDict[tri.TextureIndex].Material);
+                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty> mesh = meshDict[tri.TextureIndex];
+                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexEmpty> prim = mesh.UsePrimitive(materialDict[tri.TextureIndex].Material);
 
                 Vertice vA = model.vtxData.verticesList[tri.Vertex_A];
                 Vertice vB = model.vtxData.verticesList[tri.Vertex_B];
                 Vertice vC = model.vtxData.verticesList[tri.Vertex_C];
 
                 // Construction des positions des sommets
-                Vector3 pA = new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
 
                 // Calcul des vecteurs de bord pour la normale du triangle
                 Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
 
                 // Construction des UVs (à normaliser si nécessaire !)
-                float textureWidth = (float)materialDict[tri.TextureIndex].Width;
-                float textureHeight = (float)materialDict[tri.TextureIndex].Height;
+                float textureWidth = materialDict[tri.TextureIndex].Width;
+                float textureHeight = materialDict[tri.TextureIndex].Height;
 
-                Vector2 uvA = new Vector2(tri.U_A / textureWidth, tri.V_A / textureHeight);
-                Vector2 uvB = new Vector2(tri.U_B / textureWidth, tri.V_B / textureHeight);
-                Vector2 uvC = new Vector2(tri.U_C / textureWidth, tri.V_C / textureHeight);
+                Vector2 uvA = new(tri.U_A / textureWidth, tri.V_A / textureHeight);
+                Vector2 uvB = new(tri.U_B / textureWidth, tri.V_B / textureHeight);
+                Vector2 uvC = new(tri.U_C / textureWidth, tri.V_C / textureHeight);
 
-                prim.AddTriangle(
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pA, normal),
-                        new VertexTexture1(uvA)
-                        ),
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pB, normal),
-                        new VertexTexture1(uvB)
-                        ),
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pC, normal),
-                        new VertexTexture1(uvC)
-                        )
-                );
+                prim.AddTriangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC)));
 
             }
 
-            foreach (var quad in model.facData.planeList)
+            foreach (FAC.Plane quad in model.facData.planeList)
             {
-                var mesh = meshDict[quad.TextureIndex];
-                var prim = mesh.UsePrimitive(materialDict[quad.TextureIndex].Material);
+                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty> mesh = meshDict[quad.TextureIndex];
+                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexEmpty> prim = mesh.UsePrimitive(materialDict[quad.TextureIndex].Material);
 
                 Vertice vA = model.vtxData.verticesList[quad.Vertex_A];
                 Vertice vB = model.vtxData.verticesList[quad.Vertex_B];
                 Vertice vC = model.vtxData.verticesList[quad.Vertex_C];
                 Vertice vD = model.vtxData.verticesList[quad.Vertex_D];
 
-                Vector3 pA = new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset);
-                Vector3 pD = new Vector3(vD.XOffset, vD.YOffset, vD.ZOffset);
+                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Vector3 pD = new(vD.XOffset, vD.YOffset, vD.ZOffset);
 
-                float textureWidth = (float)materialDict[quad.TextureIndex].Width;
-                float textureHeight = (float)materialDict[quad.TextureIndex].Height;
+                float textureWidth = materialDict[quad.TextureIndex].Width;
+                float textureHeight = materialDict[quad.TextureIndex].Height;
 
-                Vector2 uvA = new Vector2(quad.U_A / textureWidth, quad.V_A / textureHeight);
-                Vector2 uvB = new Vector2(quad.U_B / textureWidth, quad.V_B / textureHeight);
-                Vector2 uvC = new Vector2(quad.U_C / textureWidth, quad.V_C / textureHeight);
-                Vector2 uvD = new Vector2(quad.U_D / textureWidth, quad.V_D / textureHeight);
+                Vector2 uvA = new(quad.U_A / textureWidth, quad.V_A / textureHeight);
+                Vector2 uvB = new(quad.U_B / textureWidth, quad.V_B / textureHeight);
+                Vector2 uvC = new(quad.U_C / textureWidth, quad.V_C / textureHeight);
+                Vector2 uvD = new(quad.U_D / textureWidth, quad.V_D / textureHeight);
 
                 // Calcul des vecteurs de bord
                 Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
                 Vector3 normal2 = Vector3.Normalize(Vector3.Cross(pC - pA, pD - pA));
-                
 
-                prim.AddQuadrangle(
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pA, normal),
-                        new VertexTexture1(uvA)),
 
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pB, normal),
-                        new VertexTexture1(uvB)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pC, normal),
-                        new VertexTexture1(uvC)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                        new VertexPositionNormal(pD, normal2),
-                        new VertexTexture1(uvD))
-                );
+                prim.AddQuadrangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pD, normal2), new VertexTexture1(uvD)));
             }
 
 
             // 5. Créer la scène
-            var scene = new SceneBuilder();
+            SceneBuilder scene = new();
 
-            foreach (var kvp in meshDict)
+            foreach (KeyValuePair<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> kvp in meshDict)
             {
                 scene.AddRigidMesh(kvp.Value, Matrix4x4.CreateScale(1, -1, 1));
             }
 
             //5. export
-            if(path != null)
+            if (path != null)
             {
-                scene.ToGltf2().SaveGLB( path);
+                scene.ToGltf2().SaveGLB(path);
             }
             else
             {
@@ -408,16 +349,15 @@ namespace hogs_gameEditor_wpf
         {
             Directory.CreateDirectory(gameFolder + "devtools/EXPORT/characters/");
             string outputPath = gameFolder + "devtools/EXPORT/characters/" + charModel.GetName();
-            ModelRoot model = ModelRoot.CreateModel();
-            List<MaterialBuilder> texList = new List<MaterialBuilder>();
-            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new Dictionary<int, (MaterialBuilder Material, int Width, int Height)>();
-            var meshDict = new Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>>();
-            SceneBuilder scene = new SceneBuilder();
+            ModelRoot.CreateModel();
+            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = [];
+            Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>> meshDict = [];
+            SceneBuilder scene = new();
 
             //materials
             foreach (Mtd texture in pngs)
             {
-                var png = texture.textureTim.ToPngBytes();
+                (int, int, byte[]) png = texture.textureTim.ToPngBytes();
                 texture.width = png.Item1;
                 texture.height = png.Item2;
 
@@ -429,110 +369,75 @@ namespace hogs_gameEditor_wpf
             }
 
             //meshbuilder
-            foreach (var texIdx in materialDict.Keys)
+            foreach (int texIdx in materialDict.Keys)
             {
                 meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>($"Mesh_{texIdx}");
             }
 
 
             //building vertex triangles and adding to mesh
-            foreach (var tri in charModel.facData.triangleList)
+            foreach (FAC.Triangle tri in charModel.facData.triangleList)
             {
-                var mesh = meshDict[tri.TextureIndex];
-                var prim = mesh.UsePrimitive(materialDict[tri.TextureIndex].Material);
+                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4> mesh = meshDict[tri.TextureIndex];
+                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexJoints4> prim = mesh.UsePrimitive(materialDict[tri.TextureIndex].Material);
 
                 Vertice vA = charModel.vtxData.verticesList[tri.Vertex_A];
                 Vertice vB = charModel.vtxData.verticesList[tri.Vertex_B];
                 Vertice vC = charModel.vtxData.verticesList[tri.Vertex_C];
 
                 // Construction des positions des sommets
-                Vector3 pA = new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
 
                 // Calcul des vecteurs de bord pour la normale du triangle
                 Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
 
                 // Construction des UVs (à normaliser si nécessaire !)
-                float textureWidth = (float)materialDict[tri.TextureIndex].Width;
-                float textureHeight = (float)materialDict[tri.TextureIndex].Height;
+                float textureWidth = materialDict[tri.TextureIndex].Width;
+                float textureHeight = materialDict[tri.TextureIndex].Height;
 
-                Vector2 uvA = new Vector2(tri.U_A / textureWidth, tri.V_A / textureHeight);
-                Vector2 uvB = new Vector2(tri.U_B / textureWidth, tri.V_B / textureHeight);
-                Vector2 uvC = new Vector2(tri.U_C / textureWidth, tri.V_C / textureHeight);
+                Vector2 uvA = new(tri.U_A / textureWidth, tri.V_A / textureHeight);
+                Vector2 uvB = new(tri.U_B / textureWidth, tri.V_B / textureHeight);
+                Vector2 uvC = new(tri.U_C / textureWidth, tri.V_C / textureHeight);
 
-                prim.AddTriangle(
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pA, normal),
-                        new VertexTexture1(uvA),
-                        new VertexJoints4(vA.BoneIndex)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pB, normal),
-                        new VertexTexture1(uvB),
-                        new VertexJoints4(vB.BoneIndex)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pC, normal),
-                        new VertexTexture1(uvC),
-                        new VertexJoints4(vC.BoneIndex))
-                );
+                prim.AddTriangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA), new VertexJoints4(vA.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB), new VertexJoints4(vB.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC), new VertexJoints4(vC.BoneIndex)));
 
             }
 
-            foreach (var quad in charModel.facData.planeList)
+            foreach (FAC.Plane quad in charModel.facData.planeList)
             {
-                var mesh = meshDict[quad.TextureIndex];
-                var prim = mesh.UsePrimitive(materialDict[quad.TextureIndex].Material);
+                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4> mesh = meshDict[quad.TextureIndex];
+                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexJoints4> prim = mesh.UsePrimitive(materialDict[quad.TextureIndex].Material);
 
                 Vertice vA = charModel.vtxData.verticesList[quad.Vertex_A];
                 Vertice vB = charModel.vtxData.verticesList[quad.Vertex_B];
                 Vertice vC = charModel.vtxData.verticesList[quad.Vertex_C];
                 Vertice vD = charModel.vtxData.verticesList[quad.Vertex_D];
 
-                Vector3 pA = new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset);
-                Vector3 pD = new Vector3(vD.XOffset, vD.YOffset, vD.ZOffset);
+                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Vector3 pD = new(vD.XOffset, vD.YOffset, vD.ZOffset);
 
-                float textureWidth = (float)materialDict[quad.TextureIndex].Width;
-                float textureHeight = (float)materialDict[quad.TextureIndex].Height;
+                float textureWidth = materialDict[quad.TextureIndex].Width;
+                float textureHeight = materialDict[quad.TextureIndex].Height;
 
-                Vector2 uvA = new Vector2(quad.U_A / textureWidth, quad.V_A / textureHeight);
-                Vector2 uvB = new Vector2(quad.U_B / textureWidth, quad.V_B / textureHeight);
-                Vector2 uvC = new Vector2(quad.U_C / textureWidth, quad.V_C / textureHeight);
-                Vector2 uvD = new Vector2(quad.U_D / textureWidth, quad.V_D / textureHeight);
+                Vector2 uvA = new(quad.U_A / textureWidth, quad.V_A / textureHeight);
+                Vector2 uvB = new(quad.U_B / textureWidth, quad.V_B / textureHeight);
+                Vector2 uvC = new(quad.U_C / textureWidth, quad.V_C / textureHeight);
+                Vector2 uvD = new(quad.U_D / textureWidth, quad.V_D / textureHeight);
 
                 // Calcul des vecteurs de bord
                 Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
                 Vector3 normal2 = Vector3.Normalize(Vector3.Cross(pC - pA, pD - pA));
 
-                prim.AddQuadrangle(
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pA, normal2),
-                        new VertexTexture1(uvA),
-                        new VertexJoints4(vA.BoneIndex)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pB, normal),
-                        new VertexTexture1(uvB),
-                        new VertexJoints4(vB.BoneIndex)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pC, normal),
-                        new VertexTexture1(uvC),
-                        new VertexJoints4(vC.BoneIndex)),
-
-                    new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
-                        new VertexPositionNormal(pD, normal),
-                        new VertexTexture1(uvD),
-                        new VertexJoints4(vD.BoneIndex))
-                );
+                prim.AddQuadrangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pA, normal2), new VertexTexture1(uvA), new VertexJoints4(vA.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB), new VertexJoints4(vB.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC), new VertexJoints4(vC.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pD, normal), new VertexTexture1(uvD), new VertexJoints4(vD.BoneIndex)));
 
             }
 
 
-            foreach (var kvp in meshDict)
+            foreach (KeyValuePair<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>> kvp in meshDict)
             {
                 scene.AddRigidMesh(kvp.Value, Matrix4x4.CreateScale(1, -1, 1));
             }
@@ -551,11 +456,11 @@ namespace hogs_gameEditor_wpf
 
         public static ModelRoot ExportTerrain_GLB(PMG mapTerrain, PTG mapTextures)
         {
-            var material = new MaterialBuilder()
+            MaterialBuilder material = new MaterialBuilder()
                 .WithChannelImage(KnownChannel.BaseColor, TIM.ToPngBytes(mapTextures.CreateIMG(mapTerrain))).WithDoubleSide(true);
 
-            var mesh = new MeshBuilder<VertexPosition, VertexTexture1, VertexEmpty>("TerrainMesh");
-            var prim = mesh.UsePrimitive(material);
+            MeshBuilder<VertexPosition, VertexTexture1, VertexEmpty> mesh = new("TerrainMesh");
+            PrimitiveBuilder<MaterialBuilder, VertexPosition, VertexTexture1, VertexEmpty> prim = mesh.UsePrimitive(material);
             //var prim = mesh.UsePrimitive( new MaterialBuilder().WithBaseColor( new Vector4(0.8f,0.8f,0.8f,1))  );
 
 
@@ -572,8 +477,8 @@ namespace hogs_gameEditor_wpf
                     {
                         for (int ty = 0; ty < 4; ty++)
                         {
-                            int globalTileX = invBx * 4 + tx;
-                            int globalTileY = invBy * 4 + ty;
+                            int globalTileX = (invBx * 4) + tx;
+                            int globalTileY = (invBy * 4) + ty;
 
                             float x0 = globalTileX * 512;
                             float z0 = globalTileY * 512;
@@ -585,28 +490,23 @@ namespace hogs_gameEditor_wpf
                             short h11 = block.HeightMap[tx + 1, ty].Height;
                             short h01 = block.HeightMap[tx, ty].Height;
 
-                            Vector3 vA = new Vector3(x0, h00, z1);
-                            Vector3 vB = new Vector3(x1, h10, z1);
-                            Vector3 vD = new Vector3(x1, h11, z0);
-                            Vector3 vC = new Vector3(x0, h01, z0);
+                            Vector3 vA = new(x0, h00, z1);
+                            Vector3 vB = new(x1, h10, z1);
+                            Vector3 vD = new(x1, h11, z0);
+                            Vector3 vC = new(x0, h01, z0);
 
 
-                            float uMax = ((63 - globalTileX) * 512f) / 32768f;
-                            float uMin = ((64 - globalTileX) * 512f) / 32768f;
-                            float vMin = ((63 - globalTileY) * 512f) / 32768f;
-                            float vMax = ((64 - globalTileY) * 512f) / 32768f;
+                            float uMax = (63 - globalTileX) * 512f / 32768f;
+                            float uMin = (64 - globalTileX) * 512f / 32768f;
+                            float vMin = (63 - globalTileY) * 512f / 32768f;
+                            float vMax = (64 - globalTileY) * 512f / 32768f;
 
-                            Vector2 uvA = new Vector2(uMax, vMin);
-                            Vector2 uvB = new Vector2(uMin, vMin);
-                            Vector2 uvC = new Vector2(uMax, vMax);
-                            Vector2 uvD = new Vector2(uMin, vMax);
+                            Vector2 uvA = new(uMax, vMin);
+                            Vector2 uvB = new(uMin, vMin);
+                            Vector2 uvC = new(uMax, vMax);
+                            Vector2 uvD = new(uMin, vMax);
 
-                            prim.AddQuadrangle(
-                                new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vA), new VertexTexture1(uvA)),
-                                new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vC), new VertexTexture1(uvC)),
-                                new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vD), new VertexTexture1(uvD)),
-                                new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vB), new VertexTexture1(uvB))
-                            );
+                            prim.AddQuadrangle(new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vA), new VertexTexture1(uvA)), new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vC), new VertexTexture1(uvC)), new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vD), new VertexTexture1(uvD)), new VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>(new VertexPosition(vB), new VertexTexture1(uvB)));
 
                         }
                     }
@@ -614,16 +514,16 @@ namespace hogs_gameEditor_wpf
             }
 
 
-            var scene = new SceneBuilder();
+            SceneBuilder scene = new();
             scene.AddRigidMesh(mesh, Matrix4x4.CreateScale(1, 1, -1));
 
-            return scene.ToGltf2(); 
+            return scene.ToGltf2();
         }
 
 
         public static void ExportSkyboxes()
         {
-            var filesList = Directory.GetFiles(gameFolder + "Skys/", "*", SearchOption.TopDirectoryOnly);
+            string[] filesList = Directory.GetFiles(gameFolder + "Skys/", "*", SearchOption.TopDirectoryOnly);
             Directory.CreateDirectory(exportFolder + "skys");
 
             ExporterWindow window = null;
@@ -636,11 +536,11 @@ namespace hogs_gameEditor_wpf
             foreach (string fichier in filesList)
             {
                 string dest = exportFolder + "skys/" + Path.GetFileNameWithoutExtension(fichier) + ".png";
-                if(File.Exists(dest) == false )
+                if (File.Exists(dest) == false)
                 {
                     if (fichier.Contains(".pmg") == true || fichier.Contains(".PMG") == true)
                     {
-                        PMG pmg = new PMG(File.ReadAllBytes(fichier));
+                        PMG pmg = new(File.ReadAllBytes(fichier));
 
                         string fichier2 = Path.ChangeExtension(fichier, "ptg");
 
@@ -649,7 +549,7 @@ namespace hogs_gameEditor_wpf
                             fichier2 = filesList.FirstOrDefault(f => string.Equals(Path.GetFileName(f), fichier2, StringComparison.OrdinalIgnoreCase));
                         }
 
-                        PTG ptg = new PTG(fichier2.Replace(".ptg", ""));
+                        PTG ptg = new(fichier2.Replace(".ptg", ""));
                         //File.WriteAllBytes( exportFolder + Path.GetFileNameWithoutExtension(fichier2) + ".glb", ExportSkybox_GLB(pmg, ptg));
 
                         ptg.CreateSkybox(pmg).Save(dest, ImageFormat.Png);
@@ -721,29 +621,29 @@ namespace hogs_gameEditor_wpf
              WHITE.MAD
             */
 
-            var list = Directory.EnumerateFiles(gameFolder + "Chars/", "*", SearchOption.AllDirectories);
+            IEnumerable<string> list = Directory.EnumerateFiles(gameFolder + "Chars/", "*", SearchOption.AllDirectories);
             ExporterWindow window = null;
             Application.Current.Dispatcher.Invoke(() =>
             {
                 window = Application.Current.Windows.OfType<ExporterWindow>().FirstOrDefault();
             });
 
-            List<MAD> models = new List<MAD>();
+            List<MAD> models = [];
 
-            MAD skydome = new MAD();
-            MAD skydomeU = new MAD();
+            MAD skydome = new();
+            MAD skydomeU = new();
 
-            foreach (string modelName in MAD.GetModelListFromMad(gameFolder + "Chars/SKYDOME.MAD") )
+            foreach (string modelName in MAD.GetModelListFromMad(gameFolder + "Chars/SKYDOME.MAD"))
             {
-                if(modelName == "skydome")
+                if (modelName == "skydome")
                 {
                     skydome = MAD.GetModelFromFullMAD(modelName, gameFolder + "Chars/SKYDOME.MAD");
                 }
-                if(modelName == "skydomeu")
+                if (modelName == "skydomeu")
                 {
                     skydomeU = MAD.GetModelFromFullMAD(modelName, gameFolder + "Chars/SKYDOME.MAD");
                 }
-                
+
             }
 
             Directory.CreateDirectory(exportFolder + "/skydomes");
@@ -752,7 +652,7 @@ namespace hogs_gameEditor_wpf
 
             foreach (string fichier in list)
             {
-                switch ( Path.GetFileName(fichier) ) 
+                switch (Path.GetFileName(fichier))
                 {
                     case "SKYDOME.MAD": //already added
                     case "british.mad": //character
@@ -761,24 +661,24 @@ namespace hogs_gameEditor_wpf
 
 
                     case "pig.HIR":
-                        File.WriteAllText(exportFolder + "/characters/Pig.HIR.json",JsonSerializer.Serialize( HIR.GetSkeletonList(fichier) , new JsonSerializerOptions { WriteIndented = true } ));  ;
+                        File.WriteAllText(exportFolder + "/characters/Pig.HIR.json", JsonSerializer.Serialize(HIR.GetSkeletonList(fichier), new JsonSerializerOptions { WriteIndented = true })); ;
                         window.IncrementProgress();
                         break;
 
                     case "mcap.mad":
-                        File.WriteAllText(exportFolder + "/characters/motioncapture.json",JsonSerializer.Serialize( MotionCapture.GetMotionCaptureAnimations(fichier) , new JsonSerializerOptions { WriteIndented = true } ));
+                        File.WriteAllText(exportFolder + "/characters/motioncapture.json", JsonSerializer.Serialize(MotionCapture.GetMotionCaptureAnimations(fichier), new JsonSerializerOptions { WriteIndented = true }));
                         window.IncrementProgress();
                         break;
 
                     case "BRITHATS.MAD": //contains various classes hats without color 
-                        
+
                         string destHats = exportFolder + "/characters/hats/";
                         Directory.CreateDirectory(destHats);
                         string hatsMtd = gameFolder + "/Chars/FHATS.MTD";
 
                         foreach (string modelName in MAD.GetModelListFromMad(fichier))
                         {
-                            if (modelName == "br_med_h" || modelName == "br_sap_h"){ continue; }
+                            if (modelName is "br_med_h" or "br_sap_h") { continue; }
                             string destHats2 = destHats + "/" + modelName + ".glb";
 
                             MAD m = MAD.GetModelFromFullMAD(modelName, fichier);
@@ -791,7 +691,7 @@ namespace hogs_gameEditor_wpf
                         continue;
 
                     case "FHATS.MAD": //contains heavy class hats of every teams
-                        
+
                         destHats = exportFolder + "/characters/hats/";
                         hatsMtd = Path.ChangeExtension(fichier, "MTD");
 
@@ -809,7 +709,7 @@ namespace hogs_gameEditor_wpf
 
 
                     case "FACES.MTD":
-                        
+
                         string faceFldr = exportFolder + "/characters/faces/";
                         Directory.CreateDirectory(faceFldr);
 
@@ -821,19 +721,19 @@ namespace hogs_gameEditor_wpf
                             int endblockContentTable = i + 24;
                             if (endblockContentTable <= endContenTable)
                             {
-                                Mtd tempTex = new Mtd
+                                Mtd tempTex = new()
                                 {
                                     Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
                                     DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
                                     DataSize = BitConverter.ToInt32(mtdData[(i + 20)..(i + 24)]),
                                 };
                                 tempTex.textureTim = new TIM(mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)]);
-                                tempTex.textureTim.ToBitmap().Save(faceFldr + tempTex.Name+".png",ImageFormat.Png);
+                                tempTex.textureTim.ToBitmap().Save(faceFldr + tempTex.Name + ".png", ImageFormat.Png);
                                 window.IncrementProgress();
                             }
                             i += 23;
                         }
-                        
+
                         break;
 
 
@@ -849,36 +749,36 @@ namespace hogs_gameEditor_wpf
                     case "SUNSET.MAD":
                     case "TOY.MAD":
                     case "WHITE.MAD":
-                        
+
                         string destDome = exportFolder + "skydomes/skydome_" + Path.GetFileNameWithoutExtension(fichier) + ".glb";
-                        if(File.Exists(destDome) ==false )
+                        if (File.Exists(destDome) == false)
                         {
                             skydome.textures = Mtd.LoadTexturesFromMTD(skydome.facData, fichier, true);
                             skydomeU.textures = Mtd.LoadTexturesFromMTD(skydomeU.facData, fichier, true);
                             ExportModelWithTexture_GLB(skydome, destDome);
                             window.IncrementProgress();
-                            ExportModelWithTexture_GLB(skydomeU, destDome.Replace("skydome_", "skydomeu_") );
+                            ExportModelWithTexture_GLB(skydomeU, destDome.Replace("skydome_", "skydomeu_"));
                             window.IncrementProgress();
                         }
                         continue;
 
 
-                    
+
                     case "WEAPONS.MAD":
-                        
+
                         string dest = exportFolder + Path.GetFileNameWithoutExtension(fichier);
-                        Directory.CreateDirectory(dest );
+                        Directory.CreateDirectory(dest);
                         string weaponsMtd = Path.ChangeExtension(fichier, "MTD");
 
-                        foreach (string modelName in  MAD.GetModelListFromMad(fichier) )
+                        foreach (string modelName in MAD.GetModelListFromMad(fichier))
                         {
                             string dest2 = dest + "/" + modelName + ".glb";
-                            if(File.Exists(dest2) == false)
+                            if (File.Exists(dest2) == false)
                             {
                                 MAD m = MAD.GetModelFromFullMAD(modelName, fichier);
                                 m.textures = Mtd.LoadTexturesFromMTD(m.facData, weaponsMtd, true);
 
-                                ExportModelWithTexture_GLB(m, dest2 );
+                                ExportModelWithTexture_GLB(m, dest2);
                                 window.IncrementProgress();
                             }
 
@@ -888,7 +788,7 @@ namespace hogs_gameEditor_wpf
                     case "PROPOINT.MAD":
                     case "SIGHT.MAD":
                     case "TOP.MAD":
-                        
+
                         string destFolder = exportFolder + "others/";
 
                         Directory.CreateDirectory(destFolder);
@@ -911,7 +811,7 @@ namespace hogs_gameEditor_wpf
                 }
 
             }
-            
+
         }
 
 
@@ -927,7 +827,7 @@ namespace hogs_gameEditor_wpf
             string destaudio = exportFolder + "Audio/";
             Directory.CreateDirectory(destaudio);
 
-            var tasks = new List<Task>();
+            List<Task> tasks = [];
             foreach (string fileName in Directory.GetFiles(gameFolder + "Audio/", "*.wav"))
             {
                 string dest2 = destaudio + Path.GetFileNameWithoutExtension(fileName) + ".opus";
@@ -972,9 +872,9 @@ namespace hogs_gameEditor_wpf
         // Fonction utilitaire qui lance ffmpeg et notifie la fenêtre
         private static Task RunFfmpegAsync(string inputFile, string outputFile, ExporterWindow window)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> tcs = new();
 
-            ProcessStartInfo psi = new ProcessStartInfo
+            ProcessStartInfo psi = new()
             {
                 FileName = "D:\\projects devs\\hogs_gameManager_wpf/ffmpeg.exe",
                 Arguments = $"-y -i \"{inputFile}\" -c:a libopus -b:a 48k -ac 1 \"{outputFile}\"",
@@ -984,9 +884,12 @@ namespace hogs_gameEditor_wpf
                 RedirectStandardError = false
             };
 
-            Process ffmpeg = new Process();
-            ffmpeg.StartInfo = psi;
-            ffmpeg.EnableRaisingEvents = true;
+            Process ffmpeg = new()
+            {
+                StartInfo = psi,
+                EnableRaisingEvents = true
+            };
+
             ffmpeg.Exited += (s, e) =>
             {
                 ffmpeg.Dispose();
@@ -1014,30 +917,30 @@ namespace hogs_gameEditor_wpf
             {
                 string fileNameB = Path.GetFileNameWithoutExtension(fileName);
 
-                var pogs = POG.GetAllMapObject(fileNameB);
+                List<POG> pogs = POG.GetAllMapObject(fileNameB);
                 string loc;
 
                 //exporting models of a map
-                foreach(string entityName in MAD.GetMapEntitiesList(fileNameB) )
+                foreach (string entityName in MAD.GetMapEntitiesList(fileNameB))
                 {
                     loc = exportFolder + "models/" + entityName + ".glb";
 
                     if (File.Exists(loc) == false)
                     {
-                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true )
+                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true)
                         {
                             POG pog = pogs.Find(x => x.GetName() == entityName);
-                            if(pog != null)
+                            if (pog != null)
                             {
                                 loc = exportFolder + "models/" + pog.GetName() + "_" + pog.type + ".glb";
                             }
                             else
-                            { 
+                            {
                                 continue;
                             }
                         }
 
-                        if(File.Exists(loc) == false)
+                        if (File.Exists(loc) == false)
                         {
                             MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
                             if (model.facData != null)
@@ -1049,13 +952,14 @@ namespace hogs_gameEditor_wpf
                         }
 
                     }
-                };
+                }
+                ;
 
-                foreach( POG pog in pogs)
+                foreach (POG pog in pogs)
                 {
                     string entityName = pog.GetName();
 
-                    if (entityFilterList.Contains(entityName) == false && models_category["Characters"].Contains(entityName) == false )
+                    if (entityFilterList.Contains(entityName) == false && models_category["Characters"].Contains(entityName) == false)
                     {
                         loc = exportFolder + "models/" + entityName + ".glb";
                         if (modelsWithMultipleSkins.ContainsKey(entityName) == true)
@@ -1063,7 +967,7 @@ namespace hogs_gameEditor_wpf
                             loc = exportFolder + "models/" + entityName + "_" + pog.type + ".glb";
                         }
 
-                        if(File.Exists(loc) == false)
+                        if (File.Exists(loc) == false)
                         {
                             MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
                             if (model.facData != null)
@@ -1078,14 +982,14 @@ namespace hogs_gameEditor_wpf
                 }
 
                 //exporting maps
-                if (fileNameB.Substring(0, 3) != "GEN") //ignore multiplayer generator maps they are not supported
+                if (fileNameB[..3] != "GEN") //ignore multiplayer generator maps they are not supported
                 {
                     loc = exportFolder + "/maps/" + fileNameB;
 
-                    PMG pmg = new PMG(mapsFolder + fileNameB);
-                    PTG ptg = new PTG(mapsFolder + fileNameB);
+                    PMG pmg = new(mapsFolder + fileNameB);
+                    PTG ptg = new(mapsFolder + fileNameB);
 
-                    ExportTerrain_GLB(pmg, ptg, loc+".glb");
+                    ExportTerrain_GLB(pmg, ptg, loc + ".glb");
                     window.IncrementProgress();
                     File.WriteAllText(loc + ".json", JsonSerializer.Serialize(pogs.Select(p => p.POG2JSON()), new JsonSerializerOptions { WriteIndented = true }));
                     window.IncrementProgress();
@@ -1108,11 +1012,11 @@ namespace hogs_gameEditor_wpf
             string loc = exportFolder + "ui/";
             Directory.CreateDirectory(loc);
 
-            var fichiers = Directory.GetFiles(gameFolder + "Language/Tims/","*.mtd",SearchOption.AllDirectories)
+            string[] fichiers = Directory.GetFiles(gameFolder + "Language/Tims/", "*.mtd", SearchOption.AllDirectories)
                    .Concat(Directory.GetFiles(gameFolder + "Language/Tims/", "*.mad", SearchOption.AllDirectories)).ToArray(); ;
 
 
-            foreach (string fileName in fichiers )
+            foreach (string fileName in fichiers)
             {
 
                 byte[] mtdData = File.ReadAllBytes(fileName);
@@ -1123,7 +1027,7 @@ namespace hogs_gameEditor_wpf
                     int endblockContentTable = i + 24;
                     if (endblockContentTable <= endContenTable)
                     {
-                        Mtd tempTex = new Mtd
+                        Mtd tempTex = new()
                         {
                             Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
                             DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
@@ -1131,7 +1035,7 @@ namespace hogs_gameEditor_wpf
 
                         };
 
-                        if(tempTex.Name.Contains(".tim") || tempTex.Name.Contains(".TIM") )
+                        if (tempTex.Name.Contains(".tim") || tempTex.Name.Contains(".TIM"))
                         {
                             tempTex.textureTim = new TIM(mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)]);
                             tempTex.textureTim.ToBitmap().Save(loc + tempTex.Name + ".png", ImageFormat.Png);
@@ -1146,15 +1050,15 @@ namespace hogs_gameEditor_wpf
                     }
                     i += 23;
                 }
-                
+
 
             }
 
             fichiers = Directory.GetFiles(gameFolder + "Language/Tims/", "*.tim", SearchOption.AllDirectories);
 
-            foreach (string fileName in fichiers )
+            foreach (string fileName in fichiers)
             {
-                new TIM(File.ReadAllBytes(fileName)).ToBitmap().Save(loc+Path.GetFileNameWithoutExtension(fileName) + ".png",ImageFormat.Png);
+                new TIM(File.ReadAllBytes(fileName)).ToBitmap().Save(loc + Path.GetFileNameWithoutExtension(fileName) + ".png", ImageFormat.Png);
                 window.IncrementProgress();
             }
 
@@ -1162,19 +1066,19 @@ namespace hogs_gameEditor_wpf
 
         public static void Export_FEBmps() //a list of .mgl files , those are LZ77 compressed bmp 
         {
-            Directory.CreateDirectory(exportFolder+"FEBMP/");
+            Directory.CreateDirectory(exportFolder + "FEBMP/");
 
             byte[] febmps = File.ReadAllBytes(gameFolder + "FEBmps/FEBMP.MAD");
 
-            int endContenTable = BitConverter.ToInt32(febmps, 16); 
+            int endContenTable = BitConverter.ToInt32(febmps, 16);
 
             for (int i = 48; i <= endContenTable; i++)
             {
                 int endblockContentTable = i + 24;
                 if (endblockContentTable <= endContenTable)
                 {
-                    Mtd mtd =  new Mtd(febmps[i..(i + 24)]);
-                    if(mtd.Name == "propoint.mgl")
+                    Mtd mtd = new(febmps[i..(i + 24)]);
+                    if (mtd.Name == "propoint.mgl")
                     {
                         //byte[] decompressed = MGL.DecompressAuto(febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)]);
                         byte[] b = MGL.Decompress(febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)]);
@@ -1213,15 +1117,15 @@ namespace hogs_gameEditor_wpf
 
             //result , it worked absolutely fine, need to make two version, one for snow, one for not snow : ) 
 
-            List<MAD> allModelsOfTheGame = new List<MAD>();
+            List<MAD> allModelsOfTheGame = [];
 
             foreach (string fileName in Directory.GetFiles(mapsFolder, "*.MAD"))
             {
                 string fileNameB = Path.GetFileNameWithoutExtension(fileName);
-               
-                MAD.GetMapEntitiesList(fileNameB,false).ForEach(entityName =>
+
+                MAD.GetMapEntitiesList(fileNameB, false).ForEach(entityName =>
                 {
-                    if(modelsWithMultipleSkins.ContainsKey(entityName) == false )
+                    if (modelsWithMultipleSkins.ContainsKey(entityName) == false)
                     {
                         MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
                         if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
@@ -1235,7 +1139,7 @@ namespace hogs_gameEditor_wpf
                             }
                         }
                     }
-                    else if(SnowMaps.Contains(fileNameB) == snow)
+                    else if (SnowMaps.Contains(fileNameB) == snow)
                     {
                         MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
                         if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
@@ -1249,7 +1153,7 @@ namespace hogs_gameEditor_wpf
                             }
                         }
                     }
-                    
+
                 });
             }
             //every model is now loaded in a list
@@ -1261,12 +1165,12 @@ namespace hogs_gameEditor_wpf
             int texCounter = 0; //texture offset to apply on fac and mtd
 
             int modelOffset = 72 * allModelsOfTheGame.Count;
-            int textureOffset =  24 * allModelsOfTheGame.Sum(model => model.textures.Count);
+            int textureOffset = 24 * allModelsOfTheGame.Sum(model => model.textures.Count);
 
-            using (var msMad = new MemoryStream())
-            using (var msMtd = new MemoryStream())
-            using (var writerMad = new BinaryWriter(msMad))
-            using (var writerMtd = new BinaryWriter(msMtd))
+            using (MemoryStream msMad = new())
+            using (MemoryStream msMtd = new())
+            using (BinaryWriter writerMad = new(msMad))
+            using (BinaryWriter writerMtd = new(msMtd))
             {
                 foreach (MAD mad in allModelsOfTheGame)
                 {
@@ -1282,12 +1186,12 @@ namespace hogs_gameEditor_wpf
                     writerMad.Write(modelOffset);
                     modelOffset += mad.DataSizes[1];
                     writerMad.Write(mad.DataSizes[1]);
-                    
+
                     writerMad.Write(Encoding.ASCII.GetBytes((mad.Name + ".FAC").PadRight(16, '\0')));
                     writerMad.Write(modelOffset);
                     modelOffset += mad.DataSizes[2];
                     writerMad.Write(mad.DataSizes[2]);
-                    
+
 
                     // --- Flux 2 (MTD) ---
                     foreach (Mtd tex in mad.textures)
@@ -1322,7 +1226,7 @@ namespace hogs_gameEditor_wpf
                 //reloop AGAIN to inject data on both mad and mtd , if we did things correctly, current BinaryWriters are right at the first model "dataoffset"
                 foreach (MAD mad in allModelsOfTheGame)
                 {
-                    writerMad.Write( mad.GoBackToMonke() );
+                    writerMad.Write(mad.GoBackToMonke());
 
                     foreach (Mtd tex in mad.textures)
                     {
@@ -1339,7 +1243,7 @@ namespace hogs_gameEditor_wpf
 
             }
 
-            if(snow == true)
+            if (snow == true)
             {
                 File.WriteAllBytes(exportFolder + "all_snow.MAD", finalMadBytes);
                 File.WriteAllBytes(exportFolder + "all_snow.MTD", finalMtdBytes);

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
@@ -11,23 +7,21 @@ namespace hogs_gameEditor_wpf.FileFormat
     {
         public List<Vertice> verticesList;
 
-        public VTX(byte[] data )
+        public VTX(byte[] data)
         {
-            using (MemoryStream ms = new MemoryStream(data))
-            using(BinaryReader reader = new BinaryReader(ms)) 
-            {
-                verticesList = new List<Vertice>();
+            using MemoryStream ms = new(data);
+            using BinaryReader reader = new(ms);
+            verticesList = [];
 
-                while(ms.Position < ms.Length)
+            while (ms.Position < ms.Length)
+            {
+                verticesList.Add(new Vertice
                 {
-                    verticesList.Add(new Vertice
-                    {
-                        XOffset = reader.ReadInt16(),
-                        YOffset = reader.ReadInt16(),
-                        ZOffset = reader.ReadInt16(),
-                        BoneIndex = reader.ReadInt16()
-                    });
-                }
+                    XOffset = reader.ReadInt16(),
+                    YOffset = reader.ReadInt16(),
+                    ZOffset = reader.ReadInt16(),
+                    BoneIndex = reader.ReadInt16()
+                });
             }
         }
     }

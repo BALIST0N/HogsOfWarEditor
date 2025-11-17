@@ -1,12 +1,8 @@
-﻿using SharpGLTF.Schema2;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
@@ -20,17 +16,17 @@ namespace hogs_gameEditor_wpf.FileFormat
         public VTX vtxData { get; set; }
         public NO2 no2Data { get; set; }
 
-        public List<HIR> skeleton{ get; set; }
-        public List<MotionCapture> animations {  get; set; }
-        public List<Mtd> textures {  get; set; }
+        public List<HIR> skeleton { get; set; }
+        public List<MotionCapture> animations { get; set; }
+        public List<Mtd> textures { get; set; }
 
 
 
         public MAD(byte[] hexblock)
         {
-            this.Name = Encoding.ASCII.GetString(hexblock[0..16]);
-            this.DataOffset = BitConverter.ToInt32(hexblock, 16);
-            this.DataSize = BitConverter.ToInt32(hexblock, 20);
+            Name = Encoding.ASCII.GetString(hexblock[0..16]);
+            DataOffset = BitConverter.ToInt32(hexblock, 16);
+            DataSize = BitConverter.ToInt32(hexblock, 20);
         }
 
         public MAD()
@@ -40,15 +36,17 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public string GetName()
         {
-            return Path.GetFileNameWithoutExtension(this.Name) ;
+            return Path.GetFileNameWithoutExtension(Name);
         }
 
         public static MAD GetModelFromMAD(string modelToFind, string mad) //return VTX NO2 FAC of a model
         {
             string fldr = GlobalVars.mapsFolder + mad + ".MAD";
 
-            MAD model = new MAD();
-            model.DataSizes = new int[3];
+            MAD model = new()
+            {
+                DataSizes = new int[3]
+            };
 
             byte[] mapdata = File.ReadAllBytes(fldr);
             int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
@@ -97,17 +95,17 @@ namespace hogs_gameEditor_wpf.FileFormat
             }
 
             return model;
-            
+
         }
 
-        public static MAD GetCharacter(string type,string team,List<HIR> skeleton, List<MotionCapture> anims)
+        public static MAD GetCharacter(string type, string team, List<HIR> skeleton, List<MotionCapture> anims)
         {
             //LE_ME = hero
             //AC_ME = legend
 
             //var list = GetModelListFromMad(GlobalVars.gameFolder + "Chars/british.mad");
 
-            switch(type) //wtf is this mess the names are wong inside the game 
+            switch (type) //wtf is this mess the names are wong inside the game 
             {
                 case "AC_ME":
                     type = "pcace_hi";
@@ -134,7 +132,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                     break;
 
                 case "SA_ME":
-                    type = "pcsap_hi";  
+                    type = "pcsap_hi";
                     break;
 
                 case "SN_ME":
@@ -161,7 +159,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         public static List<string> GetMapEntitiesList(string mapName)
         {
             string fldr = GlobalVars.mapsFolder + mapName + ".MAD";
-            List<string> entities = new List<string>();
+            List<string> entities = [];
 
             byte[] mapdata = File.ReadAllBytes(fldr);
             int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
@@ -172,25 +170,25 @@ namespace hogs_gameEditor_wpf.FileFormat
 
                 if (endblockContentTable <= endContenTable)
                 {
-                    string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                    a = a.Substring(0, a.Length - 4);
-                    if(entities.Contains(a) == false && GlobalVars.entityFilterList.Contains(a) == false) 
+                    string a = new string(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
+                    a = a[..^4];
+                    if (entities.Contains(a) == false && GlobalVars.entityFilterList.Contains(a) == false)
                     {
                         entities.Add(a);
                     }
-                        
+
                 }
                 i += 23;
             }
-            
+
             //need to apply a filter to remove dupplicates
             return entities;
         }
 
-        public static List<string> GetMapEntitiesList(string mapName,bool filter = false)
+        public static List<string> GetMapEntitiesList(string mapName, bool filter = false)
         {
             string fldr = GlobalVars.mapsFolder + mapName + ".MAD";
-            List<string> entities = new List<string>();
+            List<string> entities = [];
 
             byte[] mapdata = File.ReadAllBytes(fldr);
             int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
@@ -201,9 +199,9 @@ namespace hogs_gameEditor_wpf.FileFormat
 
                 if (endblockContentTable <= endContenTable)
                 {
-                    string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                    a = a.Substring(0, a.Length - 4);
-                    if (entities.Contains(a) == false )
+                    string a = new string(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
+                    a = a[..^4];
+                    if (entities.Contains(a) == false)
                     {
                         entities.Add(a);
                     }
@@ -211,14 +209,14 @@ namespace hogs_gameEditor_wpf.FileFormat
                 }
                 i += 23;
             }
-            
+
             return entities;
         }
 
         public static List<string> GetModelListFromMad(string fldr)
         {
 
-            List<string> entities = new List<string>();
+            List<string> entities = [];
 
             byte[] mapdata = File.ReadAllBytes(fldr);
             int endContenTable = BitConverter.ToInt32(mapdata, 16); //the first item offset define table content size ! 
@@ -229,8 +227,8 @@ namespace hogs_gameEditor_wpf.FileFormat
 
                 if (endblockContentTable <= endContenTable)
                 {
-                    string a = new String(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                    a = a.Substring(0, a.Length - 4);
+                    string a = new string(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
+                    a = a[..^4];
                     if (entities.Contains(a) == false)
                     {
                         entities.Add(a);
@@ -245,7 +243,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public static MAD GetModelFromFullMAD(string modelToFind, string fldr) //return VTX NO2 FAC of a model
         {
-            MAD model = new MAD();
+            MAD model = new();
 
             byte[] mapdata = File.ReadAllBytes(fldr);
 
@@ -295,7 +293,7 @@ namespace hogs_gameEditor_wpf.FileFormat
             }
 
             return model;
-            
+
         }
 
 
@@ -305,27 +303,27 @@ namespace hogs_gameEditor_wpf.FileFormat
         public void ReIndexFacWithTextures()
         {
             int count = 0;
-            Dictionary<int, int> indexRealloc = new Dictionary<int, int>();
-            for (int i = 0; i < this.textures.Count; i++)
+            Dictionary<int, int> indexRealloc = [];
+            for (int i = 0; i < textures.Count; i++)
             {
-                if (indexRealloc.ContainsKey(this.textures[i].indexNumber) == false)
+                if (indexRealloc.ContainsKey(textures[i].indexNumber) == false)
                 {
-                    indexRealloc.Add(this.textures[i].indexNumber, count);
-                    this.textures[i].indexNumber = count;
+                    indexRealloc.Add(textures[i].indexNumber, count);
+                    textures[i].indexNumber = count;
                     count++;
                 }
                 else
                 {
-                    this.textures[i].indexNumber = indexRealloc[this.textures[i].indexNumber];
+                    textures[i].indexNumber = indexRealloc[textures[i].indexNumber];
                 }
             }
 
-            foreach( FAC.Triangle t in this.facData.triangleList)
+            foreach (FAC.Triangle t in facData.triangleList)
             {
                 t.TextureIndex = indexRealloc[t.TextureIndex];
             }
 
-            foreach (FAC.Plane p in this.facData.planeList)
+            foreach (FAC.Plane p in facData.planeList)
             {
                 p.TextureIndex = indexRealloc[p.TextureIndex];
             }
@@ -338,94 +336,92 @@ namespace hogs_gameEditor_wpf.FileFormat
         /// </summary>
         public byte[] GoBackToMonke()
         {
-            using (var ms = new MemoryStream())
-            using (var writer = new BinaryWriter(ms))
+            using MemoryStream ms = new();
+            using BinaryWriter writer = new(ms);
+            foreach (Vertice vertx in vtxData.verticesList)
             {
-                foreach (Vertice vertx in this.vtxData.verticesList)
-                {
-                    writer.Write(vertx.XOffset);
-                    writer.Write(vertx.YOffset);
-                    writer.Write(vertx.ZOffset);
-                    writer.Write(vertx.BoneIndex);
-                }
-
-                if(ms.Position > this.DataSizes[0] )
-                {
-
-                }
-                
-                foreach (Normal no2 in this.no2Data.normalList)
-                {
-                    writer.Write(no2.X);
-                    writer.Write(no2.Y);
-                    writer.Write(no2.Z);
-                    writer.Write(no2.BoneIndex);
-                }
-
-                if (ms.Position - this.DataSizes[0] > this.DataSizes[1] )
-                {
-
-                }
-
-                writer.Write(this.facData.name);
-                writer.Write(this.facData.triangleCount);
-
-                foreach (FAC.Triangle t in this.facData.triangleList)
-                {
-                    writer.Write(t.U_A);
-                    writer.Write(t.V_A);
-                    writer.Write(t.U_B);
-                    writer.Write(t.V_B);
-                    writer.Write(t.U_C);
-                    writer.Write(t.V_C);
-                    writer.Write(t.Vertex_A);
-                    writer.Write(t.Vertex_B);
-                    writer.Write(t.Vertex_C);
-                    writer.Write(t.Normal_A);
-                    writer.Write(t.Normal_B);
-                    writer.Write(t.Normal_C);
-                    writer.Write(t.Short0);
-                    writer.Write(t.TextureIndex);
-                    writer.Write(t.Short1);
-                    writer.Write(t.Short2);
-                    writer.Write(t.Short3);
-                    writer.Write(t.Short4);
-
-                }
-
-                writer.Write(this.facData.planeCount);
-                foreach (FAC.Plane p in this.facData.planeList)
-                {
-                    writer.Write(p.U_A);
-                    writer.Write(p.V_A);
-                    writer.Write(p.U_B);
-                    writer.Write(p.V_B);
-                    writer.Write(p.U_C);
-                    writer.Write(p.V_C);
-                    writer.Write(p.U_D);
-                    writer.Write(p.V_D);
-                    writer.Write(p.Vertex_A);
-                    writer.Write(p.Vertex_B);
-                    writer.Write(p.Vertex_C);
-                    writer.Write(p.Vertex_D);
-                    writer.Write(p.Normal_A);
-                    writer.Write(p.Normal_B);
-                    writer.Write(p.Normal_C);
-                    writer.Write(p.Normal_D);
-                    writer.Write(p.TextureIndex);
-                    writer.Write(p.Short1);
-                    writer.Write(p.Short2);
-                    writer.Write(p.Short3);
-                    writer.Write(p.Short4);
-                }
-
-                if (ms.Position - this.DataSizes[0] - this.DataSizes[1] > this.DataSizes[2] )
-                {
-
-                }
-
-                return ms.ToArray();
+                writer.Write(vertx.XOffset);
+                writer.Write(vertx.YOffset);
+                writer.Write(vertx.ZOffset);
+                writer.Write(vertx.BoneIndex);
             }
+
+            if (ms.Position > DataSizes[0])
+            {
+
+            }
+
+            foreach (Normal no2 in no2Data.normalList)
+            {
+                writer.Write(no2.X);
+                writer.Write(no2.Y);
+                writer.Write(no2.Z);
+                writer.Write(no2.BoneIndex);
+            }
+
+            if (ms.Position - DataSizes[0] > DataSizes[1])
+            {
+
+            }
+
+            writer.Write(facData.name);
+            writer.Write(facData.triangleCount);
+
+            foreach (FAC.Triangle t in facData.triangleList)
+            {
+                writer.Write(t.U_A);
+                writer.Write(t.V_A);
+                writer.Write(t.U_B);
+                writer.Write(t.V_B);
+                writer.Write(t.U_C);
+                writer.Write(t.V_C);
+                writer.Write(t.Vertex_A);
+                writer.Write(t.Vertex_B);
+                writer.Write(t.Vertex_C);
+                writer.Write(t.Normal_A);
+                writer.Write(t.Normal_B);
+                writer.Write(t.Normal_C);
+                writer.Write(t.Short0);
+                writer.Write(t.TextureIndex);
+                writer.Write(t.Short1);
+                writer.Write(t.Short2);
+                writer.Write(t.Short3);
+                writer.Write(t.Short4);
+
+            }
+
+            writer.Write(facData.planeCount);
+            foreach (FAC.Plane p in facData.planeList)
+            {
+                writer.Write(p.U_A);
+                writer.Write(p.V_A);
+                writer.Write(p.U_B);
+                writer.Write(p.V_B);
+                writer.Write(p.U_C);
+                writer.Write(p.V_C);
+                writer.Write(p.U_D);
+                writer.Write(p.V_D);
+                writer.Write(p.Vertex_A);
+                writer.Write(p.Vertex_B);
+                writer.Write(p.Vertex_C);
+                writer.Write(p.Vertex_D);
+                writer.Write(p.Normal_A);
+                writer.Write(p.Normal_B);
+                writer.Write(p.Normal_C);
+                writer.Write(p.Normal_D);
+                writer.Write(p.TextureIndex);
+                writer.Write(p.Short1);
+                writer.Write(p.Short2);
+                writer.Write(p.Short3);
+                writer.Write(p.Short4);
+            }
+
+            if (ms.Position - DataSizes[0] - DataSizes[1] > DataSizes[2])
+            {
+
+            }
+
+            return ms.ToArray();
 
         }
 

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
@@ -14,31 +10,30 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public NO2(byte[] data)
         {
-            using (MemoryStream ms = new MemoryStream(data))
-            using (BinaryReader reader = new BinaryReader(ms))
+            using MemoryStream ms = new(data);
+            using BinaryReader reader = new(ms);
+            normalList = [];
+
+            while (ms.Position < ms.Length)
             {
-                normalList = new List<Normal>();
-
-                while (ms.Position < ms.Length)
+                Normal n = new()
                 {
-                    Normal n = new Normal();
+                    X = BitConverter.ToInt16(reader.ReadBytes(4)) / 32768f,
+                    Y = BitConverter.ToInt16(reader.ReadBytes(4)) / 32768f,
+                    Z = BitConverter.ToInt16(reader.ReadBytes(4)) / 32768f,
 
-                    n.X = BitConverter.ToInt16(reader.ReadBytes(4)) / 32768f;
-                    n.Y = BitConverter.ToInt16(reader.ReadBytes(4)) / 32768f;
-                    n.Z = BitConverter.ToInt16(reader.ReadBytes(4)) / 32768f;
+                    BoneIndex = reader.ReadSingle()
+                };
 
-                    n.BoneIndex = reader.ReadSingle();
+                //FixNormals(n);
 
-                    //FixNormals(n);
-
-                    normalList.Add(n);
-                }
+                normalList.Add(n);
             }
         }
 
         public void FixNormals(Normal n)
         {
-            float len = MathF.Sqrt(n.X * n.X + n.Y * n.Y + n.Z * n.Z);
+            float len = MathF.Sqrt((n.X * n.X) + (n.Y * n.Y) + (n.Z * n.Z));
             if (len > 0.0001f)
             {
                 n.X /= len;
@@ -48,7 +43,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         }
 
     }
- 
+
 
     public class Normal
     {
@@ -56,6 +51,6 @@ namespace hogs_gameEditor_wpf.FileFormat
         public float Y;
         public float Z;
         public float BoneIndex;
-        
+
     }
 }

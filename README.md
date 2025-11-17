@@ -9,7 +9,7 @@ customizing the game with modifing stuff and even adding new ones
 done : 
 - 3D viewer : Migrate to webView2 + Babylon.js 
 - 3d viewer : parse objects and place & rotate entities
-- ability to add any entity into a map (walls, bridges, flowers...)
+- ability to add any new entity into a pog (walls, bridges, flowers...)
 - compress entire export folder with ZIP
 - "export view window" with options + multithreading on exports processes (wasn't planned but still cool tho) 
 - mega exporter, read all gamefiles and convert them (audio with ffmpeg, maps, skys & skyboxes, models,textures, some ui hats )
@@ -26,14 +26,15 @@ done :
 
 TODO : 
 the tool : 
-- 3d viewer : place character according to team and class
-- manage to export character model with skeleton (.hir) 
-- manage to export character model with animations/motionCapture (mcap)
-- manage to export character model with a hat (combine two models)
 - export 1 model with multiple skins (tents, shelter) 
 - export 1 model with multiple skins and attached barrels (pillbox, artillery, tank) 
-- export FEBmps (ui)
+- manage to export character model with skeleton (.hir) 
+- manage to export character model with skeleton + animations/motionCapture (.mcap)
+- manage to export character model with a hat (combine two models)
+- when adding new entity to map, create correct collision sizes
+- 3d viewer : place character according to team and class
 - export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 
+- export FEBmps (ui)
 - class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
 - 3d viewer : load all models and export then load 3d view with exported models
 - ultimate ! 3D viewer : be able to move and rotate entities into the editor (i'm not such genius so calm down)
@@ -49,7 +50,7 @@ _________________________________________________________
 todo for PC version (need to decompile code): 
 
 - AI behavior 
-- game fixed resolution / borderless window
+- game fixed resolution / borderless window (d3d9.dll)
 - extra classes
 - modifiable progression tree 
 - machine gun behavior (manual direction while autoshooting + recoil , -4hp & -8hp)

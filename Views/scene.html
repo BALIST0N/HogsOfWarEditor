@@ -17,6 +17,7 @@
     const scene = new BABYLON.Scene(engine);
     scene.useRightHandedSystem = true;
 
+    let selectionedItemId = null;
     // -----------------------------------------------------
     // CAMERA
     // -----------------------------------------------------
@@ -43,8 +44,60 @@
 
     const light2 = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(0, 1, 0), scene);
     light2.intensity = 5;
-    // MODEL CACHE
 
+    const hl = new BABYLON.HighlightLayer("hl1", scene);
+
+    scene.onPointerObservable.add((pointerInfo) => 
+    {
+        if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) 
+        {
+
+            const pick = pointerInfo.pickInfo;
+
+            if (pick.hit && pick.pickedMesh) 
+            {
+
+                const mesh = pick.pickedMesh;
+
+                // Trouver le root
+                let root = mesh;
+                while (root && !root.metadata?.id) 
+                {
+                    root = root.parent;
+                }
+
+                if( root.metadata.id == 998 || root.metadata.id == 999 || root.metadata.id == selectionedItemId ){ return; }
+                selectionedItemId = root.metadata.id;
+                window.chrome.webview.postMessage("SELECT|"+root.metadata.id);
+                //highlightById(root.metadata.id)
+
+            }
+        }
+    });
+
+    async function highlightById(id, color = BABYLON.Color3.Yellow()) 
+    {
+        // Trouver le root correspondant à l’ID
+        const root = scene.transformNodes.find(t => t.metadata?.id === id);
+
+        if (!root) 
+        {
+            console.warn("Aucun modèle trouvé avec l'id :", id);
+            return;
+        }
+
+        // Clear highlight précédent
+        hl.removeAllMeshes();
+
+        // Highlight tous les meshes enfants du modèle
+        root.getChildMeshes().forEach(mesh => {
+            hl.addMesh(mesh, color);
+        });
+
+    }
+
+
+    // MODEL CACHE
     const modelCache = {};
 
     // -----------------------------------------------------
@@ -58,9 +111,15 @@
         cloneRoot.position = new BABYLON.Vector3(x, y, -z);
         cloneRoot.rotation = new BABYLON.Vector3(rx, ry, rz);
 
-        cloneRoot.getChildMeshes().forEach((m, i) => {
+        cloneRoot.getChildMeshes().forEach((m, i) => 
+        {
             const originalChild = original.getChildMeshes()[i];
-            if (originalChild.material) m.material = originalChild.material;
+            if (originalChild.material) 
+            {
+                m.material = originalChild.material;
+                m.material.backFaceCulling = false;
+                m.material.forceNormalForward = true;
+            }
             m.metadata = { parentId: Id };
         });
 
@@ -74,7 +133,7 @@
     async function loadModel(path, Id, x, y, z, rx = 0, ry = 0, rz = 0) 
     {
         rx =  BABYLON.Tools.ToRadians(rx);
-        ry =  BABYLON.Tools.ToRadians(ry) + BABYLON.Tools.ToRadians(270);
+        ry =  BABYLON.Tools.ToRadians(ry) + BABYLON.Tools.ToRadians(90);
         rz =  BABYLON.Tools.ToRadians(rz);
 
 
@@ -146,6 +205,7 @@
         modelCache[path] = root;
         return root;
     }
+
 
 
     // RENDER LOOP

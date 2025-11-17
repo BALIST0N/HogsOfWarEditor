@@ -1,14 +1,9 @@
-﻿using hogs_gameManager_wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using Windows.ApplicationModel.Store;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace hogs_gameEditor_wpf.FileFormat
@@ -62,53 +57,50 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public POG(byte[] hexblock)
         {
-            this.position = new short[3];
-            this.angles = new short[3];
-            this.bounds = new short[3];
-            this.ScriptParameters = new byte[19];
-            this.fallback_position = new short[3];
+            position = new short[3];
+            angles = new short[3];
+            bounds = new short[3];
+            ScriptParameters = new byte[19];
+            fallback_position = new short[3];
 
-            using (BinaryReader reader = new BinaryReader(new MemoryStream(hexblock)))
-            {
-                this.name = reader.ReadChars(16);
-                this.unused0 = reader.ReadChars(16);
+            using BinaryReader reader = new(new MemoryStream(hexblock));
+            name = reader.ReadChars(16);
+            unused0 = reader.ReadChars(16);
 
-                this.position[0] = reader.ReadInt16();
-                this.position[1] = reader.ReadInt16();
-                this.position[2] = reader.ReadInt16();
+            position[0] = reader.ReadInt16();
+            position[1] = reader.ReadInt16();
+            position[2] = reader.ReadInt16();
 
-                this.index = reader.ReadInt16();
-                this.angles[0] = reader.ReadInt16();
-                this.angles[1] = reader.ReadInt16();
-                this.angles[2] = reader.ReadInt16();
+            index = reader.ReadInt16();
+            angles[0] = reader.ReadInt16();
+            angles[1] = reader.ReadInt16();
+            angles[2] = reader.ReadInt16();
 
-                this.type = reader.ReadInt16();
+            type = reader.ReadInt16();
 
-                this.bounds[0] = reader.ReadInt16();
-                this.bounds[1] = reader.ReadInt16();
-                this.bounds[2] = reader.ReadInt16();
+            bounds[0] = reader.ReadInt16();
+            bounds[1] = reader.ReadInt16();
+            bounds[2] = reader.ReadInt16();
 
-                this.bounds_type = reader.ReadInt16();
-                this.byte0 = reader.ReadByte();
+            bounds_type = reader.ReadInt16();
+            byte0 = reader.ReadByte();
 
-                this.short0 = reader.ReadInt16();
+            short0 = reader.ReadInt16();
 
-                this.team = (PigTeam)reader.ReadByte();
-                this.objective = (ScriptType)reader.ReadInt16();
-                this.ScriptGroup = reader.ReadByte();
-                this.ScriptParameters = reader.ReadBytes(19);
+            team = (PigTeam)reader.ReadByte();
+            objective = (ScriptType)reader.ReadInt16();
+            ScriptGroup = reader.ReadByte();
+            ScriptParameters = reader.ReadBytes(19);
 
-                this.fallback_position[0] = reader.ReadInt16();
-                this.fallback_position[1] = reader.ReadInt16();
-                this.fallback_position[2] = reader.ReadInt16();
-                
-                short flags = reader.ReadInt16();
-                this.objectiveFlag = flags == 0 ? 0 : (objectiveFlagEnum)flags;
+            fallback_position[0] = reader.ReadInt16();
+            fallback_position[1] = reader.ReadInt16();
+            fallback_position[2] = reader.ReadInt16();
 
-                this.short1 = reader.ReadInt16();
-                this.short2 = reader.ReadInt16();
+            short flags = reader.ReadInt16();
+            objectiveFlag = flags == 0 ? 0 : (objectiveFlagEnum)flags;
 
-            }
+            short1 = reader.ReadInt16();
+            short2 = reader.ReadInt16();
 
         }
 
@@ -119,30 +111,30 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public string GetName()
         {
-            return GlobalVars.Name_Converter(this.name);
+            return GlobalVars.Name_Converter(name);
         }
 
         public static char[] NameToCharArray(string s)
         {
-            return  s.PadRight(16,'\0').ToCharArray();
+            return s.PadRight(16, '\0').ToCharArray();
         }
 
         public void SetName(string s)
         {
-            this.name = s.PadRight(16, '\0').ToCharArray();
+            name = s.PadRight(16, '\0').ToCharArray();
         }
 
 
         public static List<POG> GetAllMapObject(string mapName)
         {
-            List<POG> mapEntities = new List<POG>();
+            List<POG> mapEntities = [];
 
             byte[] mapdata = File.ReadAllBytes(GlobalVars.mapsFolder + mapName + ".POG");
             ushort blocks = BitConverter.ToUInt16(mapdata, 0); //get number of map objects
 
             for (int i = 1; i <= blocks; i++)
             {
-                int endblock = i * 94 + 2;
+                int endblock = (i * 94) + 2;
                 int startblock = endblock - 94; //a map object is 94 bytes, so every 94 bytes, cut and create a mapobject
 
                 if (endblock < mapdata.Length)  //if this is not the end of file
@@ -150,17 +142,17 @@ namespace hogs_gameEditor_wpf.FileFormat
                     mapEntities.Add(new POG(mapdata[startblock..endblock]));
                 }
             }
-            
+
             return mapEntities;
         }
 
 
-        public static void ExportMapPOG(List<POG> mapEntities,string mapName)
+        public static void ExportMapPOG(List<POG> mapEntities, string mapName)
         {
             string path = GlobalVars.mapsFolder + mapName + ".POG";
 
-            using var ms = new MemoryStream();
-            using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
+            using MemoryStream ms = new();
+            using BinaryWriter bw = new(ms, Encoding.ASCII, leaveOpen: true);
 
             // Écrire le nombre d'entités
             bw.Write((ushort)mapEntities.Count);
@@ -180,75 +172,75 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public byte[] ConvertToByteArray()
         {
-            using MemoryStream ms = new MemoryStream();
-            using BinaryWriter bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
+            using MemoryStream ms = new();
+            using BinaryWriter bw = new(ms, Encoding.ASCII, leaveOpen: true);
 
-            bw.Write(Encoding.ASCII.GetBytes(this.name));
-            bw.Write(Encoding.ASCII.GetBytes(this.unused0));
+            bw.Write(Encoding.ASCII.GetBytes(name));
+            bw.Write(Encoding.ASCII.GetBytes(unused0));
 
-            bw.Write(this.position[0]);
-            bw.Write(this.position[1]);
-            bw.Write(this.position[2]);
+            bw.Write(position[0]);
+            bw.Write(position[1]);
+            bw.Write(position[2]);
 
-            bw.Write(this.index);
+            bw.Write(index);
 
-            bw.Write(this.angles[0]);
-            bw.Write(this.angles[1]);
-            bw.Write(this.angles[2]);
+            bw.Write(angles[0]);
+            bw.Write(angles[1]);
+            bw.Write(angles[2]);
 
-            bw.Write(this.type);
+            bw.Write(type);
 
-            bw.Write(this.bounds[0]);
-            bw.Write(this.bounds[1]);
-            bw.Write(this.bounds[2]);
+            bw.Write(bounds[0]);
+            bw.Write(bounds[1]);
+            bw.Write(bounds[2]);
 
-            bw.Write(this.bounds_type);
-            bw.Write(this.byte0);
-            bw.Write((short)this.short0);
-            bw.Write((byte)this.team);
+            bw.Write(bounds_type);
+            bw.Write(byte0);
+            bw.Write(short0);
+            bw.Write((byte)team);
 
-            bw.Write((short)this.objective);
+            bw.Write((short)objective);
 
-            bw.Write(this.ScriptGroup);
-            bw.Write(this.ScriptParameters);
+            bw.Write(ScriptGroup);
+            bw.Write(ScriptParameters);
 
-            bw.Write(this.fallback_position[0]);
-            bw.Write(this.fallback_position[1]);
-            bw.Write(this.fallback_position[2]);
+            bw.Write(fallback_position[0]);
+            bw.Write(fallback_position[1]);
+            bw.Write(fallback_position[2]);
 
-            bw.Write((short)this.objectiveFlag);
+            bw.Write((short)objectiveFlag);
 
-            bw.Write(this.short1);
-            bw.Write(this.short2);
+            bw.Write(short1);
+            bw.Write(short2);
 
             bw.Flush();
             return ms.ToArray();
         }
 
-        public object POG2JSON() => new
+        public object POG2JSON()
         {
-            ID = this.index,
-            name = GlobalVars.Name_Converter(this.name),
-            unused0 = GlobalVars.Name_Converter(this.unused0),
-            position = this.position,
-            angles = this.angles,
-            type = this.type,
-            bounds = this.bounds,
-            bounds_type = this.bounds_type,
-            short0 = this.short0,
-            byte0 = this.byte0,
-            team = (short)this.team,
-            objective = (short)this.objective,
-            ScriptGroup = this.ScriptGroup,
-            ScriptParameters = this.ScriptParameters.Select(x => (short)x).ToArray(),
-            fallback_position = this.fallback_position,
-            objectiveFlag = (short)this.objectiveFlag,
-            short1 = this.short1,
-            short2 = this.short2
-        };
-
-
-
+            return new
+            {
+                ID = index,
+                name = GlobalVars.Name_Converter(name),
+                unused0 = GlobalVars.Name_Converter(unused0),
+                position,
+                angles,
+                type,
+                bounds,
+                bounds_type,
+                short0,
+                byte0,
+                team = (short)team,
+                objective = (short)objective,
+                ScriptGroup,
+                ScriptParameters = ScriptParameters.Select(x => (short)x).ToArray(),
+                fallback_position,
+                objectiveFlag = (short)objectiveFlag,
+                short1,
+                short2
+            };
+        }
 
         public enum PigTeam : byte
         {
@@ -286,7 +278,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         }
 
         [Flags]
-        public enum objectiveFlagEnum 
+        public enum objectiveFlagEnum
         {
             Player = 1 << 0,    // 0000 0001
             Bit1 = 1 << 1,      // 0000 0010

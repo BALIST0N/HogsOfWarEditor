@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 
 
@@ -16,41 +8,38 @@ namespace hogs_gameEditor_wpf.FileFormat
 {
     public class PTG
     {
-        int textureCount;
-        public List<TIM> textures = new List<TIM>();
+        private readonly int textureCount;
+        public List<TIM> textures = [];
 
         public PTG(string filepathWithoutExtension)
         {
-            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(filepathWithoutExtension + ".PTG")))
-            using (BinaryReader reader = new BinaryReader(ms))
+            using MemoryStream ms = new(File.ReadAllBytes(filepathWithoutExtension + ".PTG"));
+            using BinaryReader reader = new(ms);
+            textureCount = reader.ReadInt32();
+
+            int texSize = (int)(ms.Length - 4) / textureCount;
+
+            while (ms.Position < ms.Length)
             {
-                this.textureCount = reader.ReadInt32();
-
-                int texSize = (int)(ms.Length - 4) / this.textureCount;
-
-                while (ms.Position < ms.Length)
-                {
-                    textures.Add(new TIM(reader.ReadBytes(texSize)));
-                }
-
+                textures.Add(new TIM(reader.ReadBytes(texSize)));
             }
 
-            
+
         }
 
         public void DumpTiles()
         {
-            string destination = GlobalVars.gameFolder + "devtools/EXPORT/map/"; 
-            for (int i = 0; i < this.textureCount; i++)
+            string destination = GlobalVars.gameFolder + "devtools/EXPORT/map/";
+            for (int i = 0; i < textureCount; i++)
             {
-                File.WriteAllBytes(destination + i + ".png", this.textures[i].ToPngBytes().Item3 );
+                File.WriteAllBytes(destination + i + ".png", textures[i].ToPngBytes().Item3);
             }
-            
+
         }
 
         public Bitmap CreateIMG(PMG mapTerrain) //PTG2PNG
         {
-            Bitmap finalImage = new Bitmap(2048, 2048,System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Bitmap finalImage = new(2048, 2048, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(finalImage);
 
             for (int xb = 0; xb < 16; xb++)
@@ -65,9 +54,8 @@ namespace hogs_gameEditor_wpf.FileFormat
                         {
                             Tile t = b.TileMap[xT, yT];
 
-                            Bitmap tileImage = this.textures[t.TextureIndex].ToBitmap();
-                            
-                            Graphics g2 = Graphics.FromImage(tileImage);
+                            Bitmap tileImage = textures[t.TextureIndex].ToBitmap();
+                            //Graphics g2 = Graphics.FromImage(tileImage);
 
                             switch (t.RotationFlip)
                             {
@@ -104,7 +92,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                                     tileImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
                                     tileImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
                                     tileImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                                    
+
                                     break;
                             }
                             /*
@@ -162,13 +150,13 @@ namespace hogs_gameEditor_wpf.FileFormat
                                     g2.Clear(System.Drawing.Color.OrangeRed);
                                     break;
                             }*/
-                            
+
                             tileImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
- 
+
 
                             //int posX = ((15 - xb) * 4 + (3 - xT)) * 32;
-                            int posX = (xb * 4 + xT) * 32;
-                            int posY = (yb * 4 + yT) * 32;
+                            int posX = ((xb * 4) + xT) * 32;
+                            int posY = ((yb * 4) + yT) * 32;
                             g.DrawImage(tileImage, posX, posY);
                         }
                     }
@@ -178,13 +166,13 @@ namespace hogs_gameEditor_wpf.FileFormat
             finalImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
             return finalImage;
             //finalImage.Save(GlobalVars.gameFolder + "devtools/EXPORT/map.png", ImageFormat.Png);
-            
+
         }
 
 
         public Bitmap CreateSkybox(PMG mapTerrain)
         {
-            Bitmap bandImage = new Bitmap(512, 512, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Bitmap bandImage = new(512, 512, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(bandImage);
 
             for (int xb = 0; xb < 8; xb++)
@@ -199,9 +187,8 @@ namespace hogs_gameEditor_wpf.FileFormat
                         {
                             Tile t = b.TileMap[xT, yT];
 
-                            Bitmap tileImage = this.textures[t.TextureIndex].ToBitmap();
-                            
-                            Graphics g2 = Graphics.FromImage(tileImage);
+                            Bitmap tileImage = textures[t.TextureIndex].ToBitmap();
+                            Graphics.FromImage(tileImage);
 
 
                             switch (t.RotationFlip)
@@ -242,11 +229,11 @@ namespace hogs_gameEditor_wpf.FileFormat
 
                                     break;
                             }
-                            
+
                             tileImage.RotateFlip(RotateFlipType.Rotate90FlipX);
 
-                            int posX = (xb * 4 + xT) * 32;
-                            int posY = (yb * 4 + yT) * 32;
+                            int posX = ((xb * 4) + xT) * 32;
+                            int posY = ((yb * 4) + yT) * 32;
                             g.DrawImage(tileImage, posX, posY);
                         }
                     }
@@ -257,9 +244,9 @@ namespace hogs_gameEditor_wpf.FileFormat
 
             //the image is  stored in a special way for the game read lines by line, we need to swap lines to get a real view 
             Bitmap temp = bandImage.Clone(new Rectangle(0, 128, 512, 128), bandImage.PixelFormat);
-            
+
             // Copy band 2 into band 1's place
-            g.DrawImage(bandImage, new Rectangle(0, 128, 512, 128),new Rectangle(0, 2 * 128, 512, 128),GraphicsUnit.Pixel);
+            g.DrawImage(bandImage, new Rectangle(0, 128, 512, 128), new Rectangle(0, 2 * 128, 512, 128), GraphicsUnit.Pixel);
 
             // Copy temp (original band 1) into band 2's place
             g.DrawImage(temp, 0, 2 * 128, 512, 128);

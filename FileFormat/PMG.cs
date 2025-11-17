@@ -1,13 +1,5 @@
-﻿using hogs_gameManager_wpf;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Shapes;
 
 
 
@@ -21,157 +13,161 @@ namespace hogs_gameEditor_wpf.FileFormat
         //PMG structure reference : https://github.com/TalonBraveInfo/OpenHoW/blob/master/doc/file-formats/PMG.md
 
         public Block[,] blocks = new Block[16, 16];
-        
+
         public PMG(string filepath)
         {
-            using (MemoryStream ms = new MemoryStream( File.ReadAllBytes(filepath + ".PMG") ))
-            using (BinaryReader reader = new BinaryReader(ms)) //using a binaryreader make the offset advance by itself
+            using MemoryStream ms = new(File.ReadAllBytes(filepath + ".PMG"));
+            using BinaryReader reader = new(ms); //using a binaryreader make the offset advance by itself
+
+            while (ms.Position < ms.Length)
             {
-
-                while (ms.Position < ms.Length)
+                for (int yBlock = 0; yBlock < 16; yBlock++)
                 {
-                    for (int yBlock = 0; yBlock < 16; yBlock++)
+                    for (int xBlock = 0; xBlock < 16; xBlock++)
                     {
-                        for (int xBlock = 0; xBlock < 16; xBlock++)
+                        Block b = new()
                         {
-                            Block b = new Block();
+                            XOffset = reader.ReadInt16(),
+                            YOffset = reader.ReadInt16(),
+                            ZOffset = reader.ReadInt16(),
+                            Field0 = reader.ReadInt16()
+                        };
 
-                            b.XOffset = reader.ReadInt16();
-                            b.YOffset = reader.ReadInt16();
-                            b.ZOffset = reader.ReadInt16();
-                            b.Field0 = reader.ReadInt16();
-
-                            for (int yVertex = 0; yVertex < 5; yVertex++)
+                        for (int yVertex = 0; yVertex < 5; yVertex++)
+                        {
+                            for (int xVertex = 0; xVertex < 5; xVertex++)
                             {
-                                for (int xVertex = 0; xVertex < 5; xVertex++)
+                                Vertex v = new()
                                 {
-                                    Vertex v = new Vertex();
-                                    v.Height = reader.ReadInt16();
-                                    v.Lighting = reader.ReadInt16();
-                                    b.HeightMap[yVertex, xVertex] = v;
+                                    Height = reader.ReadInt16(),
+                                    Lighting = reader.ReadInt16()
+                                };
+                                b.HeightMap[yVertex, xVertex] = v;
 
-                                    //if (v.Height < minHeight) minHeight = v.Height;
-                                    //if (v.Height > maxHeight) maxHeight = v.Height;
-                                }
+                                //if (v.Height < minHeight) minHeight = v.Height;
+                                //if (v.Height > maxHeight) maxHeight = v.Height;
                             }
-
-                            b.Field1 = reader.ReadInt32();
-
-                            for (int yTile = 0; yTile < 4; yTile++)
-                            {
-                                for (int xTile = 0; xTile < 4; xTile++)
-                                {
-                                    Tile t = new Tile();
-                                    t.field0 = reader.ReadInt16();
-                                    t.field1 = reader.ReadInt16();
-                                    t.field2 = reader.ReadInt16();
-
-                                    byte typeAndFlags = reader.ReadByte();
-                                    t.flag = (TileFlag)((typeAndFlags >> 5) & 0b00000111); //don't ask me what is that magic, its chatGPT 
-                                    t.Type = (TileType)(typeAndFlags & 0b00011111); // extract the last 5-bits for the tile Type
-
-                                    t.Slip = (TileSlip)reader.ReadByte();
-
-                                    t.Field3 = reader.ReadInt16();
-
-                                    t.RotationFlip = reader.ReadByte();
-
-                                    t.TextureIndex = reader.ReadInt32();
-                                    t.Field4 = reader.ReadByte();
-
-                                    b.TileMap[yTile, xTile] = t;
-
-                                }
-                            }
-                            this.blocks[yBlock, xBlock] = b;
                         }
+
+                        b.Field1 = reader.ReadInt32();
+
+                        for (int yTile = 0; yTile < 4; yTile++)
+                        {
+                            for (int xTile = 0; xTile < 4; xTile++)
+                            {
+                                Tile t = new()
+                                {
+                                    field0 = reader.ReadInt16(),
+                                    field1 = reader.ReadInt16(),
+                                    field2 = reader.ReadInt16()
+                                };
+
+                                byte typeAndFlags = reader.ReadByte();
+                                t.flag = (TileFlag)((typeAndFlags >> 5) & 0b00000111); //don't ask me what is that magic, its chatGPT 
+                                t.Type = (TileType)(typeAndFlags & 0b00011111); // extract the last 5-bits for the tile Type
+
+                                t.Slip = (TileSlip)reader.ReadByte();
+
+                                t.Field3 = reader.ReadInt16();
+
+                                t.RotationFlip = reader.ReadByte();
+
+                                t.TextureIndex = reader.ReadInt32();
+                                t.Field4 = reader.ReadByte();
+
+                                b.TileMap[yTile, xTile] = t;
+
+                            }
+                        }
+                        blocks[yBlock, xBlock] = b;
                     }
                 }
-
-
             }
 
-           
+
         }
 
 
         public PMG(byte[] data) //parsing skyboxes 
         {
-            this.blocks = new Block[8, 8];
+            blocks = new Block[8, 8];
 
-            using (MemoryStream ms = new MemoryStream(data))
-            using (BinaryReader reader = new BinaryReader(ms)) //using a binaryreader make the offset advance by itself
+            using MemoryStream ms = new(data);
+            using BinaryReader reader = new(ms); //using a binaryreader make the offset advance by itself
+
+            while (ms.Position < ms.Length)
             {
-
-                while (ms.Position < ms.Length)
+                for (int yBlock = 0; yBlock < 8; yBlock++)
                 {
-                    for (int yBlock = 0; yBlock < 8; yBlock++)
+                    for (int xBlock = 0; xBlock < 8; xBlock++)
                     {
-                        for (int xBlock = 0; xBlock < 8; xBlock++)
+                        Block b = new()
                         {
-                            Block b = new Block();
+                            XOffset = reader.ReadInt16(),
+                            YOffset = reader.ReadInt16(),
+                            ZOffset = reader.ReadInt16(),
+                            Field0 = reader.ReadInt16()
+                        };
 
-                            b.XOffset = reader.ReadInt16();
-                            b.YOffset = reader.ReadInt16();
-                            b.ZOffset = reader.ReadInt16();
-                            b.Field0 = reader.ReadInt16();
-
-                            for (int yVertex = 0; yVertex < 5; yVertex++)
+                        for (int yVertex = 0; yVertex < 5; yVertex++)
+                        {
+                            for (int xVertex = 0; xVertex < 5; xVertex++)
                             {
-                                for (int xVertex = 0; xVertex < 5; xVertex++)
+                                Vertex v = new()
                                 {
-                                    Vertex v = new Vertex();
-                                    v.Height = reader.ReadInt16();
-                                    v.Lighting = reader.ReadInt16();
-                                    b.HeightMap[yVertex, xVertex] = v;
+                                    Height = reader.ReadInt16(),
+                                    Lighting = reader.ReadInt16()
+                                };
+                                b.HeightMap[yVertex, xVertex] = v;
 
-                                    //if (v.Height < minHeight) minHeight = v.Height;
-                                    //if (v.Height > maxHeight) maxHeight = v.Height;
-                                }
+                                //if (v.Height < minHeight) minHeight = v.Height;
+                                //if (v.Height > maxHeight) maxHeight = v.Height;
                             }
-
-                            b.Field1 = reader.ReadInt32();
-
-                            for (int yTile = 0; yTile < 4; yTile++)
-                            {
-                                for (int xTile = 0; xTile < 4; xTile++)
-                                {
-                                    Tile t = new Tile();
-                                    t.field0 = reader.ReadInt16();
-                                    t.field1 = reader.ReadInt16();
-                                    t.field2 = reader.ReadInt16();
-
-                                    byte typeAndFlags = reader.ReadByte();
-                                    t.flag = (TileFlag)((typeAndFlags >> 5) & 0b00000111); //don't ask me what is that magic, its chatGPT 
-                                    t.Type = (TileType)(typeAndFlags & 0b00011111); // extract the last 5-bits for the tile Type
-
-                                    t.Slip = (TileSlip)reader.ReadByte();
-
-                                    t.Field3 = reader.ReadInt16();
-
-                                    t.RotationFlip = reader.ReadByte();
-
-                                    t.TextureIndex = reader.ReadInt32();
-                                    t.Field4 = reader.ReadByte();
-
-                                    b.TileMap[yTile, xTile] = t;
-
-                                }
-                            }
-                            this.blocks[yBlock, xBlock] = b;
                         }
-                    }
 
+                        b.Field1 = reader.ReadInt32();
+
+                        for (int yTile = 0; yTile < 4; yTile++)
+                        {
+                            for (int xTile = 0; xTile < 4; xTile++)
+                            {
+                                Tile t = new()
+                                {
+                                    field0 = reader.ReadInt16(),
+                                    field1 = reader.ReadInt16(),
+                                    field2 = reader.ReadInt16()
+                                };
+
+                                byte typeAndFlags = reader.ReadByte();
+                                t.flag = (TileFlag)((typeAndFlags >> 5) & 0b00000111); //don't ask me what is that magic, its chatGPT 
+                                t.Type = (TileType)(typeAndFlags & 0b00011111); // extract the last 5-bits for the tile Type
+
+                                t.Slip = (TileSlip)reader.ReadByte();
+
+                                t.Field3 = reader.ReadInt16();
+
+                                t.RotationFlip = reader.ReadByte();
+
+                                t.TextureIndex = reader.ReadInt32();
+                                t.Field4 = reader.ReadByte();
+
+                                b.TileMap[yTile, xTile] = t;
+
+                            }
+                        }
+                        blocks[yBlock, xBlock] = b;
+                    }
                 }
+
             }
 
-            
+
         }
     }
 
 
 
-    public  class Block
+    public class Block
     {
         public short XOffset;        // -16384 ~ 16384
         public short YOffset;        // unreliable?
@@ -202,13 +198,13 @@ namespace hogs_gameEditor_wpf.FileFormat
         public TileSlip Slip;       // Slip type (0-8)
         public short Field3;        // always 0
 
-        public byte RotationFlip;    
+        public byte RotationFlip;
         public int TextureIndex;     // Into PTG
         public byte Field4;          // always 0
 
         public Bitmap FlipRotationSwitcher(Bitmap tileImage)
         {
-            switch (this.RotationFlip)
+            switch (RotationFlip)
             {
                 case 0:
                     break;
@@ -248,7 +244,7 @@ namespace hogs_gameEditor_wpf.FileFormat
             }
             return tileImage;
         }
-        
+
     }
 
     public enum TileFlag : byte

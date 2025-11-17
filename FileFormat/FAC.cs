@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,91 +20,88 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public FAC(byte[] data)
         {
-            using (MemoryStream ms = new MemoryStream(data))
-            using (BinaryReader reader = new BinaryReader(ms))
+            using MemoryStream ms = new(data);
+            using BinaryReader reader = new(ms);
+            name = reader.ReadChars(16);
+            triangleCount = reader.ReadInt32();
+            triangleList = [];
+
+            for (int i = 0; i < triangleCount; i++)
             {
-                this.name = reader.ReadChars(16);
-                this.triangleCount = reader.ReadInt32();
-                this.triangleList = new List<Triangle>();
-                
-                for (int i = 0; i < this.triangleCount; i++)
+                triangleList.Add(new Triangle
                 {
-                    triangleList.Add(new Triangle
-                    {
-                        U_A = reader.ReadByte(),
-                        V_A = reader.ReadByte(),
-                                     
-                        U_B = reader.ReadByte(),
-                        V_B = reader.ReadByte(),
-                                     
-                        U_C = reader.ReadByte(),
-                        V_C = reader.ReadByte(),
+                    U_A = reader.ReadByte(),
+                    V_A = reader.ReadByte(),
 
-                        Vertex_A = reader.ReadInt16(),
-                        Vertex_B = reader.ReadInt16(),  
-                        Vertex_C = reader.ReadInt16(),
+                    U_B = reader.ReadByte(),
+                    V_B = reader.ReadByte(),
 
-                        Normal_A = reader.ReadInt16(),
-                        Normal_B = reader.ReadInt16(),
-                        Normal_C = reader.ReadInt16(),
+                    U_C = reader.ReadByte(),
+                    V_C = reader.ReadByte(),
 
-                        Short0 = reader.ReadInt16(),
+                    Vertex_A = reader.ReadInt16(),
+                    Vertex_B = reader.ReadInt16(),
+                    Vertex_C = reader.ReadInt16(),
 
-                        TextureIndex = reader.ReadInt32(),
+                    Normal_A = reader.ReadInt16(),
+                    Normal_B = reader.ReadInt16(),
+                    Normal_C = reader.ReadInt16(),
 
-                        Short1 = reader.ReadInt16(),
-                        Short2 = reader.ReadInt16(),
-                        Short3 = reader.ReadInt16(),
-                        Short4 = reader.ReadInt16()
+                    Short0 = reader.ReadInt16(),
 
-                    });
-                }
+                    TextureIndex = reader.ReadInt32(),
 
-                this.planeCount = reader.ReadInt32();
-                this.planeList = new List<Plane>();
-                for (int i = 0; i < this.planeCount; i++)
+                    Short1 = reader.ReadInt16(),
+                    Short2 = reader.ReadInt16(),
+                    Short3 = reader.ReadInt16(),
+                    Short4 = reader.ReadInt16()
+
+                });
+            }
+
+            planeCount = reader.ReadInt32();
+            planeList = [];
+            for (int i = 0; i < planeCount; i++)
+            {
+                planeList.Add(new Plane
                 {
-                    planeList.Add(new Plane
-                    {
-                        U_A = reader.ReadByte(),
-                        V_A = reader.ReadByte(),
-                                    
-                        U_B = reader.ReadByte(),
-                        V_B = reader.ReadByte(),
-                                   
-                        U_C = reader.ReadByte(),
-                        V_C = reader.ReadByte(),
-                                 
-                        U_D = reader.ReadByte(),
-                        V_D = reader.ReadByte(),
+                    U_A = reader.ReadByte(),
+                    V_A = reader.ReadByte(),
 
-                        Vertex_A = reader.ReadInt16(),
-                        Vertex_B = reader.ReadInt16(),
-                        Vertex_C = reader.ReadInt16(),
-                        Vertex_D = reader.ReadInt16(), 
+                    U_B = reader.ReadByte(),
+                    V_B = reader.ReadByte(),
 
-                        Normal_A = reader.ReadInt16(),
-                        Normal_B = reader.ReadInt16(),
-                        Normal_C = reader.ReadInt16(),
-                        Normal_D = reader.ReadInt16(),
+                    U_C = reader.ReadByte(),
+                    V_C = reader.ReadByte(),
 
-                        TextureIndex = reader.ReadInt32(),
+                    U_D = reader.ReadByte(),
+                    V_D = reader.ReadByte(),
 
-                        Short1 = reader.ReadInt16(),
-                        Short2 = reader.ReadInt16(),
-                        Short3 = reader.ReadInt16(),
-                        Short4 = reader.ReadInt16()
-                    });
-                }
+                    Vertex_A = reader.ReadInt16(),
+                    Vertex_B = reader.ReadInt16(),
+                    Vertex_C = reader.ReadInt16(),
+                    Vertex_D = reader.ReadInt16(),
 
-                if (ms.Length != ms.Position)
-                {
-                    //merci chatGPT encore hein
-                    this.texturesNames = Regex.Split(Encoding.UTF8.GetString(data[(int)(ms.Position + 1)..(int)ms.Length]), @"\x00{5,8}")
-                                         .Select(s => s.Trim('\0'))       
-                                         .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-                    
-                }
+                    Normal_A = reader.ReadInt16(),
+                    Normal_B = reader.ReadInt16(),
+                    Normal_C = reader.ReadInt16(),
+                    Normal_D = reader.ReadInt16(),
+
+                    TextureIndex = reader.ReadInt32(),
+
+                    Short1 = reader.ReadInt16(),
+                    Short2 = reader.ReadInt16(),
+                    Short3 = reader.ReadInt16(),
+                    Short4 = reader.ReadInt16()
+                });
+            }
+
+            if (ms.Length != ms.Position)
+            {
+                //merci chatGPT encore hein
+                texturesNames = Regex.Split(Encoding.UTF8.GetString(data[(int)(ms.Position + 1)..(int)ms.Length]), @"\x00{5,8}")
+                                     .Select(s => s.Trim('\0'))
+                                     .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
 
             }
 
@@ -113,20 +109,20 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public List<int> GetIndexes()
         {
-            return this.triangleList.Select(x => x.TextureIndex).Concat(this.planeList.Select(x => x.TextureIndex)).Distinct().ToList();
+            return triangleList.Select(x => x.TextureIndex).Concat(planeList.Select(x => x.TextureIndex)).Distinct().ToList();
         }
 
 
-        public  class Triangle //32 bytes
+        public class Triangle //32 bytes
         {
-            public byte  U_A;             // U component for Vertex_A
-            public byte  V_A;             // U component for Vertex_A
-                   
-            public byte  U_B;             // U component for Vertex_B
-            public byte  V_B;             // V component for Vertex_B
-                   
-            public byte  U_C;             // U component for Vertex_C	
-            public byte  V_C;             // V component for Vertex_C
+            public byte U_A;             // U component for Vertex_A
+            public byte V_A;             // U component for Vertex_A
+
+            public byte U_B;             // U component for Vertex_B
+            public byte V_B;             // V component for Vertex_B
+
+            public byte U_C;             // U component for Vertex_C	
+            public byte V_C;             // V component for Vertex_C
 
             public short Vertex_A;        // index from .VTX
             public short Vertex_B;        // index from .VTX
@@ -150,13 +146,13 @@ namespace hogs_gameEditor_wpf.FileFormat
         {
             public byte U_A;                // U component for Vertex_A
             public byte V_A;                // U component for Vertex_A
-                   
+
             public byte U_B;                // U component for Vertex_B
             public byte V_B;                // V component for Vertex_B
-                   
+
             public byte U_C;                // U component for Vertex_C 
             public byte V_C;                // V component for Vertex_C
-                   
+
             public byte U_D;                // U component for Vertex_D
             public byte V_D;                // V component for Vertex_D
 

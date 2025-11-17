@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Reflection.PortableExecutable;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
@@ -20,24 +15,24 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public MotionCapture(byte[] header)
         {
-            this.DataOffset = BitConverter.ToInt32(header, 0);
-            this.DataSize = BitConverter.ToInt32(header, 4);
+            DataOffset = BitConverter.ToInt32(header, 0);
+            DataSize = BitConverter.ToInt32(header, 4);
 
-            this.Keyframes = new List<Keyframe>();
+            Keyframes = [];
         }
 
         public void SetKeyframesFromData(byte[] data)
         {
             for (int i = 0; i < DataSize; i++)
             {
-                this.Keyframes.Add(new Keyframe(data[i..(i + 272)]));
-                i = i + 271;
+                Keyframes.Add(new Keyframe(data[i..(i + 272)]));
+                i += 271;
             }
         }
 
         public static List<MotionCapture> GetMotionCaptureAnimations()
         {
-            List<MotionCapture> motionCaptures = new List<MotionCapture>();
+            List<MotionCapture> motionCaptures = [];
 
             byte[] mapdata = File.ReadAllBytes(GlobalVars.gameFolder + "chars/mcap.mad");
             int endContenTable = BitConverter.ToInt32(mapdata, 0); //the first item offset define table content size ! 
@@ -48,20 +43,20 @@ namespace hogs_gameEditor_wpf.FileFormat
 
                 if (endblockContentTable <= endContenTable)
                 {
-                    MotionCapture mcap = new MotionCapture(mapdata[i..(i + 8)]);
+                    MotionCapture mcap = new(mapdata[i..(i + 8)]);
                     mcap.SetKeyframesFromData(mapdata[mcap.DataOffset..(mcap.DataOffset + mcap.DataSize)]);
                     motionCaptures.Add(mcap);
                 }
                 i += 7;
             }
-            
+
 
             return motionCaptures;
         }
 
-        public static List<MotionCapture> GetMotionCaptureAnimations(string path )
+        public static List<MotionCapture> GetMotionCaptureAnimations(string path)
         {
-            List<MotionCapture> motionCaptures = new List<MotionCapture>();
+            List<MotionCapture> motionCaptures = [];
 
             byte[] mapdata = File.ReadAllBytes(path);
             int endContenTable = BitConverter.ToInt32(mapdata, 0); //the first item offset define table content size ! 
@@ -72,7 +67,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
                 if (endblockContentTable <= endContenTable)
                 {
-                    MotionCapture mcap = new MotionCapture(mapdata[i..(i + 8)]);
+                    MotionCapture mcap = new(mapdata[i..(i + 8)]);
                     mcap.SetKeyframesFromData(mapdata[mcap.DataOffset..(mcap.DataOffset + mcap.DataSize)]);
                     motionCaptures.Add(mcap);
                 }
@@ -102,30 +97,27 @@ namespace hogs_gameEditor_wpf.FileFormat
         [JsonIgnore]
         public List<Vector4> BoneRotation { get; set; }
 
-        [JsonPropertyName("BoneRotation")] 
+        [JsonPropertyName("BoneRotation")]
         public List<float[]> BoneRotationData => SerializeBoneRotation(); //thanks chatgpt for sharing this trick , when serializing, json ignore the vector4 list, and create a converted list of float array
 
         public Keyframe(byte[] data)
         {
-            using (MemoryStream ms = new MemoryStream(data))
-            using (BinaryReader reader = new BinaryReader(ms))
+            using MemoryStream ms = new(data);
+            using BinaryReader reader = new(ms);
+
+            rootTransformX = reader.ReadInt32();
+            rootTransformY = reader.ReadInt32();
+            rootTransformZ = reader.ReadInt32();
+            rootTransformW = reader.ReadInt32();
+            objectTransformX = reader.ReadInt32();
+            objectTransformY = reader.ReadInt32();
+            objectTransformZ = reader.ReadInt32();
+            objectTransformW = reader.ReadInt32();
+
+            BoneRotation = [];
+            while (ms.Position < ms.Length)
             {
-
-                this.rootTransformX = reader.ReadInt32();
-                this.rootTransformY = reader.ReadInt32();
-                this.rootTransformZ = reader.ReadInt32();
-                this.rootTransformW = reader.ReadInt32();
-                this.objectTransformX = reader.ReadInt32();
-                this.objectTransformY = reader.ReadInt32();
-                this.objectTransformZ = reader.ReadInt32();
-                this.objectTransformW = reader.ReadInt32();
-
-                this.BoneRotation = new List<Vector4>();
-                while (ms.Position < ms.Length)
-                {
-                    this.BoneRotation.Add(new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
-                }
-
+                BoneRotation.Add(new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
             }
 
 
@@ -133,9 +125,9 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public List<float[]> SerializeBoneRotation()
         {
-            List<float[]> fdp = new List<float[]>();
+            List<float[]> fdp = [];
 
-            foreach(Vector4 v4 in this.BoneRotation)
+            foreach (Vector4 v4 in BoneRotation)
             {
                 fdp.Add(new float[]
                 {

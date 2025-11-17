@@ -10,7 +10,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Xceed.Wpf.Toolkit;
 
 
 namespace hogs_gameEditor_wpf
@@ -20,25 +19,25 @@ namespace hogs_gameEditor_wpf
     /// </summary>
     public partial class AddObjectWindow : Window
     {
-        string mapName;
-        int  newId;
-        List<(string, string, short)> charactersTypes;
-        Dictionary<string, byte> weaponList;
-        Dictionary<string, string[]> json;
+        private readonly string mapName;
+        private readonly int newId;
+        private List<(string, string, short)> charactersTypes;
+        private Dictionary<string, byte> weaponList;
+        private Dictionary<string, string[]> json;
 
         public AddObjectWindow(string mapName)
         {
             MainWindow main = (MainWindow)Application.Current.MainWindow;
             this.mapName = mapName;
-            this.newId = main.CurrentMap[main.CurrentMap.Count -1 ].index +1;
+            newId = main.CurrentMap.Count + 1;
             InitializeComponent();
         }
 
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            charactersTypes = new List<(string,string,short)>
-            {
+            charactersTypes =
+            [
                 ( "Grunt","GR_ME", 0 ),
                 ( "Gunner","HV_ME", 1 ),
                 ( "Bombardier","HV_ME", 2 ),
@@ -56,41 +55,88 @@ namespace hogs_gameEditor_wpf
                 ( "Hero","LE_ME", 14 ),
                 ( "Ace","AC_ME", 15 ),
                 ( "Legend","AC_ME", 16 ),
+            ];
+
+
+            weaponList = new Dictionary<string, byte>
+            {
+                { "Cattle Prod", 5 },
+                { "Pistol", 6 },
+                { "Rifle Burst", 8 },
+                { "MG", 9 },
+                { "Heavy MG", 10 },
+                { "Sniper Rifle", 11 },
+                { "Shotgun", 12 },
+                { "Flamethrower", 13 },
+                { "Rocket Launcher", 14 },
+                { "Guided Missile", 15 },
+                { "Medicine Dart", 16 },
+                { "Tranquiliser", 17 },
+                { "Grenade", 18 },
+                { "Clustergrenade", 19 },
+                { "HX-Grenade", 20 },
+                { "Roller Grenade", 21 },
+                { "Confusion Gas", 22 },
+                { "Freeze Gas", 23 },
+                { "Madness Gas", 24 },
+                { "Poison Gas", 25 },
+                { "Mortar", 26 },
+                { "Bazooka", 27 },
+                { "Airburst", 28 },
+                { "Super Airburst", 29 },
+                { "Medicine Ball", 30 },
+                { "Homing Missile", 31 },
+                { "Mine", 32 },
+                { "Anti-P Mine", 33 },
+                { "TNT", 34 },
+                { "Jetpack", 51 },
+                { "Suicide", 52 },
+                { "Healing Hands", 53 },
+                { "Self Heal", 54 },
+                { "Pick Pocket", 55 },
+                { "Shockwave", 56 },
+                { "Spec-Ops", 57 },
+                { "Airstrike", 58 },
+                { "Fire Rain Airstrike", 59 },
+                { "HX-TNT", 67 },
+                { "Hide", 68 },
+                { "Super Shotgun", 69 },
+                { "Shrapnel Grenade", 70 },
+                { "Grenade Launcher", 71 }
             };
 
-
-            weaponList = new Dictionary<string, byte>();
-
             //load JSON:
-            this.json = JsonSerializer.Deserialize<Dictionary< string,string[]>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"));
+            json = JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"));
 
-            this.objectTypeToAddComboBox.ItemsSource = this.json.Keys;
+            objectTypeToAddComboBox.ItemsSource = json.Keys;
 
             //this.objectTypeToAddComboBox.ItemsSource = entityTypesList.Select(x => x.type ).ToList();
 
-            this.weaponComboBox.ItemsSource = weaponList.Select(x => x.Key);
-            this.weaponComboBox.IsEnabled = false;
-            this.amountUpDown.Value = 1;
-            
-            this.amountUpDown.IsEnabled = false;
-            this.isPlayerCheckBox.IsEnabled = false;
+            weaponComboBox.ItemsSource = weaponList.Select(x => x.Key);
+            weaponComboBox.IsEnabled = false;
+            amountUpDown.Value = 1;
 
-            this.mapImage.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + mapName + ".png"));
+            amountUpDown.IsEnabled = false;
+            isPlayerCheckBox.IsEnabled = false;
 
-            Ellipse eli = new Ellipse();
-            eli.Width = 8;
-            eli.Height = 8;
-            eli.Fill = Brushes.Transparent;
-            eli.Stroke = Brushes.Red;
-            eli.StrokeThickness = 2;
+            mapImage.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + mapName + ".png"));
 
-            this.mapCanvas.Children.Add(eli);
+            Ellipse eli = new()
+            {
+                Width = 8,
+                Height = 8,
+                Fill = Brushes.Transparent,
+                Stroke = Brushes.Red,
+                StrokeThickness = 2
+            };
+
+            mapCanvas.Children.Add(eli);
             mapCanvas.MouseLeftButtonDown += (s, e) =>
             {
                 Point pos = e.GetPosition(mapCanvas);
 
-                double x = pos.X - eli.Width / 2;
-                double y = pos.Y - eli.Height / 2;
+                double x = pos.X - (eli.Width / 2);
+                double y = pos.Y - (eli.Height / 2);
 
                 // limite à 256x256
                 x = Math.Clamp(x, 0, 256 - eli.Width);
@@ -99,28 +145,28 @@ namespace hogs_gameEditor_wpf
                 Canvas.SetLeft(eli, x);
                 Canvas.SetTop(eli, y);
 
-                label_Copy0.Content = $"{x * 128 - 16384} | {-(y * 128 - 16384)}";
+                label_Copy0.Content = $"{(x * 128) - 16384} | {-((y * 128) - 16384)}";
             };
 
             Canvas.SetLeft(eli, 124);
             Canvas.SetTop(eli, 124);
         }
 
-  
+
 
         private void objectTypeToAddComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.EntityListView.Items.Clear();
+            EntityListView.Items.Clear();
 
             if ((string)objectTypeToAddComboBox.SelectedItem == "Characters")
             {
-                foreach (var character in  charactersTypes )
+                foreach ((string, string, short) character in charactersTypes)
                 {
-                    this.EntityListView.Items.Add(new
+                    EntityListView.Items.Add(new
                     {
                         name = character.Item1,
                         img = new BitmapImage(),
-                        type = character.Item3, 
+                        type = character.Item3,
                     });
                 }
             }
@@ -128,11 +174,11 @@ namespace hogs_gameEditor_wpf
             {
                 foreach (string ent_name in json[(string)objectTypeToAddComboBox.SelectedItem])
                 {
-                    if( GlobalVars.modelsWithMultipleSkins.ContainsKey(ent_name) == true )
+                    if (GlobalVars.modelsWithMultipleSkins.ContainsKey(ent_name) == true)
                     {
-                        foreach(int model_type in GlobalVars.modelsWithMultipleSkins[ent_name])
+                        foreach (int model_type in GlobalVars.modelsWithMultipleSkins[ent_name])
                         {
-                            this.EntityListView.Items.Add(new
+                            EntityListView.Items.Add(new
                             {
                                 name = ent_name,
                                 img = new BitmapImage(new Uri("file://" + GlobalVars.exportFolder + "thumbnails/" + ent_name + "_" + model_type + ".png")),
@@ -140,13 +186,14 @@ namespace hogs_gameEditor_wpf
                             });
                         }
                     }
-                    else 
+                    else
                     {
-                        this.EntityListView.Items.Add(new
+
+                        EntityListView.Items.Add(new
                         {
                             name = ent_name,
                             img = new BitmapImage(new Uri("file://" + GlobalVars.exportFolder + "thumbnails/" + ent_name + ".png")),
-                            type = GlobalVars.models_uniqueids[ent_name]
+                            type = GlobalVars.models_uniqueids.TryGetValue(ent_name, out short id) ? (short)id : (short)0
                         });
                     }
 
@@ -156,50 +203,50 @@ namespace hogs_gameEditor_wpf
 
         private void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.objectTypeToAddComboBox.SelectedIndex != -1) 
+            if (objectTypeToAddComboBox.SelectedIndex != -1)
             {
-                FrameworkElement fe = (FrameworkElement)this.mapCanvas.Children[0];
+                FrameworkElement fe = (FrameworkElement)mapCanvas.Children[0];
 
-                short top1 = (short)(Canvas.GetLeft(fe) * 128 - 16384);
-                short left1 = (short)-((Canvas.GetTop(fe) * 128 - 16384));
+                short top1 = (short)((Canvas.GetLeft(fe) * 128) - 16384);
+                short left1 = (short)-((Canvas.GetTop(fe) * 128) - 16384);
 
-                short angle = (short)GlobalVars.ScaleUpAngles(this.rotationSlider.Value);
+                short angle = (short)GlobalVars.ScaleUpAngles(rotationSlider.Value);
                 dynamic item = EntityListView.SelectedValue;
 
 
-                POG mo = new POG
+                POG mo = new()
                 {
-                    name = POG.NameToCharArray( charactersTypes.Find(x => x.Item1 == item.name ).Item2 ),
+                    name = POG.NameToCharArray(charactersTypes.Find(x => x.Item1 == item.name).Item2),
                     unused0 = POG.NameToCharArray("NULL"),
                     position = new short[] { top1, 128, left1 },
-                    index = (short)this.newId,
+                    index = (short)newId,
                     angles = new short[] { 0, angle, 0 },
                     type = item.type,
                     bounds = new short[] { 10, 10, 10 },
                     bounds_type = 0,
-                    short0 = this.isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128,
+                    short0 = isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128,
                     byte0 = 255,
                     team = POG.PigTeam.Team01,
                     objective = 0,
                     ScriptGroup = 0,
                     ScriptParameters = new byte[19],
                     fallback_position = new short[] { 0, 0, 0 },
-                    objectiveFlag = this.isPlayerCheckBox.IsChecked == true ? POG.objectiveFlagEnum.Player : 0,
+                    objectiveFlag = isPlayerCheckBox.IsChecked == true ? POG.objectiveFlagEnum.Player : 0,
                     short1 = 0,
                     short2 = 0
                 };
 
-                if(this.objectTypeToAddComboBox.SelectedItem == "Weapon Crate")
+                if (objectTypeToAddComboBox.SelectedItem == "Weapon Crate")
                 {
-                    mo.ScriptParameters[0] = this.weaponList[""+this.weaponComboBox.SelectedItem];
-                    mo.ScriptParameters[1] = (byte)this.amountUpDown.Value;
+                    mo.ScriptParameters[0] = weaponList["" + weaponComboBox.SelectedItem];
+                    mo.ScriptParameters[1] = (byte)amountUpDown.Value;
                     mo.objective = POG.ScriptType.PICKUP_ITEM;
                 }
 
-                if (this.objectTypeToAddComboBox.SelectedItem == "Health Crate")
+                if (objectTypeToAddComboBox.SelectedItem == "Health Crate")
                 {
                     mo.ScriptParameters[0] = 255;
-                    mo.ScriptParameters[1] = (byte)this.amountUpDown.Value;
+                    mo.ScriptParameters[1] = (byte)amountUpDown.Value;
                     mo.objective = POG.ScriptType.PICKUP_ITEM;
                 }
 
@@ -211,7 +258,7 @@ namespace hogs_gameEditor_wpf
                 main.LoadMapObjects();
                 main.mapObjectEdited = true;
 
-                this.Close();
+                Close();
             }
 
 
@@ -226,30 +273,30 @@ namespace hogs_gameEditor_wpf
                 switch (objectTypeToAddComboBox.SelectedItem)
                 {
                     case "Characters":
-                        this.weaponComboBox.IsEnabled = false;
-                        this.amountUpDown.IsEnabled = false;
-                        this.isPlayerCheckBox.IsEnabled = true;
+                        weaponComboBox.IsEnabled = false;
+                        amountUpDown.IsEnabled = false;
+                        isPlayerCheckBox.IsEnabled = true;
                         break;
 
                     case "Crates":
-                        if(item.name == "CRATE1" || item.name == "CRATE4")
+                        if (item.name is (dynamic)"CRATE1" or (dynamic)"CRATE4")
                         {
-                            this.weaponComboBox.IsEnabled = true;
-                            this.amountUpDown.IsEnabled = true;
-                            this.isPlayerCheckBox.IsEnabled = false;
+                            weaponComboBox.IsEnabled = true;
+                            amountUpDown.IsEnabled = true;
+                            isPlayerCheckBox.IsEnabled = false;
                         }
                         else
                         {
-                            this.weaponComboBox.IsEnabled = false;
-                            this.amountUpDown.IsEnabled = true;
-                            this.isPlayerCheckBox.IsEnabled = false;
+                            weaponComboBox.IsEnabled = false;
+                            amountUpDown.IsEnabled = true;
+                            isPlayerCheckBox.IsEnabled = false;
                         }
                         break;
 
                     default:
-                        this.weaponComboBox.IsEnabled = false;
-                        this.amountUpDown.IsEnabled = false;
-                        this.isPlayerCheckBox.IsEnabled = false;
+                        weaponComboBox.IsEnabled = false;
+                        amountUpDown.IsEnabled = false;
+                        isPlayerCheckBox.IsEnabled = false;
                         break;
 
                 }

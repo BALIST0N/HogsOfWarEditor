@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
     internal class HOGSMAP
     {
-        string mapName { get; set; }
-        PMG pmg { get; set; }
-        PTG mapTiles { get; set; }
-        List<POG> mapEntities { get; set; }
-        List<MAD> entitiesAssets { get; set; }
-        string skybox {  get; set; }
-        Weather weather { get; set; } //skycolor, fog, rain, clouds (created from openHOW .map data) 
+        private string mapName { get; set; }
+        private PMG pmg { get; set; }
+        private PTG mapTiles { get; set; }
+        private List<POG> mapEntities { get; set; }
+        private List<MAD> entitiesAssets { get; set; }
+        private string skybox { get; set; }
+        private Weather weather { get; set; } //skycolor, fog, rain, clouds (created from openHOW .map data) 
 
 
         public HOGSMAP() { }

@@ -3,20 +3,20 @@ using hogs_gameEditor_wpf.FileFormat;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+using Xceed.Wpf.Toolkit.Primitives;
 using Xceed.Wpf.Toolkit.PropertyGrid;
 
 
@@ -27,19 +27,18 @@ namespace hogs_gameManager_wpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        Dictionary<string, string> MapList;
+        private readonly Dictionary<string, string> MapList;
         public List<POG> CurrentMap;
-        string CurrentMapName;
+        private string CurrentMapName;
         public bool mapObjectEdited = false;
-        public Dictionary<string, List<string>> TableOfTextureAdded;
-        bool viewMode3D = false;
+        private bool viewMode3D = false;
 
         public MainWindow()
         {
             InitializeComponent();
 
             #region MapList Fillings
-            this.MapList = new Dictionary<string, string>
+            MapList = new Dictionary<string, string>
             {
                 { "You Hillock", "ARCHI" },
                 { "Doomed", "ARTGUN" },
@@ -98,192 +97,47 @@ namespace hogs_gameManager_wpf
                 { "06: Under Siege", "ZULUS" }
             };
 
-            this.MapList = MapList.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-            #endregion
-
-            #region instance texure/models
-
-            this.TableOfTextureAdded = new Dictionary<string, List<string>>()
-            {
-                {"AMLAUNCH", new List<string>()
-                    {"AM-SIDE3.TIM",
-                    "AM-WEELS.TIM",
-                    "AM-SIDE2.TIM",
-                    "AM-TOPA1.TIM",
-                    "AM-BACK.TIM",
-                    "AM-TOP3.TIM",
-                    "AM-SIDE.TIM",
-                    "AM-TOP2.TIM",
-                    "AM-TOP1.TIM",
-                    "AM-UNDA2.TIM",
-                    "AM-TOP4.TIM",
-                    "AM-FNTL.TIM",
-                    "AM-UNDA1.TIM",
-                    "AM-HACH2.TIM",
-                    "AM-HACH1.TIM",
-                    "AM-FNTR.TIM"}
-                },
-                {"TANK", new List<string>()
-                    {"TANK1000.TIM",
-                    "TANK1001.TIM",
-                    "TANK1002.TIM",
-                    "TANK1003.TIM",
-                    "TANK1004.TIM",
-                    "TANK1005.TIM",
-                    "TANK1006.TIM",
-                    "TANK1008.TIM",
-                    "TANK1007.TIM",
-                    "TANK1009.TIM",
-                    "TANK1010.TIM",
-                    "TANK1011.TIM",
-                    "TANK1012.TIM",
-                    "TANK1013.TIM"}
-                },
-                {"PILLBOX", new List<string>()
-                    {"L-FRONT2.TIM",
-                    "L-TOP4.TIM",
-                    "L-SIDE3.TIM",
-                    "L-TOP5.TIM",
-                    "L-TOP2.TIM",
-                    "L-SIDE4.TIM",
-                    "L-FRONT1.TIM",
-                    "L-SIDE2.TIM",
-                    "L-SIDE1.TIM",
-                    "L-TUR1.TIM",
-                    "L-TUR2.TIM",
-                    "L-BACK1.TIM",
-                    "L-TOP6.TIM",
-                    "L-TOP3.TIM"}
-                },
-
-                {"BIG_GUN", new List<string>()
-                    {"BIGN002.TIM",
-                    "BIGN005.TIM",
-                    "BIGN006.TIM",
-                    "BIGN001.TIM",
-                    "BIGN006.TIM",
-                    "BIGN005.TIM",
-                    "BIGN006.TIM",
-                    "BIGN005.TIM",
-                    "BIGN013.TIM",
-                    "BIGN015.TIM",
-                    "BIGN012.TIM",
-                    "BIGN010.TIM",
-                    "BIGN011.TIM",
-                    "BIGN004.TIM",
-                    "BIGN003.TIM",
-                    "BIGN016.TIM",
-                    "BIGN009.TIM",
-                    "BIGN008.TIM",
-                    "BIGN007.TIM",
-                    "BIGN000.TIM"}
-                },
-                {"CARRY", new List<string>()
-                    {"AM-SIDE3.TIM",
-                    "AM-WEELS.TIM",
-                    "AM-SIDE2.TIM",
-                    "AM-TOPA1.TIM",
-                    "AM-BACK.TIM",
-                    "AM-TOP3.TIM",
-                    "AM-SIDE.TIM",
-                    "AM-TOP2.TIM",
-                    "AM-TOP1.TIM",
-                    "AM-UNDA2.TIM",
-                    "AM-TOP4.TIM",
-                    "AM-FNTL.TIM",
-                    "AM-UNDA1.TIM",
-                    "AM-HACH2.TIM",
-                    "AM-HACH1.TIM",
-                    "AM-FNTR.TIM"}
-                },
-                {"DRUM", new List<string>()
-                    {"DRUM000.TIM",
-                    "DRUM001.TIM",
-                    "DRUM002.TIM"}
-                },
-                {"DRUM2", new List<string>()
-                    {"DRUM000.TIM",
-                    "DRUM001.TIM",
-                    "DRUM003.TIM"}
-                },
-                {"M_TENT1", new List<string>()
-                    {"T_M002.TIM",
-                    "T_M000.TIM",
-                    "T_M001.TIM",
-                    "T_M005.TIM"}
-                },
-                {"M_TENT2", new List<string>()
-                    {"T_M002.TIM",
-                    "T_M000.TIM",
-                    "T_M001.TIM",
-                    "T_M005A.TIM"
-                    }
-                },
-                {"TENT_S", new List<string>()
-                    {"T_S001.TIM",
-                    "T_S002.TIM",
-                    "T_S000.TIM"
-                    }
-                },
-                {"SHELTER", new List<string>()
-                    {"SHEL_1.TIM",
-                    "SHEL_2.TIM",
-                    "SHEL_5.TIM",
-                    "SHEL_3.TIM",
-                    "SHEL_4.TIM"}
-                },
-                {"AM_TANK", new List<string>()
-                    {"AMTA007.TIM",
-                    "AMTA006.TIM",
-                    "AMTA005.TIM",
-                    "AMTA004.TIM",
-                    "AMTA000.TIM",
-                    "AMTA003.TIM",
-                    "AMTA002.TIM",
-                    "AMTA001.TIM"}
-                }
-            };
-
+            MapList = MapList.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
             #endregion
 
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.mapListComboBox.ItemsSource = MapList.Keys;
-            this.MapObjectsListView.KeyUp += MapObjectsListView_KeyUp;
+            mapListComboBox.ItemsSource = MapList.Keys;
+            MapObjectsListView.KeyUp += MapObjectsListView_KeyUp;
 
         }
 
         public void MapListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this.mapListComboBox.SelectedIndex != -1)
+            if (mapListComboBox.SelectedIndex != -1)
             {
                 if (e != null && e.RemovedItems.Count > 0 && mapObjectEdited)
                 {
                     if (MessageBox.Show("would You like to save your data on this map ?", "Attention", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
                     {
-                        POG.ExportMapPOG(this.CurrentMap, this.CurrentMapName);
+                        POG.ExportMapPOG(CurrentMap, CurrentMapName);
                     }
                 }
 
                 //clear to avoid Exceptions
-                this.MapObjectPropertiesControl.SelectedObject = null;
-                this.MapObjectsListView.Items.Clear();
-                this.CanvasImageMap.Children.Clear();
-                this.mapObjectEdited = false;
-                this.CurrentMapName = MapList.ElementAt(mapListComboBox.SelectedIndex).Value;
-                this.buttonExportEntity.Content = "";
-                this.buttonMapExport.Content = "Export " + this.CurrentMapName;
+                MapObjectPropertiesControl.SelectedObject = null;
+                MapObjectsListView.Items.Clear();
+                CanvasImageMap.Children.Clear();
+                mapObjectEdited = false;
+                CurrentMapName = MapList.ElementAt(mapListComboBox.SelectedIndex).Value;
+                buttonExportEntity.Content = "";
+                buttonMapExport.Content = "Export " + CurrentMapName;
 
                 //Read the File
-                this.CurrentMap = POG.GetAllMapObject(this.CurrentMapName);
-                foreach (POG mo in this.CurrentMap)
+                CurrentMap = POG.GetAllMapObject(CurrentMapName);
+                foreach (POG mo in CurrentMap)
                 {
-                    this.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = GlobalVars.Name_Converter(mo.name), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
+                    MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = GlobalVars.Name_Converter(mo.name), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
                 }
 
-                this.MapImageControl.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + CurrentMapName + ".png")); //loading the center map
+                MapImageControl.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + CurrentMapName + ".png")); //loading the center map
 
                 //generate buttons with icons in the minimap
                 LoadMapObjects();
@@ -293,16 +147,25 @@ namespace hogs_gameManager_wpf
             }
         }
 
-        private void MapObjectsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)    //click on a different map object
+        private async void MapObjectsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)    //click on a different map object
         {
-            if (this.MapObjectsListView.SelectedIndex != -1)
+            if (MapObjectsListView.SelectedItem is MapObjectsListViewItem selectedItem) //what the hell is taht magic ? 
             {
-                this.MapObjectPropertiesControl.SelectedObject = CurrentMap[this.MapObjectsListView.SelectedIndex];
-                this.MapObjectPropertiesControl.SelectedObjectName = new string(CurrentMap[this.MapObjectsListView.SelectedIndex].name);  //"new string" cuz char[]
-                this.MapObjectPropertiesControl.SelectedObjectTypeName = "Object n°" + this.MapObjectsListView.SelectedIndex.ToString();
-                this.MapObjectPropertiesControl.Update();
-                this.MapObjectPropertiesControl.ExpandAllProperties();
-                this.buttonExportEntity.Content = "Export " + this.MapObjectPropertiesControl.SelectedObjectName;
+                int a = MapObjectsListView.SelectedIndex;
+
+                MapObjectPropertiesControl.SelectedObject = CurrentMap[a];
+                MapObjectPropertiesControl.SelectedObjectName = CurrentMap[a].GetName();
+                MapObjectPropertiesControl.SelectedObjectTypeName = "Object n°" + selectedItem.Id;
+                MapObjectPropertiesControl.Update();
+                MapObjectPropertiesControl.ExpandAllProperties();
+                buttonExportEntity.Content = "Export " + MapObjectPropertiesControl.SelectedObjectName;
+
+                if( this.viewMode3D == true)
+                {
+                    // Envoyer à Babylon.js
+                    await webView.CoreWebView2.ExecuteScriptAsync($@"highlightById({selectedItem.Id});");
+                }
+
             }
         }
 
@@ -315,12 +178,12 @@ namespace hogs_gameManager_wpf
                 if (res == MessageBoxResult.Yes)
                 {
                     CurrentMap.Remove(CurrentMap.Find(x => x.index == Convert.ToInt16(molv.Id)));
-                    this.MapObjectsListView.Items.Remove(molv);
+                    MapObjectsListView.Items.Remove(molv);
 
-                    this.CanvasImageMap.Children.Clear();
+                    CanvasImageMap.Children.Clear();
                     LoadMapObjects();
 
-                    this.mapObjectEdited = true;
+                    mapObjectEdited = true;
                 }
             }
         }
@@ -336,10 +199,10 @@ namespace hogs_gameManager_wpf
 
         public void LoadMapObject(POG mo)
         {
-           if( GlobalVars.models_category["Characters"].Contains(mo.GetName()) == true )
+            if (GlobalVars.models_category["Characters"].Contains(mo.GetName()) == true)
             {
                 GenerateAndSpawnCharacterMapButton(mo);
-                return; 
+                return;
             }
 
             switch (mo.GetName())    //check the mapobject name and draw it differently accoring to his name
@@ -401,7 +264,7 @@ namespace hogs_gameManager_wpf
         {
             //MessageBox.Show(CurrentMap.IndexOf(mo).ToString() + " '\n\r" + mo.position[0] + " " + mo.position[1] + " '\n\r" + Math.Round(mo.position[0] / 72.81, 2) + " " + Math.Round(mo.position[1] / 72.81, 2));
 
-            Rectangle b = new Rectangle
+            Rectangle b = new()
             {
                 Name = "n" + CurrentMap.IndexOf(mo).ToString(),
                 Width = 9,
@@ -416,7 +279,7 @@ namespace hogs_gameManager_wpf
 
         private void GenerateAndSpawnCharacterMapButton(POG mo)
         {
-            var X = new System.Windows.Shapes.Path
+            System.Windows.Shapes.Path X = new()
             {
                 StrokeThickness = 1,
                 Stroke = Brushes.Black,
@@ -462,7 +325,7 @@ namespace hogs_gameManager_wpf
 
             X.MouseDown += B_Click;
 
-            this.CanvasImageMap.Children.Add(X);
+            CanvasImageMap.Children.Add(X);
             Canvas.SetLeft(X, (mo.position[0] / 64) + 251);
             Canvas.SetTop(X, -(mo.position[2] / 64) + 251);
 
@@ -488,7 +351,7 @@ namespace hogs_gameManager_wpf
             double x = mo.position[0] / 64;
             double y = -mo.position[2] / 64;
 
-            this.CanvasImageMap.Children.Add(R);
+            CanvasImageMap.Children.Add(R);
             Canvas.SetLeft(R, x + 251);
             Canvas.SetTop(R, y + 251);
         }
@@ -496,10 +359,10 @@ namespace hogs_gameManager_wpf
         private void B_Click(object sender, RoutedEventArgs e)
         {
             Shape b = (Shape)sender;
-            this.MapObjectPropertiesControl.PropertyValueChanged -= MapObjectPropertiesControl_PropertyValueChanged;
-            this.MapObjectsListView.SelectedIndex = Convert.ToInt32(b.Name.Replace("n", String.Empty));
-            this.MapObjectsListView.ScrollIntoView(this.MapObjectsListView.Items[this.MapObjectsListView.SelectedIndex]);
-            this.MapObjectPropertiesControl.PropertyValueChanged += MapObjectPropertiesControl_PropertyValueChanged;
+            MapObjectPropertiesControl.PropertyValueChanged -= MapObjectPropertiesControl_PropertyValueChanged;
+            MapObjectsListView.SelectedIndex = Convert.ToInt32(b.Name.Replace("n", string.Empty));
+            MapObjectsListView.ScrollIntoView(MapObjectsListView.Items[MapObjectsListView.SelectedIndex]);
+            MapObjectPropertiesControl.PropertyValueChanged += MapObjectPropertiesControl_PropertyValueChanged;
         }
 
         private void MapObjectPropertiesControl_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
@@ -507,17 +370,21 @@ namespace hogs_gameManager_wpf
             //no need to do anything, looks like wpf Propertygrid manage that by itself
             //just need to update the visual position 
 
-            this.CanvasImageMap.Children.Clear();
+            CanvasImageMap.Children.Clear();
             LoadMapObjects();
-            this.mapObjectEdited = true;
+            mapObjectEdited = true;
 
         }
 
         private void AddNewObjectButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.mapListComboBox.SelectedIndex != -1)
+            if (mapListComboBox.SelectedIndex != -1)
             {
-                AddObjectWindow a = new AddObjectWindow(CurrentMapName);
+                AddObjectWindow a = new(CurrentMapName)
+                {
+                    Left = this.Left + 150,
+                    Top = this.Top + 40
+                };
                 a.Show();
             }
         }
@@ -525,25 +392,25 @@ namespace hogs_gameManager_wpf
 
         private async void buttonViewMap_Click(object sender, RoutedEventArgs e)
         {
-            if( this.mapListComboBox.SelectedIndex != -1 )
+            if (mapListComboBox.SelectedIndex != -1)
             {
                 //disabel the button for approx 1 sec
 
-                if (this.viewMode3D == false)
+                if (viewMode3D == false)
                 {
                     // --- UI ---
-                    this.Width += 130;
-                    this.mainGrid.Width = this.Width;
+                    Width += 130;
+                    mainGrid.Width = Width;
 
-                    this.buttonViewMap.Content = "Switch to 2D View";
-                    this.viewMode3D = true;
+                    buttonViewMap.Content = "Switch to 2D View";
+                    viewMode3D = true;
 
-                    this.mapListComboBox.IsEnabled = false;
-                    this.MapImageControl.Visibility = Visibility.Collapsed;
-                    this.CanvasImageMap.Visibility = Visibility.Collapsed;
+                    mapListComboBox.IsEnabled = false;
+                    MapImageControl.Visibility = Visibility.Collapsed;
+                    CanvasImageMap.Visibility = Visibility.Collapsed;
 
                     // --- CRÉER WEBVIEW PROPRE ---
-                    this.webView = new Microsoft.Web.WebView2.Wpf.WebView2()
+                    webView = new Microsoft.Web.WebView2.Wpf.WebView2()
                     {
                         Height = 480,
                         Width = 640,
@@ -552,20 +419,17 @@ namespace hogs_gameManager_wpf
                         HorizontalAlignment = HorizontalAlignment.Left,
                     };
 
-                    this.mainGrid.Children.Add(webView);
+                    mainGrid.Children.Add(webView);
 
                     // ENVIRONNEMENT
-                    var env = await CoreWebView2Environment.CreateAsync(
-                        null, null,
-                        new CoreWebView2EnvironmentOptions("--allow-file-access-from-files")
-                    );
+                    CoreWebView2Environment env = await CoreWebView2Environment.CreateAsync(  null, null,  new CoreWebView2EnvironmentOptions("--allow-file-access-from-files") );
 
                     await webView.EnsureCoreWebView2Async(env);
 
                     // --- ATTACHER L'ÉVÈNEMENT AVANT LA NAVIGATION ---
-                    this.webView.CoreWebView2.NavigationCompleted += async (s, e2) =>
+                    webView.CoreWebView2.NavigationCompleted += async (s, e2) =>
                     {
-                        string m_path = GlobalVars.exportFolder + "maps/" + this.CurrentMapName + ".glb";
+                        string m_path = GlobalVars.exportFolder + "maps/" + CurrentMapName + ".glb";
                         await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', 999, 0, 0, 0);");
 
                         // Sky
@@ -573,67 +437,89 @@ namespace hogs_gameManager_wpf
                         await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', 998, 0, 0, 0);");
 
                         // --- NE PLUS MÉLANGER LA LISTE ---
-                        foreach (POG p in this.CurrentMap)
+                        foreach (POG p in CurrentMap)
                         {
-                            if (GlobalVars.models_category["Characters"].Contains(p.GetName()) == false )
+                            if (GlobalVars.models_category["Characters"].Contains(p.GetName()) == false)
                             {
-                                if (GlobalVars.modelsWithMultipleSkins.ContainsKey(p.GetName()) == true )
-                                    m_path = GlobalVars.exportFolder + $"models/{p.GetName()}_{p.type}.glb";
-                                else
-                                    m_path = GlobalVars.exportFolder + $"models/{p.GetName()}.glb";
+                                m_path = GlobalVars.modelsWithMultipleSkins.ContainsKey(p.GetName()) == true
+                                    ? GlobalVars.exportFolder + $"models/{p.GetName()}_{p.type}.glb"
+                                    : GlobalVars.exportFolder + $"models/{p.GetName()}.glb";
 
                                 try
                                 {
                                     string rx = GlobalVars.ScaleDownAngles(p.angles[0]).ToString(CultureInfo.InvariantCulture);
                                     string ry = GlobalVars.ScaleDownAngles(p.angles[1]).ToString(CultureInfo.InvariantCulture);
                                     string rz = GlobalVars.ScaleDownAngles(p.angles[2]).ToString(CultureInfo.InvariantCulture);
-                                               
+
                                     await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
-                                    
+
                                 }
-                                catch (Exception e) { break; }
+                                catch (Exception) { break; }
 
                             }
                         }
                     };
 
-                    
-                    this.webView.Source = new Uri("file:///D:/projects devs/hogs_gameManager_wpf/Views/scene.html");
+                    webView.CoreWebView2.WebMessageReceived += (s, e) =>
+                    {
+                        handle3DWebViewMessages( e.TryGetWebMessageAsString() );
+                    };
+
+                    webView.Source = new Uri("file:///D:/projects devs/hogs_gameManager_wpf/Views/scene.html");
                 }
                 else
                 {
                     // --- Retour en 2D ---
 
-                    this.Width -= 130;
-                    this.mainGrid.Width = this.Width;
+                    Width -= 130;
+                    mainGrid.Width = Width;
 
-                    this.buttonViewMap.Content = "Switch to 3D View";
-                    this.viewMode3D = false;
+                    buttonViewMap.Content = "Switch to 3D View";
+                    viewMode3D = false;
 
-                    this.MapImageControl.Visibility = Visibility.Visible;
-                    this.CanvasImageMap.Visibility = Visibility.Visible;
-                    this.mapListComboBox.IsEnabled = true;
+                    MapImageControl.Visibility = Visibility.Visible;
+                    CanvasImageMap.Visibility = Visibility.Visible;
+                    mapListComboBox.IsEnabled = true;
 
                     // Détruire proprement
-                    if (this.webView != null)
+                    if (webView != null)
                     {
-                        try { this.webView.CoreWebView2.Navigate("about:blank"); } catch { }
+                        try { webView.CoreWebView2.Navigate("about:blank"); } catch { }
                         await Task.Delay(50);
-                        this.webView.Dispose();
-                        this.webView = null;
+                        webView.Dispose();
+                        webView = null;
                     }
                 }
             }
-            
+
         }
 
+        private void handle3DWebViewMessages(string message)
+        {
 
+            if (message.StartsWith("SELECT|"))
+            {
+                string id = message.Substring("SELECT|".Length);
+
+                // On trouve l'objet qui correspond
+                MapObjectsListViewItem selectedObject = MapObjectsListView.Items.OfType<MapObjectsListViewItem>().FirstOrDefault(x => x.Id == id);
+
+                if (selectedObject != null)
+                {
+                    MapObjectsListView.SelectedItem = selectedObject;
+                    MapObjectsListView.ScrollIntoView(selectedObject);
+                }
+                return;
+            }
+
+
+        }
 
         private void buttonExportEntity_Click(object sender, RoutedEventArgs e)
         {
-            if (this.mapListComboBox.SelectedIndex != -1 && this.MapObjectsListView.SelectedIndex != -1)
+            if (mapListComboBox.SelectedIndex != -1 && MapObjectsListView.SelectedIndex != -1)
             {
-                POG pog = CurrentMap[this.MapObjectsListView.SelectedIndex];
+                POG pog = CurrentMap[MapObjectsListView.SelectedIndex];
 
                 string entityName = pog.GetName();
 
@@ -647,10 +533,10 @@ namespace hogs_gameManager_wpf
                 }
                 else
                 {
-                    MAD model = new MAD();
-                    model = MAD.GetModelFromMAD(entityName, this.CurrentMapName);
+                    new MAD();
+                    MAD model = MAD.GetModelFromMAD(entityName, CurrentMapName);
 
-                    model.textures = Mtd.LoadTexturesFromMTD(model.facData, this.CurrentMapName);
+                    model.textures = Mtd.LoadTexturesFromMTD(model.facData, CurrentMapName);
 
                     GlobalVars.ExportModelWithTexture_GLB(model);
 
@@ -661,12 +547,12 @@ namespace hogs_gameManager_wpf
         private void buttonMapExport_Click(object sender, RoutedEventArgs e)
         {
 
-            PMG mapTerrain = new PMG(GlobalVars.mapsFolder + this.CurrentMapName);
-            PTG mapTiles = new PTG(GlobalVars.mapsFolder + this.CurrentMapName);
+            PMG mapTerrain = new(GlobalVars.mapsFolder + CurrentMapName);
+            PTG mapTiles = new(GlobalVars.mapsFolder + CurrentMapName);
 
-            string loc = GlobalVars.exportFolder + "/" + this.CurrentMapName + "/" + this.CurrentMapName;
+            string loc = GlobalVars.exportFolder + "/" + CurrentMapName + "/" + CurrentMapName;
 
-            File.WriteAllText(loc + ".json", JsonSerializer.Serialize(this.CurrentMap.Select(p => p.POG2JSON()), new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(loc + ".json", JsonSerializer.Serialize(CurrentMap.Select(p => p.POG2JSON()), new JsonSerializerOptions { WriteIndented = true }));
             mapTiles.CreateIMG(mapTerrain).Save(loc + ".png", ImageFormat.Png);
 
             GlobalVars.ExportTerrain_GLB(mapTerrain, mapTiles, loc + ".glb");
@@ -674,18 +560,18 @@ namespace hogs_gameManager_wpf
 
         private async void buttonMapExportALL_Click(object sender, RoutedEventArgs e)
         {
-            if (this.mapListComboBox.SelectedIndex != -1)
+            if (mapListComboBox.SelectedIndex != -1)
             {
                 if (MessageBox.Show("You gonna export all models and textures of this map !,are you sure ? \n\r (Charaters are not exported) ", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     buttonMapExport_Click(null, null);
 
-                    MAD.GetMapEntitiesList(this.CurrentMapName).ForEach(entityName =>
+                    MAD.GetMapEntitiesList(CurrentMapName).ForEach(entityName =>
                     {
-                        MAD model = MAD.GetModelFromMAD(entityName, this.CurrentMapName);
+                        MAD model = MAD.GetModelFromMAD(entityName, CurrentMapName);
                         if (model.facData != null)
                         {
-                            model.textures = Mtd.LoadTexturesFromMTD(model.facData, this.CurrentMapName);
+                            model.textures = Mtd.LoadTexturesFromMTD(model.facData, CurrentMapName);
                             // export
                             GlobalVars.ExportModelWithTexture_GLB(model, GlobalVars.exportFolder + "models/" + entityName + ".glb");
                         }
@@ -696,7 +582,12 @@ namespace hogs_gameManager_wpf
             }
             else
             {
-                //new ExporterWindow().Show();
+                ExporterWindow nw = new ExporterWindow()
+                {
+                    Top = this.Top + 70,
+                    Left = this.Left + 300,
+                };
+                nw.Show();
 
 
                 //test if the tool worked : load all.mad and all.mtd -> done
@@ -753,7 +644,7 @@ namespace hogs_gameManager_wpf
 
 
 
-    class MapObjectsListViewItem
+    internal class MapObjectsListViewItem
     {
         public string Name { get; set; }
         public string Id { get; set; }
