@@ -43,7 +43,7 @@
     light.intensity = 8;
 
     const light2 = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(0, 1, 0), scene);
-    light2.intensity = 5;
+    light2.intensity = 6;
 
     const hl = new BABYLON.HighlightLayer("hl1", scene);
 
@@ -206,7 +206,58 @@
         return root;
     }
 
+    async function positionModel(id,x,y,z)
+    {
+        const root = scene.transformNodes.find(t => t.metadata?.id === id);
 
+        if (!root) 
+        {
+            console.warn("Aucun modèle trouvé avec l'id :", id);
+            return;
+        }
+
+        root.position = new BABYLON.Vector3(x, y , -z);
+    }
+
+    async function RotateModel(id,rx,ry,rz)
+    {
+
+
+        const root = scene.transformNodes.find(t => t.metadata?.id === id);
+
+        if (!root) 
+        {
+            console.warn("Aucun modèle trouvé avec l'id :", id);
+            return;
+        }
+        rx =  BABYLON.Tools.ToRadians(rx);
+        ry =  BABYLON.Tools.ToRadians(ry) + BABYLON.Tools.ToRadians(90);
+        rz =  BABYLON.Tools.ToRadians(rz);
+        root.rotation = new BABYLON.Vector3(rx,ry,rz);
+    }
+
+    async function DeleteModel(id,rx,ry,rz)
+    {
+        const root = scene.transformNodes.find(t => t.metadata?.id === id);
+
+        if (!root) 
+        {
+            console.warn("Aucun modèle trouvé avec l'id :", id);
+            return;
+        }
+
+        root.getChildMeshes().forEach(mesh => 
+        {
+            if (mesh.material) {
+                mesh.material.dispose(true); // même les textures
+            }
+            mesh.dispose();
+        });
+
+        // Supprimer le root parent
+        root.dispose();
+
+    }
 
     // RENDER LOOP
     engine.runRenderLoop(() => scene.render());

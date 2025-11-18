@@ -2,6 +2,7 @@
 using hogs_gameManager_wpf;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -29,7 +30,7 @@ namespace hogs_gameEditor_wpf
         {
             MainWindow main = (MainWindow)Application.Current.MainWindow;
             this.mapName = mapName;
-            newId = main.CurrentMap.Count + 1;
+            newId = main.CurrentMap.Max(x => x.index) + 1;
             InitializeComponent();
         }
 
@@ -213,28 +214,37 @@ namespace hogs_gameEditor_wpf
                 short angle = (short)GlobalVars.ScaleUpAngles(rotationSlider.Value);
                 dynamic item = EntityListView.SelectedValue;
 
-
-                POG mo = new()
+                char[] name;
+                if (objectTypeToAddComboBox.SelectedItem == "Characters" )
                 {
-                    name = POG.NameToCharArray(charactersTypes.Find(x => x.Item1 == item.name).Item2),
-                    unused0 = POG.NameToCharArray("NULL"),
-                    position = new short[] { top1, 128, left1 },
-                    index = (short)newId,
-                    angles = new short[] { 0, angle, 0 },
-                    type = item.type,
-                    bounds = new short[] { 10, 10, 10 },
-                    bounds_type = 0,
-                    short0 = isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128,
-                    byte0 = 255,
-                    team = POG.PigTeam.Team01,
-                    objective = 0,
-                    ScriptGroup = 0,
-                    ScriptParameters = new byte[19],
-                    fallback_position = new short[] { 0, 0, 0 },
-                    objectiveFlag = isPlayerCheckBox.IsChecked == true ? POG.objectiveFlagEnum.Player : 0,
-                    short1 = 0,
-                    short2 = 0
-                };
+                    name = POG.NameToCharArray(charactersTypes.Find(x => x.Item1 == item.name).Item2);
+                }
+                else
+                {
+                    name = POG.NameToCharArray(item.name);
+                }
+
+                POG mo = new POG();
+
+                mo.name = name;
+                mo.unused0 = POG.NameToCharArray("NULL");
+                mo.position = new short[] { top1, 1000, left1 };
+                mo.index = (short)newId;
+                mo.angles = new short[] { 0, angle, 0 };
+                mo.type = item.type;
+                mo.bounds = new short[] { 10, 10, 10 };
+                mo.bounds_type = 0;
+                mo.short0 = isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128;
+                mo.byte0 = 255;
+                mo.team = POG.PigTeam.Team01;
+                mo.objective = 0;
+                mo.ScriptGroup = 0;
+                mo.ScriptParameters = new byte[19];
+                mo.fallback_position = new short[] { 0, 0, 0 };
+                mo.objectiveFlag = isPlayerCheckBox.IsChecked == true ? POG.objectiveFlagEnum.Player : 0;
+                mo.short1 = 0;
+                mo.short2 = 0;
+                
 
                 if (objectTypeToAddComboBox.SelectedItem == "Weapon Crate")
                 {
@@ -253,6 +263,19 @@ namespace hogs_gameEditor_wpf
 
 
                 MainWindow main = (MainWindow)Application.Current.MainWindow;
+                if(main.viewMode3D == true)
+                {
+                    string m_path = GlobalVars.modelsWithMultipleSkins.ContainsKey(mo.GetName()) == true
+                                    ? GlobalVars.exportFolder + $"models/{mo.GetName()}_{mo.type}.glb"
+                                    : GlobalVars.exportFolder + $"models/{mo.GetName()}.glb";
+
+                    string rx = GlobalVars.ScaleDownAngles(mo.angles[0]).ToString(CultureInfo.InvariantCulture);
+                    string ry = GlobalVars.ScaleDownAngles(mo.angles[1]).ToString(CultureInfo.InvariantCulture);
+                    string rz = GlobalVars.ScaleDownAngles(mo.angles[2]).ToString(CultureInfo.InvariantCulture);
+
+                    main.webView.ExecuteScriptAsync($@"loadModel('{m_path}', {mo.index}, {mo.position[0]}, {mo.position[1]}, {mo.position[2]},{rx},{ry},{rz});");
+                }
+
                 main.CurrentMap.Add(mo);
                 main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
                 main.LoadMapObjects();

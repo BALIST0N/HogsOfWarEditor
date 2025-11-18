@@ -3,6 +3,7 @@ using hogs_gameEditor_wpf.FileFormat;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
@@ -31,7 +32,7 @@ namespace hogs_gameManager_wpf
         public List<POG> CurrentMap;
         private string CurrentMapName;
         public bool mapObjectEdited = false;
-        private bool viewMode3D = false;
+        public bool viewMode3D = false;
 
         public MainWindow()
         {
@@ -182,6 +183,12 @@ namespace hogs_gameManager_wpf
 
                     CanvasImageMap.Children.Clear();
                     LoadMapObjects();
+
+                    if(this.viewMode3D == true)
+                    {
+
+                        this.webView.ExecuteScriptAsync($@"DeleteModel({molv.Id});");
+                    }
 
                     mapObjectEdited = true;
                 }
@@ -365,10 +372,34 @@ namespace hogs_gameManager_wpf
             MapObjectPropertiesControl.PropertyValueChanged += MapObjectPropertiesControl_PropertyValueChanged;
         }
 
-        private void MapObjectPropertiesControl_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
+        private async void MapObjectPropertiesControl_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
             //no need to do anything, looks like wpf Propertygrid manage that by itself
             //just need to update the visual position 
+            if( this.viewMode3D  == true )
+            {
+                string propertyName = e.OriginalSource is Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item ? item.PropertyName : null;
+                POG pgm = e.OriginalSource is Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem propertyItem ? (POG)propertyItem.Instance : null;
+                if (propertyName != null && pgm != null)
+                {
+                    if(propertyName == "PositionX" || propertyName == "PositionY" | propertyName == "PositionZ")
+                    {
+                        await webView.CoreWebView2.ExecuteScriptAsync($@"positionModel( {pgm.index},{pgm.position[0]},{pgm.position[1]},{pgm.position[2]} );");
+                        Debug.WriteLine(" Id : "+ pgm.index+ " / pos : "+ pgm.position[0] + " - " + pgm.position[1] + " - " + pgm.position[2]);
+                    }
+
+                    if (propertyName == "AngleX" || propertyName == "AngleY" | propertyName == "AngleZ")
+                    {
+                        string rx = GlobalVars.ScaleDownAngles(pgm.angles[0]).ToString(CultureInfo.InvariantCulture);
+                        string ry = GlobalVars.ScaleDownAngles(pgm.angles[1]).ToString(CultureInfo.InvariantCulture);
+                        string rz = GlobalVars.ScaleDownAngles(pgm.angles[2]).ToString(CultureInfo.InvariantCulture);
+                        await webView.CoreWebView2.ExecuteScriptAsync($@"RotateModel( {pgm.index},{rx},{ry},{rz} );");
+                    }
+
+                }
+
+            }
+
 
             CanvasImageMap.Children.Clear();
             LoadMapObjects();

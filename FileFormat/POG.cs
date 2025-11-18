@@ -4,6 +4,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace hogs_gameEditor_wpf.FileFormat
@@ -36,7 +39,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         public short short1 { get; set; }    //the number of turns (pig change) before the entity get dropped on the map. -> delayed flag must be active ! 
         public short short2 { get; set; }   //unused anywhere, always 0  
 
-
+        #region DisplayProperty
         // Propriété uniquement pour le PropertyGrid
         [Browsable(true)]
         [DisplayName("Script Parameters")]
@@ -53,7 +56,85 @@ namespace hogs_gameEditor_wpf.FileFormat
             }
         }
 
+        [Browsable(true)]
+        [DisplayName("Position X")]
+        public short PositionX
+        {
+            get => position != null && position.Length > 0 ? position[0] : (short)0;
+            set
+            {
+                if (position == null || position.Length < 3)
+                    position = new short[3];
+                position[0] = value;
+            }
+        }
 
+        [Browsable(true)]
+        [DisplayName("Position Y")]
+        public short PositionY
+        {
+            get => position != null && position.Length > 1 ? position[1] : (short)0;
+            set
+            {
+                if (position == null || position.Length < 3)
+                    position = new short[3];
+                position[1] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Position Z")]
+        public short PositionZ
+        {
+            get => position != null && position.Length > 2 ? position[2] : (short)0;
+            set
+            {
+                if (position == null || position.Length < 3)
+                    position = new short[3];
+                position[2] = value;
+            }
+        }
+
+
+        [Browsable(true)]
+        [DisplayName("Angle X")]
+        public short AngleX
+        {
+            get => angles != null && angles.Length > 0 ? angles[0] : (short)0;
+            set
+            {
+                if (angles == null || angles.Length < 3)
+                    angles = new short[3];
+                angles[0] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Angle Y")]
+        public short AngleY
+        {
+            get => angles != null && angles.Length > 1 ? angles[1] : (short)0;
+            set
+            {
+                if (angles == null || angles.Length < 3)
+                    angles = new short[3];
+                angles[1] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Angle Z")]
+        public short AngleZ
+        {
+            get => angles != null && angles.Length > 2 ? angles[2] : (short)0;
+            set
+            {
+                if (angles == null || angles.Length < 3)
+                    angles = new short[3];
+                angles[2] = value;
+            }
+        }
+        #endregion
 
         public POG(byte[] hexblock)
         {
@@ -293,4 +374,11 @@ namespace hogs_gameEditor_wpf.FileFormat
 
 
     }
+    public class Vec3s
+    {
+        public short X { get; set; }
+        public short Y { get; set; }
+        public short Z { get; set; }
+    }
+
 }

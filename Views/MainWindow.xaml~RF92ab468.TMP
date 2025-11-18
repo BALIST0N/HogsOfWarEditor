@@ -54,7 +54,7 @@
             </ListView.View>
         </ListView>
 
-        <xctk:PropertyGrid x:Name="MapObjectPropertiesControl" NameColumnWidth="110" AutoGenerateProperties="False" Margin="0,0,17,0" ShowSummary="False" ShowSortOptions="False" ShowDescriptionByTooltip="False" Background="#FF202020" Foreground="White" BorderBrush="Black" Height="530" Width="280" VerticalAlignment="Top" HorizontalAlignment="Right" PropertyValueChanged="MapObjectPropertiesControl_PropertyValueChanged">
+        <xctk:PropertyGrid x:Name="MapObjectPropertiesControl" NameColumnWidth="200" AutoGenerateProperties="False" Margin="0,0,17,0" ShowSummary="False" ShowSortOptions="False" ShowDescriptionByTooltip="False" Background="#FF202020" Foreground="White" BorderBrush="Black" Height="530" Width="280" VerticalAlignment="Top" HorizontalAlignment="Right" PropertyValueChanged="MapObjectPropertiesControl_PropertyValueChanged">
             <!--  properties, categories,display names  -->
             <xctk:PropertyGrid.PropertyDefinitions>
 

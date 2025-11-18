@@ -7,8 +7,10 @@ customizing the game with modifing stuff and even adding new ones
 
 
 done : 
+- 3D editor : delete , insert when adding new entity
+- 3D viewer : be able to move and rotate entities into the editor (turns out i'm such a genius 🤡 )
+- 3d viewer : parse objects and place / rotate entities
 - 3D viewer : Migrate to webView2 + Babylon.js 
-- 3d viewer : parse objects and place & rotate entities
 - ability to add any new entity into a pog (walls, bridges, flowers...)
 - compress entire export folder with ZIP
 - "export view window" with options + multithreading on exports processes (wasn't planned but still cool tho) 
@@ -26,8 +28,10 @@ done :
 
 TODO : 
 the tool : 
+- in the meantime, export 6 dummy model with full team colors
+- redo the modding mad+mtd to filter some incorrect models / game will load the first model wih the name, model index is ignored
 - export 1 model with multiple skins (tents, shelter) 
-- export 1 model with multiple skins and attached barrels (pillbox, artillery, tank) 
+- export 1 model with attached barrel (pillbox, artillery, tank) 
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)
 - manage to export character model with a hat (combine two models)
@@ -37,7 +41,6 @@ the tool :
 - export FEBmps (ui)
 - class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
 - 3d viewer : load all models and export then load 3d view with exported models
-- ultimate ! 3D viewer : be able to move and rotate entities into the editor (i'm not such genius so calm down)
 
 
 Scrapped/ cancelled : 
