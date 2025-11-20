@@ -8,6 +8,8 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 
 done : 
+- tempoary: export 7 dummy model with  team colors (replacing characters to export)
+- export 1 model with attached barrel (pillbox, artillery, tank) 
 - 3D editor : delete , insert when adding new entity
 - 3D viewer : be able to move and rotate entities into the editor (turns out i'm such a genius 🤡 )
 - 3d viewer : parse objects and place / rotate entities
@@ -29,11 +31,9 @@ done :
 
 TODO : 
 the tool : 
-- in the meantime, export 7 dummy model with full team colors
 - create 3 different "modding .mad .mtd", one for normal maps, one for snow maps, one for desert maps  
 - redo the modding mad+mtd to filter some incorrect models / game will load the first model wih the name, model type number is ignored
 - export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
-- export 1 model with attached barrel (pillbox, artillery, tank) 
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)
 - manage to export character model with a hat (combine two models)
@@ -61,4 +61,5 @@ todo for PC version (need to decompile code):
 - machine gun behavior (manual direction while autoshooting + recoil , -4hp & -8hp)
 - extra weapons 
 - new campaigns
+
 - defense mode
