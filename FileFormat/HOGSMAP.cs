@@ -13,9 +13,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         private string skybox { get; set; }
         private Weather weather { get; set; } //skycolor, fog, rain, clouds (created from openHOW .map data) 
 
-
         public HOGSMAP() { }
-
 
 
     }

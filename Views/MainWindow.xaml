@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:hogs_gameManager_wpf"
         mc:Ignorable="d"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:hx="http://helix-toolkit.org/wpf/SharpDX" xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="Hogs Game Editor" Height="570" Width="1050" Loaded="Window_Loaded" WindowStyle="ToolWindow" ResizeMode="NoResize">
-    
+        
     <Grid x:Name="mainGrid" Background="#FF202020" Margin="0,0,0,0" Width="1050" Height="570">
 
         <ComboBox x:Name="mapListComboBox" Width="235" Height="30" Background="#FF202020" Foreground="White" SelectionChanged="MapListComboBox_SelectionChanged"
@@ -54,7 +55,7 @@
             </ListView.View>
         </ListView>
 
-        <xctk:PropertyGrid x:Name="MapObjectPropertiesControl" NameColumnWidth="110" AutoGenerateProperties="False" Margin="0,0,17,0" ShowSummary="False" ShowSortOptions="False" ShowDescriptionByTooltip="False" Background="#FF202020" Foreground="White" BorderBrush="Black" Height="530" Width="280" VerticalAlignment="Top" HorizontalAlignment="Right" PropertyValueChanged="MapObjectPropertiesControl_PropertyValueChanged">
+        <xctk:PropertyGrid x:Name="MapObjectPropertiesControl"  NameColumnWidth="120" AutoGenerateProperties="False" Margin="0,0,17,0" ShowSummary="False" ShowSortOptions="False" ShowDescriptionByTooltip="False" Background="#FF202020" Foreground="White" BorderBrush="Black" Height="530" Width="280" VerticalAlignment="Top" HorizontalAlignment="Right" PropertyValueChanged="MapObjectPropertiesControl_PropertyValueChanged">
             <!--  properties, categories,display names  -->
             <xctk:PropertyGrid.PropertyDefinitions>
 
@@ -92,7 +93,7 @@
                 <xctk:EditorTemplateDefinition TargetProperties="bounds,fallback_position">
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate >
-                            <TextBlock Text="X,Y,Z" />
+                            <TextBlock Text=" X,Y,Z" />
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
@@ -144,7 +145,7 @@
                 <xctk:EditorTemplateDefinition TargetProperties="ScriptParametersPreview" >
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate>
-                            <TextBlock Text="" />
+                            <TextBlock Text="    (id / amnt)" FontSize="9"/>
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
@@ -153,6 +154,7 @@
 
             <!-- css for the propertygrid -->
             <xctk:PropertyGrid.PropertyContainerStyle>
+
                 <Style TargetType="{x:Type xctk:PropertyItem}">
                     <Setter Property="Background" Value="#FF202020"/>
                     <Setter Property="Foreground" Value="White"/>
@@ -165,9 +167,11 @@
                     </Style.Triggers>
                 </Style>
             </xctk:PropertyGrid.PropertyContainerStyle>
-            
+
             
         </xctk:PropertyGrid>
+        
+        
         <Image x:Name="MapImageControl" Height="512" Width="512" Margin="240,0,0,0" HorizontalAlignment="Left" VerticalAlignment="top" />
         <Canvas x:Name="CanvasImageMap" Height="512" Width="512" Margin="240,0,0,0" HorizontalAlignment="Left"  VerticalAlignment="top" />
         <Button x:Name="button" Content="Add New item to map" HorizontalAlignment="Left" Margin="5,0,0,70" VerticalAlignment="bottom" Width="230" Background="#FF202020" Foreground="White" Height="20" Click="AddNewObjectButton_Click"/>

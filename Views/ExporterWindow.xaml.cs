@@ -44,7 +44,7 @@ namespace hogs_gameEditor_wpf
             if (exportchars_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportCharsFolder)); }
             if (exportskybox_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportSkyboxes)); }
             if (exportlanguages_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportLanguages)); }
-            if (exportmoddedmad_checkbox.IsChecked == true) { tasks.Add(Task.Run(() => { GlobalVars.MadMtdModdingTool(); GlobalVars.MadMtdModdingTool(true); })); }
+            if (exportmoddedmad_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.MadMtdModdingTool)); }
 
             if (tasks.Count > 0)
             {

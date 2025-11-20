@@ -116,7 +116,8 @@
             const originalChild = original.getChildMeshes()[i];
             if (originalChild.material) 
             {
-                m.material = originalChild.material;
+                // Créer une copie du matériau pour ce clone
+                m.material = originalChild.material.clone(`${originalChild.material.name}_${Id}`);
                 m.material.backFaceCulling = false;
                 m.material.forceNormalForward = true;
             }
@@ -205,6 +206,8 @@
         modelCache[path] = root;
         return root;
     }
+
+
 
     async function positionModel(id,x,y,z)
     {

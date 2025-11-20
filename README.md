@@ -2,8 +2,9 @@
 
 a tool to edit maps data, planning to do much more 
 
-Primary functions : display in a 2d format all entities of each map of the game, 
+Primary functions : display in a 2d or in 3D all entities of each map of the game, 
 customizing the game with modifing stuff and even adding new ones 
+Extractor function : Exract and convert any asset of the game into modern format : .GLB for models, .opus for audio, .png for textures... 
 
 
 done : 
@@ -18,19 +19,20 @@ done :
 - HIR & MCAP to JSON 
 - remove forced passing "extension" on PMG,PTG,etcc.. classes (use memorystream + FileReadallbyte instead of filestream)
 - revamp the editor primary functions : rewrite "Additem" and save function 
-- modding mode : build a verified working MAD + mtd with correct fac indexes, one for normal maps, one for snow maps 
+- modding mode : build a verified working MAD + mtd with correct fac indexes
 - pigs are displayed with cross instead of squares
 - PogToJson V2 (easy, c# JsonSerialiser since .net 7)
-- export skyboxes 
+- export skyboxes
 - TIM.ConvertToPng() function
 - export map (terrain) with textures
 
 
 TODO : 
 the tool : 
-- in the meantime, export 6 dummy model with full team colors
-- redo the modding mad+mtd to filter some incorrect models / game will load the first model wih the name, model index is ignored
-- export 1 model with multiple skins (tents, shelter) 
+- in the meantime, export 7 dummy model with full team colors
+- create 3 different "modding .mad .mtd", one for normal maps, one for snow maps, one for desert maps  
+- redo the modding mad+mtd to filter some incorrect models / game will load the first model wih the name, model type number is ignored
+- export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
 - export 1 model with attached barrel (pillbox, artillery, tank) 
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)

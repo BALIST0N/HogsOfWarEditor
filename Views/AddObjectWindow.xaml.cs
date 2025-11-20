@@ -231,7 +231,7 @@ namespace hogs_gameEditor_wpf
                 mo.position = new short[] { top1, 1000, left1 };
                 mo.index = (short)newId;
                 mo.angles = new short[] { 0, angle, 0 };
-                mo.type = item.type;
+                mo.type = (short)item.type;
                 mo.bounds = new short[] { 10, 10, 10 };
                 mo.bounds_type = 0;
                 mo.short0 = isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128;
@@ -277,7 +277,15 @@ namespace hogs_gameEditor_wpf
                 }
 
                 main.CurrentMap.Add(mo);
-                main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
+                if(this.objectTypeToAddComboBox.SelectedItem == "Characters")
+                {
+                    main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
+                }
+                else
+                {
+                    main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = "" });  //this is just adding a row on the listbox
+
+                }
                 main.LoadMapObjects();
                 main.mapObjectEdited = true;
 

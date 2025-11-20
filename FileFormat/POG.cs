@@ -315,7 +315,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                 team = (short)team,
                 objective = (short)objective,
                 ScriptGroup,
-                ScriptParameters = ScriptParameters.Select(x => (short)x).ToArray(),
+                ScriptParameters = ScriptParameters.Select(x => (byte)x).ToArray(),
                 fallback_position,
                 objectiveFlag = (short)objectiveFlag,
                 short1,

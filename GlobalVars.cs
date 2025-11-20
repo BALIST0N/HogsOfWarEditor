@@ -13,6 +13,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -95,13 +96,12 @@ namespace hogs_gameEditor_wpf
             "DEMO2",
         };
 
-        public static Dictionary<string, string> modelsWithChilds = new()
+        public static List<(string, string,Vector3)> modelsWithChilds = new()
         {
-            {"SWILL2","SW2ARM"},
-            {"PILLBOX","PILLBAR"},
-            {"AM_TANK","AMPHGUN"},
-            {"BIG_GUN","BIGBAR"},
-            {"TANK","TANBAR"},
+            ("PILLBOX","PILLBAR", new Vector3(650,200,10) ),
+            ("AM_TANK","AMPHGUN",new Vector3(180,250,0)),
+            ("BIG_GUN","BIGBAR",Vector3.Zero),
+            ("TANK","TANBAR",new Vector3(420, 250, 0)),
         };
 
 
@@ -121,13 +121,13 @@ namespace hogs_gameEditor_wpf
             return new string(arreteTonChar).Trim('\0');
         }
 
-        public static void ExportModelWithOutTexture_GLB(MAD model, string path = null)
+        public static void ExportModelWithOutTexture_GLB(MAD model, Vector4 color, string path = null)
         {
 
             // Création des matériaux correspondant à chaque texture
             Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new()
             {
-                [0] = (new MaterialBuilder().WithBaseColor(new Vector4(1, 1, 1, 1)), 64, 64)
+                [0] = (new MaterialBuilder().WithBaseColor(color), 64, 64)
             };
 
 
@@ -344,6 +344,156 @@ namespace hogs_gameEditor_wpf
                 scene.ToGltf2().SaveGLB(exportFolder + model.GetName());
             }
         }
+
+
+        public static void ExportCombinedModels_GLB(MAD model1, MAD model2, Vector3 offset, string path = null )
+        {
+            // --- Création d'une seule scène ---
+            SceneBuilder scene = new();
+
+            // Liste des modèles à combiner
+            MAD[] models = { model1, model2 };
+
+            foreach (MAD model in models)
+            {
+                // 1. Création des matériaux pour ce modèle
+                Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new();
+                foreach (Mtd texture in model.textures)
+                {
+                    if (texture.textureData != null)
+                    {
+                        using var img = System.Drawing.Image.FromStream(new MemoryStream(texture.textureData));
+                        texture.width = img.Width;
+                        texture.height = img.Height;
+
+                        MaterialBuilder mat = new MaterialBuilder()
+                            .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(texture.textureData)))
+                            .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK)
+                            .WithDoubleSide(true);
+                        mat.AlphaCutoff = 0.5f;
+
+                        materialDict[texture.indexNumber] = (mat, texture.width, texture.height);
+                    }
+                    else
+                    {
+                        (int, int, byte[]) t = texture.textureTim.ToPngBytes();
+                        texture.width = t.Item1;
+                        texture.height = t.Item2;
+
+                        MaterialBuilder mat = new MaterialBuilder()
+                            .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(t.Item3)))
+                            .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK)
+                            .WithDoubleSide(true);
+                        mat.AlphaCutoff = 0.5f;
+
+                        materialDict[texture.indexNumber] = (mat, texture.width, texture.height);
+                    }
+                }
+
+                // 2. Crée les MeshBuilders
+                Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>> meshDict = new();
+                foreach (int texIdx in materialDict.Keys)
+                {
+                    meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>($"Mesh_{model.GetName()}_{texIdx}");
+                }
+
+                // 3. Remplissage des triangles
+                foreach (FAC.Triangle tri in model.facData.triangleList)
+                {
+                    var mesh = meshDict[tri.TextureIndex];
+                    var prim = mesh.UsePrimitive(materialDict[tri.TextureIndex].Material);
+
+                    Vertice vA = model.vtxData.verticesList[tri.Vertex_A];
+                    Vertice vB = model.vtxData.verticesList[tri.Vertex_B];
+                    Vertice vC = model.vtxData.verticesList[tri.Vertex_C];
+
+                    Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                    Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                    Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
+
+                    Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
+
+                    float texW = materialDict[tri.TextureIndex].Width;
+                    float texH = materialDict[tri.TextureIndex].Height;
+
+                    Vector2 uvA = new(tri.U_A / texW, tri.V_A / texH);
+                    Vector2 uvB = new(tri.U_B / texW, tri.V_B / texH);
+                    Vector2 uvC = new(tri.U_C / texW, tri.V_C / texH);
+
+                    prim.AddTriangle(
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA)),
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB)),
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC))
+                    );
+                }
+
+                // 4. Remplissage des quadrangles
+                foreach (FAC.Plane quad in model.facData.planeList)
+                {
+                    var mesh = meshDict[quad.TextureIndex];
+                    var prim = mesh.UsePrimitive(materialDict[quad.TextureIndex].Material);
+
+                    Vertice vA = model.vtxData.verticesList[quad.Vertex_A];
+                    Vertice vB = model.vtxData.verticesList[quad.Vertex_B];
+                    Vertice vC = model.vtxData.verticesList[quad.Vertex_C];
+                    Vertice vD = model.vtxData.verticesList[quad.Vertex_D];
+
+                    Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
+                    Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
+                    Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
+                    Vector3 pD = new(vD.XOffset, vD.YOffset, vD.ZOffset);
+
+                    float texW = materialDict[quad.TextureIndex].Width;
+                    float texH = materialDict[quad.TextureIndex].Height;
+
+                    Vector2 uvA = new(quad.U_A / texW, quad.V_A / texH);
+                    Vector2 uvB = new(quad.U_B / texW, quad.V_B / texH);
+                    Vector2 uvC = new(quad.U_C / texW, quad.V_C / texH);
+                    Vector2 uvD = new(quad.U_D / texW, quad.V_D / texH);
+
+                    Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
+                    Vector3 normal2 = Vector3.Normalize(Vector3.Cross(pC - pA, pD - pA));
+
+                    prim.AddQuadrangle(
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA)),
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB)),
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC)),
+                        new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(new VertexPositionNormal(pD, normal2), new VertexTexture1(uvD))
+                    );
+                }
+
+                // 5. Ajouter les Meshes à la scène
+
+                foreach (var kvp in meshDict)
+                {
+                    Matrix4x4 transform = Matrix4x4.Identity;
+
+                    if (model == model2)
+                    {
+                        // Scale puis translation
+                        transform = Matrix4x4.CreateScale(1, -1, 1) * Matrix4x4.CreateTranslation(offset);
+                    }
+                    else
+                    {
+                        transform = Matrix4x4.CreateScale(1, -1, 1);
+                    }
+
+                    scene.AddRigidMesh(kvp.Value, transform);
+
+                }
+            }
+
+            // 6. Exporter la scène combinée
+            if (path != null)
+            {
+                scene.ToGltf2().SaveGLB(path);
+            }
+            else
+            {
+                scene.ToGltf2().SaveGLB(exportFolder + "CombinedModel.glb");
+            }
+        }
+
 
         public static void ExportCharacterWithTexture_GLB(MAD charModel, List<Mtd> pngs)
         {
@@ -684,7 +834,7 @@ namespace hogs_gameEditor_wpf
                             MAD m = MAD.GetModelFromFullMAD(modelName, fichier);
                             m.textures = Mtd.LoadTexturesFromMTD(m.facData, hatsMtd, true);
 
-                            ExportModelWithOutTexture_GLB(m, destHats2);
+                            ExportModelWithOutTexture_GLB(m,new Vector4(1,1,1,1) , destHats2);
                             window.IncrementProgress();
                         }
 
@@ -737,8 +887,6 @@ namespace hogs_gameEditor_wpf
                         break;
 
 
-
-
                     case "COLDSKY.MAD":
                     case "DESERT.MAD":
                     case "NIGHT1.MAD":
@@ -785,7 +933,6 @@ namespace hogs_gameEditor_wpf
                         }
                         break;
 
-                    case "PROPOINT.MAD":
                     case "SIGHT.MAD":
                     case "TOP.MAD":
 
@@ -915,6 +1062,7 @@ namespace hogs_gameEditor_wpf
             //export every map 
             foreach (string fileName in Directory.GetFiles(mapsFolder, "*.MAD"))
             {
+
                 string fileNameB = Path.GetFileNameWithoutExtension(fileName);
 
                 List<POG> pogs = POG.GetAllMapObject(fileNameB);
@@ -923,15 +1071,24 @@ namespace hogs_gameEditor_wpf
                 //exporting models of a map
                 foreach (string entityName in MAD.GetMapEntitiesList(fileNameB))
                 {
+                    if (modelsWithChilds.Exists(x => x.Item2 == entityName) == true)
+                    {
+                        //ignore barrels 
+                        continue;
+                    }
+
                     loc = exportFolder + "models/" + entityName + ".glb";
 
                     if (File.Exists(loc) == false)
                     {
-                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true)
+                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true  )
                         {
+                            
                             POG pog = pogs.Find(x => x.GetName() == entityName);
-                            if (pog != null)
+                            if (pog != null  )
                             {
+                                if (pog.type == 66)
+                                { continue; }
                                 loc = exportFolder + "models/" + pog.GetName() + "_" + pog.type + ".glb";
                             }
                             else
@@ -939,6 +1096,26 @@ namespace hogs_gameEditor_wpf
                                 continue;
                             }
                         }
+
+                        //case of models with childs (tanks, swill...)
+                        if (modelsWithChilds.Exists(x => x.Item1 == entityName) == true && File.Exists(loc) == false)
+                        {
+                            var specs = modelsWithChilds.Find(x => x.Item1 == entityName);
+
+                            MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+                            if (model.facData != null)
+                            {
+                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
+
+                                MAD model2 = MAD.GetModelFromMAD(specs.Item2 , fileNameB);
+                                model2.textures = Mtd.LoadTexturesFromMTD(model2.facData, fileNameB);
+
+                                ExportCombinedModels_GLB(model, model2,specs.Item3,loc);
+                                window.IncrementProgress();
+                            }
+                            continue;
+                        }
+                         
 
                         if (File.Exists(loc) == false)
                         {
@@ -959,12 +1136,21 @@ namespace hogs_gameEditor_wpf
                 {
                     string entityName = pog.GetName();
 
-                    if (entityFilterList.Contains(entityName) == false && models_category["Characters"].Contains(entityName) == false)
-                    {
+
+                    if (entityFilterList.Contains(entityName) == false && models_category["Characters"].Contains(entityName) == false )
+                    { 
                         loc = exportFolder + "models/" + entityName + ".glb";
-                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true)
+                        if (modelsWithMultipleSkins.ContainsKey(entityName) == true )
                         {
-                            loc = exportFolder + "models/" + entityName + "_" + pog.type + ".glb";
+                            if(modelsWithMultipleSkins[entityName].Contains(pog.type) == true)
+                            {
+                                loc = exportFolder + "models/" + entityName + "_" + pog.type + ".glb";
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                            
                         }
 
                         if (File.Exists(loc) == false)
@@ -1082,7 +1268,7 @@ namespace hogs_gameEditor_wpf
                     {
                         //byte[] decompressed = MGL.DecompressAuto(febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)]);
                         byte[] b = MGL.Decompress(febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)]);
-                        File.WriteAllBytes(exportFolder + mtd.Name + ".BMP", b);
+                        File.WriteAllBytes(exportFolder + "FEBMP/" + mtd.Name + ".BMP", b);
                     }
 
                 }
@@ -1090,7 +1276,7 @@ namespace hogs_gameEditor_wpf
             }
         }
 
-        public static void MadMtdModdingTool(bool snow = false)
+        public static void MadMtdModdingTool()
         {
             /**
              * i have a theory, what happens if i replace every Mad+mtd file of each map by  
@@ -1125,37 +1311,21 @@ namespace hogs_gameEditor_wpf
 
                 MAD.GetMapEntitiesList(fileNameB, false).ForEach(entityName =>
                 {
-                    if (modelsWithMultipleSkins.ContainsKey(entityName) == false)
+                    
+                    MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+                    if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
                     {
-                        MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
-                        if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
+                        if (model.facData != null)
                         {
-                            if (model.facData != null)
-                            {
-                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
-                                model.ReIndexFacWithTextures();
+                            model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
+                            model.ReIndexFacWithTextures();
 
-                                allModelsOfTheGame.Add(model);
-                            }
+                            allModelsOfTheGame.Add(model);
                         }
                     }
-                    else if (SnowMaps.Contains(fileNameB) == snow)
-                    {
-                        MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
-                        if (allModelsOfTheGame.Exists(x => x.Name == model.Name) == false)
-                        {
-                            if (model.facData != null)
-                            {
-                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
-                                model.ReIndexFacWithTextures();
-
-                                allModelsOfTheGame.Add(model);
-                            }
-                        }
-                    }
-
                 });
             }
+
             //every model is now loaded in a list
             //construct both mad and mtd header ?
 
@@ -1243,16 +1413,10 @@ namespace hogs_gameEditor_wpf
 
             }
 
-            if (snow == true)
-            {
-                File.WriteAllBytes(exportFolder + "all_snow.MAD", finalMadBytes);
-                File.WriteAllBytes(exportFolder + "all_snow.MTD", finalMtdBytes);
-            }
-            else
-            {
-                File.WriteAllBytes(exportFolder + "all.MAD", finalMadBytes);
-                File.WriteAllBytes(exportFolder + "all.MTD", finalMtdBytes);
-            }
+
+            File.WriteAllBytes(exportFolder + "all.MAD", finalMadBytes);
+            File.WriteAllBytes(exportFolder + "all.MTD", finalMtdBytes);
+            
 
 
         }

@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -133,18 +134,25 @@ namespace hogs_gameManager_wpf
 
                 //Read the File
                 CurrentMap = POG.GetAllMapObject(CurrentMapName);
+                string[] charsNames = JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"))["Characters"];
+                
                 foreach (POG mo in CurrentMap)
                 {
-                    MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = GlobalVars.Name_Converter(mo.name), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
+                    if( charsNames.Contains(mo.GetName() ) == true )
+                    {
+                        MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = GlobalVars.Name_Converter(mo.name), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
+                    }
+                    else
+                    {
+                        MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = GlobalVars.Name_Converter(mo.name), Id = Convert.ToString(mo.index), Team = "" });  
+
+                    }
                 }
 
                 MapImageControl.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + CurrentMapName + ".png")); //loading the center map
 
                 //generate buttons with icons in the minimap
                 LoadMapObjects();
-
-                //MadMtdModdingTool();
-
             }
         }
 
@@ -488,6 +496,20 @@ namespace hogs_gameManager_wpf
                                 catch (Exception) { break; }
 
                             }
+                            else
+                            {
+                                try
+                                {
+
+                                    string rx = GlobalVars.ScaleDownAngles(p.angles[0]).ToString(CultureInfo.InvariantCulture);
+                                    string ry = GlobalVars.ScaleDownAngles(p.angles[1]).ToString(CultureInfo.InvariantCulture);
+                                    string rz = GlobalVars.ScaleDownAngles(p.angles[2]).ToString(CultureInfo.InvariantCulture);
+
+                                    await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{GlobalVars.exportFolder}temp_dummy_team_{(short)p.team}.glb', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
+
+                                }
+                                catch (Exception) { break; }
+                            }
                         }
                     };
 
@@ -619,6 +641,57 @@ namespace hogs_gameManager_wpf
                     Left = this.Left + 300,
                 };
                 nw.Show();
+
+                /*
+                MAD dummy = MAD.GetModelFromFullMAD("DUMMY", GlobalVars.mapsFolder + "CAMP.MAD");
+
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(9,155,46,255) ),   GlobalVars.exportFolder + "temp_dummy_team_1.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(0,0,196,255) ),    GlobalVars.exportFolder + "temp_dummy_team_2.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(51,166,217,255) ), GlobalVars.exportFolder + "temp_dummy_team_3.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(202,0,0,255) ),    GlobalVars.exportFolder + "temp_dummy_team_4.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(202,204,4,255) ),  GlobalVars.exportFolder + "temp_dummy_team_5.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(90,80,70,255) ),   GlobalVars.exportFolder + "temp_dummy_team_6.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(133,0,200,255) ),  GlobalVars.exportFolder + "temp_dummy_team_7.glb");
+                */
+
+
+                /*
+                List<MAD> wesh_alors = new List<MAD>();
+                MAD bigbar = null;
+                foreach(string filename in Directory.GetFiles(GlobalVars.mapsFolder,"*.MAD") )
+                {
+                    MAD.GetModelListFromMad(filename).ForEach(entityName =>
+                    {
+                        if (entityName == "SWILL2")
+                        {
+                            MAD model = MAD.GetModelFromFullMAD(entityName, filename);
+                            if (model.facData != null)
+                            {
+                                model.textures = Mtd.LoadTexturesFromMTD(model.facData, filename.Remove(filename.Length-4) +  ".MTD", true);
+                            }
+                            wesh_alors.Add(model);
+
+                        }
+
+                        if (entityName == "SW2ARM")
+                        {
+                            bigbar = MAD.GetModelFromFullMAD(entityName, filename);
+                            if (bigbar.facData != null)
+                            {
+                                bigbar.textures = Mtd.LoadTexturesFromMTD(bigbar.facData, filename.Remove(filename.Length - 4) + ".MTD", true);
+                            }
+
+                        }
+                    });
+                }
+
+
+
+                
+                GlobalVars.ExportCombinedModels_GLB(wesh_alors[0], bigbar, new Vector3(0, 550, 0), "E:/Games/IGG-HogsofWar/devtools/EXPORT/swill_with_arms.glb");
+                */
+
+
 
 
                 //test if the tool worked : load all.mad and all.mtd -> done
