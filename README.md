@@ -9,8 +9,8 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 done : 
 - tempoary: export 7 dummy model with  team colors (replacing characters to export)
-- export 1 model with attached barrel (pillbox, artillery, tank) 
-- 3D editor : delete , insert when adding new entity
+- export models with attached barrel (pillbox, artillery, tank) 
+- 3D editor : delete selected entity, insert when adding new entity
 - 3D viewer : be able to move and rotate entities into the editor (turns out i'm such a genius 🤡 )
 - 3d viewer : parse objects and place / rotate entities
 - 3D viewer : Migrate to webView2 + Babylon.js 
@@ -31,9 +31,12 @@ done :
 
 TODO : 
 the tool : 
-- create 3 different "modding .mad .mtd", one for normal maps, one for snow maps, one for desert maps  
-- redo the modding mad+mtd to filter some incorrect models / game will load the first model wih the name, model type number is ignored
+- create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps  
+- redo the modding mad+mtd to filter some incorrect models 
+- skyboxes : find witch map has what skybox?
 - export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
+- try to understand why VSstudio doesn't compile into a single Exe File....
+- FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)
 - manage to export character model with a hat (combine two models)
@@ -43,7 +46,6 @@ the tool :
 - export FEBmps (ui)
 - class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
 - 3d viewer : load all models and export then load 3d view with exported models
-
 
 Scrapped/ cancelled : 
 - converting fonts images to TTF (no library available, too complex, useless)
@@ -61,5 +63,4 @@ todo for PC version (need to decompile code):
 - machine gun behavior (manual direction while autoshooting + recoil , -4hp & -8hp)
 - extra weapons 
 - new campaigns
-
 - defense mode

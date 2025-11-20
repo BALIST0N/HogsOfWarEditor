@@ -5,19 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:hogs_gameManager_wpf"
         mc:Ignorable="d"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
         xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="Hogs Game Editor" Height="570" Width="1050" Loaded="Window_Loaded" WindowStyle="ToolWindow" ResizeMode="NoResize">
         
     <Grid x:Name="mainGrid" Background="#FF202020" Margin="0,0,0,0" Width="1050" Height="570">
 
-        <ComboBox x:Name="mapListComboBox" Width="235" Height="30" Background="#FF202020" Foreground="White" SelectionChanged="MapListComboBox_SelectionChanged"
-          Style="{StaticResource {x:Static ToolBar.ComboBoxStyleKey}}" HorizontalAlignment="Left" Margin="2,2,0,0" VerticalAlignment="Top">
+        <ComboBox x:Name="mapListComboBox"  FontSize="16" Width="235" Height="30" Background="#FF202020" 
+         Foreground="White" SelectionChanged="MapListComboBox_SelectionChanged"
+         Style="{StaticResource {x:Static ToolBar.ComboBoxStyleKey}}" HorizontalAlignment="Left" Margin="2,2,0,0" VerticalAlignment="Top">
             <ComboBox.ItemContainerStyle>
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="Background" Value="#FF202020"/>
                     <Setter Property="BorderBrush" Value="#FF202020"/>
                     <Setter Property="Foreground" Value="White"/>
+
                 </Style>
             </ComboBox.ItemContainerStyle>
         </ComboBox>

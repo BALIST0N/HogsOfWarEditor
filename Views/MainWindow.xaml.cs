@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
@@ -34,6 +35,8 @@ namespace hogs_gameManager_wpf
         private string CurrentMapName;
         public bool mapObjectEdited = false;
         public bool viewMode3D = false;
+
+        Storyboard pulseStoryboard;
 
         public MainWindow()
         {
@@ -106,13 +109,42 @@ namespace hogs_gameManager_wpf
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            this.pulseStoryboard = new();
+
+            ColorAnimation animation = new()
+            {
+                From = Color.FromRgb(32, 32, 32),
+                To = Colors.DarkOliveGreen,
+                Duration = new Duration(TimeSpan.FromSeconds(1)),
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+
+            Storyboard.SetTarget(animation, mapListComboBox);
+            Storyboard.SetTargetProperty(animation, new PropertyPath("(ComboBox.Background).(SolidColorBrush.Color)"));
+
+            pulseStoryboard.Children.Add(animation);
+
+            pulseStoryboard.Begin();
+           
+
+            this.button.Content = "";
+            this.buttonViewMap.Content = "";
             mapListComboBox.ItemsSource = MapList.Keys;
             MapObjectsListView.KeyUp += MapObjectsListView_KeyUp;
+
+
+
+        
 
         }
 
         public void MapListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            this.button.Content = "Add New item to map";
+            this.buttonViewMap.Content = "Switch to 3D View";
+            this.pulseStoryboard.Stop();
+
             if (mapListComboBox.SelectedIndex != -1)
             {
                 if (e != null && e.RemovedItems.Count > 0 && mapObjectEdited)

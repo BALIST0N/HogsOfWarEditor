@@ -204,7 +204,7 @@ namespace hogs_gameEditor_wpf
 
         private void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            if (objectTypeToAddComboBox.SelectedIndex != -1)
+            if (objectTypeToAddComboBox.SelectedIndex != -1 && EntityListView.SelectedValue != null)
             {
                 FrameworkElement fe = (FrameworkElement)mapCanvas.Children[0];
 
