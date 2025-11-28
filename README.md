@@ -8,7 +8,8 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 
 done : 
-- tempoary: export 7 dummy model with  team colors (replacing characters to export)
+- manage to export character model with skeleton (.hir) 
+- tempoary: export 7 dummy model with team colors (replacing characters to export)
 - export models with attached barrel (pillbox, artillery, tank) 
 - 3D editor : delete selected entity, insert when adding new entity
 - 3D viewer : be able to move and rotate entities into the editor (turns out i'm such a genius 🤡 )
@@ -21,7 +22,7 @@ done :
 - HIR & MCAP to JSON 
 - remove forced passing "extension" on PMG,PTG,etcc.. classes (use memorystream + FileReadallbyte instead of filestream)
 - revamp the editor primary functions : rewrite "Additem" and save function 
-- modding mode : build a verified working MAD + mtd with correct fac indexes
+- modding mode : build a verified working MAD + mtd containg all models of the game with correct fac indexes
 - pigs are displayed with cross instead of squares
 - PogToJson V2 (easy, c# JsonSerialiser since .net 7)
 - export skyboxes
@@ -31,16 +32,14 @@ done :
 
 TODO : 
 the tool : 
-- create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps  
-- redo the modding mad+mtd to filter some incorrect models 
-- skyboxes : find witch map has what skybox?
+- create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps
+- skyboxes : find witch map has what skybox? <- Decomp exe needed : found something but need investigation
+- when adding new entity to map, create correct collision sizes
 - export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
 - try to understand why VSstudio doesn't compile into a single Exe File....
 - FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation
-- manage to export character model with skeleton (.hir) 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)
 - manage to export character model with a hat (combine two models)
-- when adding new entity to map, create correct collision sizes
 - 3d viewer : place character according to team and class
 - export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 
 - export FEBmps (ui)

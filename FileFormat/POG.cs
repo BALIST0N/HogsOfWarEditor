@@ -39,17 +39,24 @@ namespace hogs_gameEditor_wpf.FileFormat
         #region DisplayProperty
         // Propriété uniquement pour le PropertyGrid
         [Browsable(true)]
-        [DisplayName("Script Parameters")]
-        public byte[] ScriptParametersPreview
+        [DisplayName("Script Parameters 1")]
+        public byte ScriptParametersPreview1
         {
-            get => ScriptParameters.Take(2).ToArray();
+            get => ScriptParameters[0];
             set
             {
-                if (value.Length >= 2)
-                {
-                    ScriptParameters[0] = value[0];
-                    ScriptParameters[1] = value[1];
-                }
+                ScriptParameters[0] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Script Parameters 2")]
+        public byte ScriptParametersPreview2
+        {
+            get => ScriptParameters[1];
+            set
+            {
+                ScriptParameters[1] = value;
             }
         }
 
@@ -129,6 +136,42 @@ namespace hogs_gameEditor_wpf.FileFormat
                 if (angles == null || angles.Length < 3)
                     angles = new short[3];
                 angles[2] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Fallback Pos X")]
+        public short FallbackPositionX
+        {
+            get => fallback_position != null && fallback_position.Length > 0 ? fallback_position[0] : (short)0;
+            set
+            {
+                if (fallback_position == null || fallback_position.Length < 3){ fallback_position = new short[3]; }
+                fallback_position[0] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Fallback Pos Y")]
+        public short FallbackPositionY
+        {
+            get => fallback_position != null && fallback_position.Length > 1 ? fallback_position[1] : (short)0;
+            set
+            {
+                if (fallback_position == null || fallback_position.Length < 3) { fallback_position = new short[3]; }
+                fallback_position[1] = value;
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("Fallback Pos Z")]
+        public short FallbackPositionZ
+        {
+            get => fallback_position != null && fallback_position.Length > 2 ? fallback_position[2] : (short)0;
+            set
+            {
+                if (fallback_position == null || fallback_position.Length < 3){ fallback_position = new short[3]; }
+                fallback_position[2] = value;
             }
         }
         #endregion

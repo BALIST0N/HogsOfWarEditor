@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -127,15 +128,10 @@ namespace hogs_gameManager_wpf
 
             pulseStoryboard.Begin();
            
-
             this.button.Content = "";
             this.buttonViewMap.Content = "";
             mapListComboBox.ItemsSource = MapList.Keys;
             MapObjectsListView.KeyUp += MapObjectsListView_KeyUp;
-
-
-
-        
 
         }
 
@@ -210,7 +206,7 @@ namespace hogs_gameManager_wpf
             }
         }
 
-        private void MapObjectsListView_KeyUp(object sender, KeyEventArgs e)
+        private async void MapObjectsListView_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete && MapObjectsListView.SelectedIndex != -1)
             {
@@ -226,8 +222,7 @@ namespace hogs_gameManager_wpf
 
                     if(this.viewMode3D == true)
                     {
-
-                        this.webView.ExecuteScriptAsync($@"DeleteModel({molv.Id});");
+                        await this.webView.ExecuteScriptAsync($@"DeleteModel({molv.Id});");
                     }
 
                     mapObjectEdited = true;
@@ -493,7 +488,7 @@ namespace hogs_gameManager_wpf
                     mainGrid.Children.Add(webView);
 
                     // ENVIRONNEMENT
-                    CoreWebView2Environment env = await CoreWebView2Environment.CreateAsync(  null, null,  new CoreWebView2EnvironmentOptions("--allow-file-access-from-files") );
+                    CoreWebView2Environment env = await CoreWebView2Environment.CreateAsync(null, null, new CoreWebView2EnvironmentOptions("--allow-file-access-from-files"));
 
                     await webView.EnsureCoreWebView2Async(env);
 
@@ -503,11 +498,9 @@ namespace hogs_gameManager_wpf
                         string m_path = GlobalVars.exportFolder + "maps/" + CurrentMapName + ".glb";
                         await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', 999, 0, 0, 0);");
 
-                        // Sky
-                        m_path = GlobalVars.exportFolder + "skydomes/skydomeu_SUNNY.glb";
-                        await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', 998, 0, 0, 0);");
 
-                        // --- NE PLUS MÉLANGER LA LISTE ---
+
+                        int max = CurrentMap.Max(x => x.index);
                         foreach (POG p in CurrentMap)
                         {
                             if (GlobalVars.models_category["Characters"].Contains(p.GetName()) == false)
@@ -522,10 +515,13 @@ namespace hogs_gameManager_wpf
                                     string ry = GlobalVars.ScaleDownAngles(p.angles[1]).ToString(CultureInfo.InvariantCulture);
                                     string rz = GlobalVars.ScaleDownAngles(p.angles[2]).ToString(CultureInfo.InvariantCulture);
 
-                                    await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
+                                    if (webView != null) 
+                                    {
+                                        await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
+                                    }
 
                                 }
-                                catch (Exception) { break; }
+                                catch (Exception) { continue; }
 
                             }
                             else
@@ -540,17 +536,31 @@ namespace hogs_gameManager_wpf
                                     await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{GlobalVars.exportFolder}temp_dummy_team_{(short)p.team}.glb', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
 
                                 }
-                                catch (Exception) { break; }
+                                catch (Exception) { continue; }
                             }
+
+
                         }
+
+                        // Sky
+                        m_path = GlobalVars.exportFolder + "skydomes/skydomeu_SUNNY.glb";
+                        try
+                        {
+                            await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', 998, 0, 0, 0);");
+                        }
+                        catch (Exception){ }
+
                     };
 
                     webView.CoreWebView2.WebMessageReceived += (s, e) =>
                     {
-                        handle3DWebViewMessages( e.TryGetWebMessageAsString() );
+                        handle3DWebViewMessages(e.TryGetWebMessageAsString());
                     };
 
                     webView.Source = new Uri("file:///D:/projects devs/hogs_gameManager_wpf/Views/scene.html");
+
+
+
                 }
                 else
                 {
@@ -581,7 +591,6 @@ namespace hogs_gameManager_wpf
 
         private void handle3DWebViewMessages(string message)
         {
-
             if (message.StartsWith("SELECT|"))
             {
                 string id = message.Substring("SELECT|".Length);
@@ -597,7 +606,14 @@ namespace hogs_gameManager_wpf
                 return;
             }
 
-
+            if(message == "LOADFINISHED")
+            {
+                if (this.MapObjectsListView.SelectedIndex != -1) //if all models has been loaded and something is selected
+                {
+                    MapObjectsListViewItem tg = MapObjectsListView.SelectedItem as MapObjectsListViewItem;
+                    webView.CoreWebView2.ExecuteScriptAsync($@"highlightById({tg.Id});");
+                }
+            }
         }
 
         private void buttonExportEntity_Click(object sender, RoutedEventArgs e)
@@ -612,9 +628,9 @@ namespace hogs_gameManager_wpf
                 {
                     //its a character
 
-                    MAD characterModel = MAD.GetCharacter(entityName, "british", HIR.GetSkeletonList(), MotionCapture.GetMotionCaptureAnimations());
+                    MAD characterModel = MAD.GetCharacter(entityName, "british");
                     characterModel.Name = entityName; //replace the wrong name with current entity name
-                    GlobalVars.ExportCharacterWithTexture_GLB(characterModel, Mtd.LoadTexturesFromMTD(characterModel.facData, GlobalVars.gameFolder + "Chars/TEAMLARD.MTD", true));
+                    GlobalVars.ExportCharacterWithTexture_GLB(characterModel, Mtd.LoadTexturesFromMTD(characterModel.facData, GlobalVars.gameFolder + "Chars/TEAMLARD.MTD", true) );
                 }
                 else
                 {
@@ -667,6 +683,8 @@ namespace hogs_gameManager_wpf
             }
             else
             {
+                
+
                 ExporterWindow nw = new ExporterWindow()
                 {
                     Top = this.Top + 70,
@@ -674,18 +692,21 @@ namespace hogs_gameManager_wpf
                 };
                 nw.Show();
 
+
                 /*
+                
                 MAD dummy = MAD.GetModelFromFullMAD("DUMMY", GlobalVars.mapsFolder + "CAMP.MAD");
 
                 GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(9,155,46,255) ),   GlobalVars.exportFolder + "temp_dummy_team_1.glb");
                 GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(0,0,196,255) ),    GlobalVars.exportFolder + "temp_dummy_team_2.glb");
-                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(51,166,217,255) ), GlobalVars.exportFolder + "temp_dummy_team_3.glb");
-                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(202,0,0,255) ),    GlobalVars.exportFolder + "temp_dummy_team_4.glb");
-                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(202,204,4,255) ),  GlobalVars.exportFolder + "temp_dummy_team_5.glb");
-                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(90,80,70,255) ),   GlobalVars.exportFolder + "temp_dummy_team_6.glb");
-                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(133,0,200,255) ),  GlobalVars.exportFolder + "temp_dummy_team_7.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(51,166,217,255) ), GlobalVars.exportFolder + "temp_dummy_team_4.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(202,0,0,255) ),    GlobalVars.exportFolder + "temp_dummy_team_8.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(202,204,4,255) ),  GlobalVars.exportFolder + "temp_dummy_team_16.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(90,80,70,255) ),   GlobalVars.exportFolder + "temp_dummy_team_32.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(133,0,200,255) ),  GlobalVars.exportFolder + "temp_dummy_team_64.glb");
+                GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(133,0,200,255) ),  GlobalVars.exportFolder + "temp_dummy_team_128.glb");
+                
                 */
-
 
                 /*
                 List<MAD> wesh_alors = new List<MAD>();

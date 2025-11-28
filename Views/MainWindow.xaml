@@ -82,18 +82,21 @@
                 <xctk:PropertyDefinition TargetProperties="short1" DisplayName="short1" Category="4 Others" />
                 <xctk:PropertyDefinition TargetProperties="short2" DisplayName="short2" Category="4 Others" />
 
-                <xctk:PropertyDefinition TargetProperties="objective"               DisplayName="objective"         Category="5 Script" DisplayOrder="1" />
-                <xctk:PropertyDefinition TargetProperties="ScriptGroup"             DisplayName="Script Group"      Category="5 Script" DisplayOrder="2"/>
-                <xctk:PropertyDefinition TargetProperties="ScriptParametersPreview" DisplayName="Script Parameters" Category="5 Script" DisplayOrder="3" IsExpandable="true"/>
-                <xctk:PropertyDefinition TargetProperties="fallback_position"       DisplayName="fallback pos"      Category="5 Script" DisplayOrder="4" IsExpandable="true"/>
-                <xctk:PropertyDefinition TargetProperties="objectiveFlag"           DisplayName="objective Flag"    Category="5 Script" DisplayOrder="5" />
+                <xctk:PropertyDefinition TargetProperties="objective"                DisplayName="objective"        Category="5 Script" DisplayOrder="1" />
+                <xctk:PropertyDefinition TargetProperties="ScriptGroup"              DisplayName="Script Group"     Category="5 Script" DisplayOrder="2"/>
+                <xctk:PropertyDefinition TargetProperties="ScriptParametersPreview1" DisplayName="Script Param 1"   Category="5 Script" DisplayOrder="3"/>
+                <xctk:PropertyDefinition TargetProperties="ScriptParametersPreview2" DisplayName="Script Param 2"   Category="5 Script" DisplayOrder="4"/>
+                <xctk:PropertyDefinition TargetProperties="FallbackPositionX"        DisplayName="fallback pos X"     Category="5 Script" DisplayOrder="5"/>
+                <xctk:PropertyDefinition TargetProperties="FallbackPositionY"        DisplayName="fallback pos Y"     Category="5 Script" DisplayOrder="5"/>
+                <xctk:PropertyDefinition TargetProperties="FallbackPositionZ"        DisplayName="fallback pos Z"     Category="5 Script" DisplayOrder="5"/>
+                <xctk:PropertyDefinition TargetProperties="objectiveFlag"            DisplayName="objective Flag"   Category="5 Script" DisplayOrder="6" />
 
             </xctk:PropertyGrid.PropertyDefinitions>
             
             <!-- changing type of edit method for some props -->
             <xctk:PropertyGrid.EditorDefinitions>
 
-                <xctk:EditorTemplateDefinition TargetProperties="bounds,fallback_position">
+                <xctk:EditorTemplateDefinition TargetProperties="bounds">
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate >
                             <TextBlock Text=" X,Y,Z" />
@@ -101,9 +104,9 @@
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
 
-                <xctk:EditorTemplateDefinition TargetProperties="PositionX,PositionY,PositionZ,AngleX,AngleY,AngleZ">
-                    <xctk:EditorTemplateDefinition.EditingTemplate>
-                        <DataTemplate>
+                <xctk:EditorTemplateDefinition TargetProperties="PositionX,PositionY,PositionZ,AngleX,AngleY,AngleZ,FallbackPositionX,FallbackPositionY,FallbackPositionZ">
+                    <xctk:EditorTemplateDefinition.EditingTemplate>                                                 
+                        <DataTemplate>                                                                              
                             <xctk:ShortUpDown Value="{Binding Value}" Increment="100" Background="Transparent" Foreground="White" Minimum="-16384" Maximum="16384" />
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>
@@ -137,21 +140,15 @@
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
 
-                <xctk:EditorTemplateDefinition TargetProperties="ScriptGroup,byte0">
-                    <xctk:EditorTemplateDefinition.EditingTemplate>
+                <xctk:EditorTemplateDefinition TargetProperties="ScriptGroup,byte0,ScriptParametersPreview1,ScriptParametersPreview2">
+                    <xctk:EditorTemplateDefinition.EditingTemplate>                
                         <DataTemplate>
                             <xctk:ByteUpDown Background="#FF202020" Foreground="White" Value="{Binding Value}"/>
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
 
-                <xctk:EditorTemplateDefinition TargetProperties="ScriptParametersPreview" >
-                    <xctk:EditorTemplateDefinition.EditingTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="    (id / amnt)" FontSize="9"/>
-                        </DataTemplate>
-                    </xctk:EditorTemplateDefinition.EditingTemplate>
-                </xctk:EditorTemplateDefinition>
+
 
             </xctk:PropertyGrid.EditorDefinitions>
 

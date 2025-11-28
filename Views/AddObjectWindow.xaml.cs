@@ -42,7 +42,8 @@ namespace hogs_gameEditor_wpf
                 ( "Grunt","GR_ME", 0 ),
                 ( "Gunner","HV_ME", 1 ),
                 ( "Bombardier","HV_ME", 2 ),
-                ( "Pyrotechnic","HV_ME", 3 ),
+                ( "Pyrotechnic","HV_ME", 3 ), 
+                ( "Commando","CO_ME", 4 ),
                 ( "Sapper","SA_ME", 5 ),
                 ( "Engineer","SA_ME", 6 ),
                 ( "Saboteur","SA_ME", 7 ),
@@ -52,7 +53,6 @@ namespace hogs_gameEditor_wpf
                 ( "Orderly","ME_ME", 11 ),
                 ( "Medic","ME_ME", 12 ),
                 ( "Surgeon","ME_ME", 13 ),
-                ( "Commando","CO_ME", 4 ),
                 ( "Hero","LE_ME", 14 ),
                 ( "Ace","AC_ME", 15 ),
                 ( "Legend","AC_ME", 16 ),
@@ -61,6 +61,7 @@ namespace hogs_gameEditor_wpf
 
             weaponList = new Dictionary<string, byte>
             {
+                { "Random ?", 72 },
                 { "Cattle Prod", 5 },
                 { "Pistol", 6 },
                 { "Rifle Burst", 8 },
@@ -202,7 +203,7 @@ namespace hogs_gameEditor_wpf
             }
         }
 
-        private void saveButton_Click(object sender, RoutedEventArgs e)
+        private async void saveButton_Click(object sender, RoutedEventArgs e)
         {
             if (objectTypeToAddComboBox.SelectedIndex != -1 && EntityListView.SelectedValue != null)
             {
@@ -215,7 +216,7 @@ namespace hogs_gameEditor_wpf
                 dynamic item = EntityListView.SelectedValue;
 
                 char[] name;
-                if (objectTypeToAddComboBox.SelectedItem == "Characters" )
+                if (objectTypeToAddComboBox.SelectedIndex == 0 )
                 {
                     name = POG.NameToCharArray(charactersTypes.Find(x => x.Item1 == item.name).Item2);
                 }
@@ -246,14 +247,18 @@ namespace hogs_gameEditor_wpf
                 mo.short2 = 0;
                 
 
-                if (objectTypeToAddComboBox.SelectedItem == "Weapon Crate")
+                if (item.name == "CRATE1" || item.name == "CRATE4" )
                 {
+                    if(this.weaponComboBox.SelectedIndex == -1)
+                    {
+                        return;
+                    }
                     mo.ScriptParameters[0] = weaponList["" + weaponComboBox.SelectedItem];
                     mo.ScriptParameters[1] = (byte)amountUpDown.Value;
                     mo.objective = POG.ScriptType.PICKUP_ITEM;
                 }
 
-                if (objectTypeToAddComboBox.SelectedItem == "Health Crate")
+                if (item.name == "CRATE2")
                 {
                     mo.ScriptParameters[0] = 255;
                     mo.ScriptParameters[1] = (byte)amountUpDown.Value;
@@ -273,11 +278,11 @@ namespace hogs_gameEditor_wpf
                     string ry = GlobalVars.ScaleDownAngles(mo.angles[1]).ToString(CultureInfo.InvariantCulture);
                     string rz = GlobalVars.ScaleDownAngles(mo.angles[2]).ToString(CultureInfo.InvariantCulture);
 
-                    main.webView.ExecuteScriptAsync($@"loadModel('{m_path}', {mo.index}, {mo.position[0]}, {mo.position[1]}, {mo.position[2]},{rx},{ry},{rz});");
+                    await main.webView.ExecuteScriptAsync($@"loadModel('{m_path}', {mo.index}, {mo.position[0]}, {mo.position[1]}, {mo.position[2]},{rx},{ry},{rz});");
                 }
 
                 main.CurrentMap.Add(mo);
-                if(this.objectTypeToAddComboBox.SelectedItem == "Characters")
+                if(this.objectTypeToAddComboBox.SelectedIndex == 0)
                 {
                     main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
                 }

@@ -94,11 +94,7 @@ namespace hogs_gameEditor_wpf.FileFormat
         public int objectTransformZ { get; set; }
         public int objectTransformW { get; set; }
 
-        [JsonIgnore]
-        public List<Vector4> BoneRotation { get; set; }
-
-        [JsonPropertyName("BoneRotation")]
-        public List<float[]> BoneRotationData => SerializeBoneRotation(); //thanks chatgpt for sharing this trick , when serializing, json ignore the vector4 list, and create a converted list of float array
+        public List<(float x,float y, float z,float w) > BoneRotation { get; set; }
 
         public Keyframe(byte[] data)
         {
@@ -117,26 +113,13 @@ namespace hogs_gameEditor_wpf.FileFormat
             BoneRotation = [];
             while (ms.Position < ms.Length)
             {
-                BoneRotation.Add(new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+                BoneRotation.Add( new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()) );
             }
 
 
         }
 
-        public List<float[]> SerializeBoneRotation()
-        {
-            List<float[]> fdp = [];
 
-            foreach (Vector4 v4 in BoneRotation)
-            {
-                fdp.Add(new float[]
-                {
-                    v4.X,v4.Y,v4.Z,v4.W
-                });
-            }
-
-            return fdp;
-        }
 
     }
 

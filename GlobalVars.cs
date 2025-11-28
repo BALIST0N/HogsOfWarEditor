@@ -3,8 +3,10 @@ using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
+using SharpGLTF.Runtime;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
+using SharpGLTF.Transforms;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,11 +15,13 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media.Animation;
+using System.Xml.Linq;
 using Path = System.IO.Path;
 
 
@@ -495,107 +499,241 @@ namespace hogs_gameEditor_wpf
         }
 
 
-        public static void ExportCharacterWithTexture_GLB(MAD charModel, List<Mtd> pngs)
+
+        public static void ExportCharacterWithTexture_GLB(MAD charModel, List<Mtd> pngs )
         {
+
             Directory.CreateDirectory(gameFolder + "devtools/EXPORT/characters/");
             string outputPath = gameFolder + "devtools/EXPORT/characters/" + charModel.GetName();
-            ModelRoot.CreateModel();
-            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = [];
-            Dictionary<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>> meshDict = [];
-            SceneBuilder scene = new();
 
-            //materials
+ 
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("default");
+
+            Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new();
+
             foreach (Mtd texture in pngs)
             {
-                (int, int, byte[]) png = texture.textureTim.ToPngBytes();
-                texture.width = png.Item1;
-                texture.height = png.Item2;
+                var data = texture.textureTim.ToPngBytes();
 
                 MaterialBuilder mat = new MaterialBuilder()
-                    .WithChannelImage(KnownChannel.BaseColor, png.Item3)
-                    .WithAlpha(SharpGLTF.Materials.AlphaMode.BLEND);
+                    .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(data.Item3)))
+                    .WithDoubleSide(true);
 
-                materialDict[texture.indexNumber] = (mat, texture.width, texture.height);
+
+                materialDict[texture.indexNumber] = (mat, data.Item1,data.Item2);
             }
 
-            //meshbuilder
-            foreach (int texIdx in materialDict.Keys)
+            var mesh = model.CreateMeshes(CreateMesh(charModel.skeleton.Count, charModel)).First();
+
+            MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4> CreateMesh(int boneCount,MAD ModelDataToConvert) //wtf you can define a function inside a function ?? 
             {
-                meshDict[texIdx] = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>($"Mesh_{texIdx}");
+                var mesh = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>("skinned mesh");
+                mesh.VertexPreprocessor.SetValidationPreprocessors();
+
+                for (int i = 0; i < boneCount; ++i)
+                {
+                    foreach(FAC.Triangle tri in ModelDataToConvert.facData.triangleList)
+                    {
+                        Vertice vA = ModelDataToConvert.vtxData.verticesList[tri.Vertex_A];
+
+                        if(vA.BoneIndex != i)
+                        {
+                            continue;
+                        }
+
+                        Vertice vB = ModelDataToConvert.vtxData.verticesList[tri.Vertex_B];
+                        Vertice vC = ModelDataToConvert.vtxData.verticesList[tri.Vertex_C];
+
+                        // Construction des positions des sommets
+                        Matrix4x4 boneMatrix = ComputeBoneWorldMatrix(vA.BoneIndex);
+                        Vector3 pA = Vector3.Transform( new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset),boneMatrix );
+                        
+                        boneMatrix = ComputeBoneWorldMatrix(vB.BoneIndex);
+                        Vector3 pB = Vector3.Transform( new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset),boneMatrix );
+
+                        boneMatrix = ComputeBoneWorldMatrix(vC.BoneIndex);
+                        Vector3 pC = Vector3.Transform( new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset),boneMatrix );
+
+
+                        // Calcul des vecteurs de bord pour la normale du triangle
+                        Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
+
+                        float textureWidth = materialDict[tri.TextureIndex].Width;
+                        float textureHeight = materialDict[tri.TextureIndex].Height;
+
+                        Vector2 uvA = new(tri.U_A / textureWidth, tri.V_A / textureHeight);
+                        Vector2 uvB = new(tri.U_B / textureWidth, tri.V_B / textureHeight);
+                        Vector2 uvC = new(tri.U_C / textureWidth, tri.V_C / textureHeight);
+
+                        mesh.UsePrimitive(materialDict[tri.TextureIndex].Material)
+                            .AddTriangle(
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA),(vA.BoneIndex,1)),
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB),(vB.BoneIndex, 1)),
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC),(vC.BoneIndex,1)));
+
+                    }
+
+                    foreach (FAC.Plane quad in ModelDataToConvert.facData.planeList)
+                    {
+                        Vertice vA = ModelDataToConvert.vtxData.verticesList[quad.Vertex_A];
+                        if (vA.BoneIndex != i)
+                        {
+                            continue;
+                        }
+
+                        Vertice vB = ModelDataToConvert.vtxData.verticesList[quad.Vertex_B];
+                        Vertice vC = ModelDataToConvert.vtxData.verticesList[quad.Vertex_C];
+                        Vertice vD = ModelDataToConvert.vtxData.verticesList[quad.Vertex_D];
+
+                        // Construction des positions des sommets
+
+                        Matrix4x4 boneMatrix = ComputeBoneWorldMatrix(vA.BoneIndex);
+                        Vector3 pA = Vector3.Transform(new Vector3(vA.XOffset, vA.YOffset, vA.ZOffset), boneMatrix);
+
+
+                        boneMatrix = ComputeBoneWorldMatrix(vB.BoneIndex);
+                        Vector3 pB = Vector3.Transform(new Vector3(vB.XOffset, vB.YOffset, vB.ZOffset), boneMatrix);
+
+                        boneMatrix = ComputeBoneWorldMatrix(vC.BoneIndex);
+                        Vector3 pC = Vector3.Transform(new Vector3(vC.XOffset, vC.YOffset, vC.ZOffset), boneMatrix);
+
+
+                        boneMatrix = ComputeBoneWorldMatrix(vD.BoneIndex);
+                        Vector3 pD = Vector3.Transform(new Vector3(vD.XOffset, vD.YOffset, vD.ZOffset), boneMatrix);
+
+                        float textureWidth = materialDict[quad.TextureIndex].Width;
+                        float textureHeight = materialDict[quad.TextureIndex].Height;
+
+                        Vector2 uvA = new(quad.U_A / textureWidth, quad.V_A / textureHeight);
+                        Vector2 uvB = new(quad.U_B / textureWidth, quad.V_B / textureHeight);
+                        Vector2 uvC = new(quad.U_C / textureWidth, quad.V_C / textureHeight);
+                        Vector2 uvD = new(quad.U_D / textureWidth, quad.V_D / textureHeight);
+
+                        // Calcul des vecteurs de bord
+                        Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
+                        Vector3 normal2 = Vector3.Normalize(Vector3.Cross(pC - pA, pD - pA));
+
+                        mesh.UsePrimitive(materialDict[quad.TextureIndex].Material)
+                            .AddQuadrangle(
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA) ,(vA.BoneIndex,1)),
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB) ,(vB.BoneIndex,1)),
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC) ,(vC.BoneIndex, 1)),
+                            new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pD, normal2), new VertexTexture1(uvD),(vD.BoneIndex, 1)));
+                    }
+
+
+                }
+
+                Matrix4x4 ComputeBoneWorldMatrix(int boneIndex)
+                {
+                    Matrix4x4 world = Matrix4x4.Identity;
+
+                    int current = boneIndex;
+                    while (current >= 0)
+                    {
+                        var b = charModel.skeleton[current];
+                        var local = Matrix4x4.CreateTranslation(b.TransformX, b.TransformY, b.TransformZ);
+
+                        world = local * world;
+
+                        if (b.boneParentIndex == current) // root
+                            break;
+
+                        current = b.boneParentIndex;
+                    }
+
+                    return world;
+                }
+
+                return mesh;
             }
 
+            Node parent = scene.CreateNode().WithLocalTransform(Matrix4x4.CreateTranslation(0, 0, 0));
 
-            //building vertex triangles and adding to mesh
-            foreach (FAC.Triangle tri in charModel.facData.triangleList)
+            List<Node> bindings = new();
+
+            Node bone = null;
+
+            for (int i = 0; i < charModel.skeleton.Count; ++i)
             {
-                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4> mesh = meshDict[tri.TextureIndex];
-                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexJoints4> prim = mesh.UsePrimitive(materialDict[tri.TextureIndex].Material);
+                HIR b = charModel.skeleton[i];
 
-                Vertice vA = charModel.vtxData.verticesList[tri.Vertex_A];
-                Vertice vB = charModel.vtxData.verticesList[tri.Vertex_B];
-                Vertice vC = charModel.vtxData.verticesList[tri.Vertex_C];
+                Vector3 pos = new Vector3(b.TransformX, b.TransformY , b.TransformZ );
 
-                // Construction des positions des sommets
-                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
+                Node node;
 
-                // Calcul des vecteurs de bord pour la normale du triangle
-                Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
+                if (b.boneParentIndex == i || b.boneParentIndex < 0)
+                {
+                    node = parent.CreateNode().WithLocalTranslation(pos);
+                }
+                else
+                {
+                    node = bindings[b.boneParentIndex].CreateNode().WithLocalTranslation(pos);
+                }
 
-                // Construction des UVs (à normaliser si nécessaire !)
-                float textureWidth = materialDict[tri.TextureIndex].Width;
-                float textureHeight = materialDict[tri.TextureIndex].Height;
-
-                Vector2 uvA = new(tri.U_A / textureWidth, tri.V_A / textureHeight);
-                Vector2 uvB = new(tri.U_B / textureWidth, tri.V_B / textureHeight);
-                Vector2 uvC = new(tri.U_C / textureWidth, tri.V_C / textureHeight);
-
-                prim.AddTriangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pA, normal), new VertexTexture1(uvA), new VertexJoints4(vA.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB), new VertexJoints4(vB.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC), new VertexJoints4(vC.BoneIndex)));
-
+                bindings.Add(node);
             }
 
-            foreach (FAC.Plane quad in charModel.facData.planeList)
+
+
+            for (int i = 0; i < charModel.skeleton.Count; ++i)
             {
-                MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4> mesh = meshDict[quad.TextureIndex];
-                PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexTexture1, VertexJoints4> prim = mesh.UsePrimitive(materialDict[quad.TextureIndex].Material);
+                bone = bindings[i];
 
-                Vertice vA = charModel.vtxData.verticesList[quad.Vertex_A];
-                Vertice vB = charModel.vtxData.verticesList[quad.Vertex_B];
-                Vertice vC = charModel.vtxData.verticesList[quad.Vertex_C];
-                Vertice vD = charModel.vtxData.verticesList[quad.Vertex_D];
+                foreach (MotionCapture anim in charModel.animations)
+                {
+                    
+                    Dictionary<float, Quaternion> boneRotations = new();
+                    Dictionary<float, Vector3> rootTranslations = null;
 
-                Vector3 pA = new(vA.XOffset, vA.YOffset, vA.ZOffset);
-                Vector3 pB = new(vB.XOffset, vB.YOffset, vB.ZOffset);
-                Vector3 pC = new(vC.XOffset, vC.YOffset, vC.ZOffset);
-                Vector3 pD = new(vD.XOffset, vD.YOffset, vD.ZOffset);
+                    for (int j = 0; j < anim.Keyframes.Count; j++)
+                    {
+                        var br = anim.Keyframes[j].BoneRotation[i];
+                        float t = j / 20f; //PAL = 50hz/2
+ 
 
-                float textureWidth = materialDict[quad.TextureIndex].Width;
-                float textureHeight = materialDict[quad.TextureIndex].Height;
+                        boneRotations[t] = Quaternion.Normalize( new Quaternion(br.x, br.y, -br.z, br.w) );
 
-                Vector2 uvA = new(quad.U_A / textureWidth, quad.V_A / textureHeight);
-                Vector2 uvB = new(quad.U_B / textureWidth, quad.V_B / textureHeight);
-                Vector2 uvC = new(quad.U_C / textureWidth, quad.V_C / textureHeight);
-                Vector2 uvD = new(quad.U_D / textureWidth, quad.V_D / textureHeight);
+                        if (i == 0)
+                        {
+                            rootTranslations ??= new();
+                            rootTranslations[t] = new Vector3(anim.Keyframes[j].rootTransformX,anim.Keyframes[j].rootTransformY,anim.Keyframes[j].rootTransformZ);
+                        }
+                    }
 
-                // Calcul des vecteurs de bord
-                Vector3 normal = Vector3.Normalize(Vector3.Cross(pB - pA, pC - pA));
-                Vector3 normal2 = Vector3.Normalize(Vector3.Cross(pC - pA, pD - pA));
+                    if (i == 0)
+                    {
+                        bone.WithTranslationAnimation($"anim_{anim.DataOffset}", rootTranslations);
+                    }
 
-                prim.AddQuadrangle(new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pA, normal2), new VertexTexture1(uvA), new VertexJoints4(vA.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pB, normal), new VertexTexture1(uvB), new VertexJoints4(vB.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pC, normal), new VertexTexture1(uvC), new VertexJoints4(vC.BoneIndex)), new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(new VertexPositionNormal(pD, normal), new VertexTexture1(uvD), new VertexJoints4(vD.BoneIndex)));
+                    bone.WithRotationAnimation($"anim_{anim.DataOffset}", boneRotations);
 
+
+
+                }
             }
 
+            parent = bindings.Last();
 
-            foreach (KeyValuePair<int, MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>> kvp in meshDict)
-            {
-                scene.AddRigidMesh(kvp.Value, Matrix4x4.CreateScale(1, -1, 1));
-            }
+            scene.CreateNode().WithSkinnedMesh(mesh, Matrix4x4.Identity, bindings.ToArray());
 
-            //export
-            scene.ToGltf2().SaveGLB(outputPath);
+            model.SaveGLB(outputPath);
 
         }
+
+
+
+
+
+        
+
+        
+
+
+
+
+
 
 
         //to do : add vertexColor1 for lighting but not mandatory ...
@@ -780,21 +918,9 @@ namespace hogs_gameEditor_wpf
 
             List<MAD> models = [];
 
-            MAD skydome = new();
-            MAD skydomeU = new();
 
-            foreach (string modelName in MAD.GetModelListFromMad(gameFolder + "Chars/SKYDOME.MAD"))
-            {
-                if (modelName == "skydome")
-                {
-                    skydome = MAD.GetModelFromFullMAD(modelName, gameFolder + "Chars/SKYDOME.MAD");
-                }
-                if (modelName == "skydomeu")
-                {
-                    skydomeU = MAD.GetModelFromFullMAD(modelName, gameFolder + "Chars/SKYDOME.MAD");
-                }
-
-            }
+            MAD skydome = MAD.GetModelFromFullMAD("skydome", gameFolder + "Chars/SKYDOME.MAD");
+            MAD skydomeU = MAD.GetModelFromFullMAD("skydomeu", gameFolder + "Chars/SKYDOME.MAD");
 
             Directory.CreateDirectory(exportFolder + "/skydomes");
             Directory.CreateDirectory(exportFolder + "/characters");

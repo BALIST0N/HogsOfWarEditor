@@ -16,6 +16,7 @@
     const engine = new BABYLON.Engine(canvas, true);
     const scene = new BABYLON.Scene(engine);
     scene.useRightHandedSystem = true;
+    scene.clearColor = new BABYLON.Color4(0.725, 0.882, 1.0, 1.0);
 
     let selectionedItemId = null;
     // -----------------------------------------------------
@@ -200,6 +201,7 @@
             root.scaling = new BABYLON.Vector3(2,2,2);
             const clone = cloneModel(root, Id, x, y, z, rx + Math.PI, ry, rz);
             clone.name = `${root.name}_mirror`;
+            window.chrome.webview.postMessage("LOADFINISHED");
         }
 
         // Mettre dans le cache
@@ -263,7 +265,7 @@
     }
 
     // RENDER LOOP
-    engine.runRenderLoop(() => scene.render());
+    engine.runRenderLoop(() => {  scene.render(); });
     window.addEventListener("resize", () => engine.resize());
 </script>
 

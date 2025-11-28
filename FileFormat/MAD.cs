@@ -98,7 +98,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         }
 
-        public static MAD GetCharacter(string type, string team, List<HIR> skeleton, List<MotionCapture> anims)
+        public static MAD GetCharacter(string type, string team)
         {
             //LE_ME = hero
             //AC_ME = legend
@@ -150,8 +150,8 @@ namespace hogs_gameEditor_wpf.FileFormat
 
             MAD mad = GetModelFromFullMAD(type, GlobalVars.gameFolder + "Chars/british.mad");
 
-            mad.skeleton = skeleton;
-            mad.animations = anims;
+            mad.skeleton = HIR.GetSkeletonList();
+            mad.animations = MotionCapture.GetMotionCaptureAnimations();
             return mad;
         }
 
@@ -171,7 +171,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                 if (endblockContentTable <= endContenTable)
                 {
                     string a = new string(Encoding.ASCII.GetString(mapdata[i..(i + 16)])).Trim('\0');
-                    a = a[..^4];
+                    a = a[..^4]; 
                     if (entities.Contains(a) == false && GlobalVars.entityFilterList.Contains(a) == false)
                     {
                         entities.Add(a);
