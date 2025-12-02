@@ -237,7 +237,7 @@ namespace hogs_gameEditor_wpf
                 mo.bounds_type = 0;
                 mo.short0 = isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128;
                 mo.byte0 = 255;
-                mo.team = POG.PigTeam.Team01;
+                mo.team = POG.PigTeam.british;
                 mo.objective = 0;
                 mo.ScriptGroup = 0;
                 mo.ScriptParameters = new byte[19];

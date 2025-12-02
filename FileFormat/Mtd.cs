@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using System.Windows;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
@@ -106,6 +108,35 @@ namespace hogs_gameEditor_wpf.FileFormat
                 counter++;
             }
 
+
+            return textures;
+        }
+
+
+        public static List<Mtd> LoadAlltextures(string path)
+        {
+            List<Mtd> textures = new List<Mtd>();
+
+            byte[] mtdData = File.ReadAllBytes(path);
+            int endContenTable = BitConverter.ToInt32(mtdData, 16); //the first item offset define table content size ! 
+
+            for (int i = 0; i <= endContenTable; i++)
+            {
+                int endblockContentTable = i + 24;
+                if (endblockContentTable <= endContenTable)
+                {
+                    Mtd tempTex = new()
+                    {
+                        Name = Encoding.ASCII.GetString(mtdData[i..(i + 16)]).Trim('\0'),
+                        DataOffset = BitConverter.ToInt32(mtdData[(i + 16)..(i + 20)]),
+                        DataSize = BitConverter.ToInt32(mtdData[(i + 20)..(i + 24)]),
+                    };
+                    tempTex.textureTim = new TIM(mtdData[tempTex.DataOffset..(tempTex.DataOffset + tempTex.DataSize)]);
+
+                    textures.Add(tempTex);
+                }
+                i += 23;
+            }
 
             return textures;
         }

@@ -12,7 +12,7 @@ done :
 - tempoary: export 7 dummy model with team colors (replacing characters to export)
 - export models with attached barrel (pillbox, artillery, tank) 
 - 3D editor : delete selected entity, insert when adding new entity
-- 3D viewer : be able to move and rotate entities into the editor (turns out i'm such a genius 🤡 )
+- 3D viewer : be able to move and rotate entities into the editor (turns out i'm such a genius 🤡)
 - 3d viewer : parse objects and place / rotate entities
 - 3D viewer : Migrate to webView2 + Babylon.js 
 - ability to add any new entity into a pog (walls, bridges, flowers...)

@@ -98,7 +98,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         }
 
-        public static MAD GetCharacter(string type, string team)
+        public static MAD GetCharacter(string type, POG.PigTeam team)
         {
             //LE_ME = hero
             //AC_ME = legend
@@ -136,7 +136,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                     break;
 
                 case "SN_ME":
-                    type = "pcgru_hi";
+                    type = "pcsni_hi";
                     break;
 
                 case "SP_ME":
@@ -149,6 +149,21 @@ namespace hogs_gameEditor_wpf.FileFormat
             }
 
             MAD mad = GetModelFromFullMAD(type, GlobalVars.gameFolder + "Chars/british.mad");
+
+            mad.textures = Mtd.LoadTexturesFromMTD(mad.facData, GlobalVars.gameFolder + "Chars/"+team+".MTD", true);
+
+            List<Mtd> faces = Mtd.LoadAlltextures(GlobalVars.gameFolder + "Chars/FACES.MTD");
+
+            if( type == "pcsab_hi") //commando
+            {
+                mad.textures.Find(x => x.Name == "eyes000.tim").textureTim = faces.Find(x => x.Name == "eyes006.tim").textureTim;
+                mad.textures.Find(x => x.Name == "gobs000.tim").textureTim = faces.Find(x => x.Name == "gobs007.tim").textureTim;
+            }
+            else
+            {
+                mad.textures.Find(x => x.Name == "eyes000.tim").textureTim = faces.Find(x => x.Name == "eyes001.tim").textureTim;
+                mad.textures.Find(x => x.Name == "gobs000.tim").textureTim = faces.Find(x => x.Name == "gobs002.tim").textureTim;
+            }
 
             mad.skeleton = HIR.GetSkeletonList();
             mad.animations = MotionCapture.GetMotionCaptureAnimations();
@@ -181,7 +196,7 @@ namespace hogs_gameEditor_wpf.FileFormat
                 i += 23;
             }
 
-            //need to apply a filter to remove dupplicates
+            //need to apply a filter to remove duplicates
             return entities;
         }
 

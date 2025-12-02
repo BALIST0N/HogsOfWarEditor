@@ -14,7 +14,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public static byte[] Decompress(byte[] input)
         {
-            return null; //c'est de la merde allez tous vous fairzmljfejmzfheklfjmzefsdvcvhmlpoîpo^m(-è(-47&
+            return null; 
         }
 
         public static Bitmap RemoveMagenta(Bitmap b)

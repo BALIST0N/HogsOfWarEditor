@@ -366,14 +366,14 @@ namespace hogs_gameEditor_wpf.FileFormat
         public enum PigTeam : byte
         {
             // PigTeam:
-            Team01 = 0x01,
-            Team02 = 0x02,
-            Team03 = 0x04,
-            Team04 = 0x08,
-            Team05 = 0x10,
-            Team06 = 0x20,
-            Team07 = 0x40,
-            Team08 = 0x80
+            british = 0x01,
+            FRENCH = 0x02,
+            AMERICAN = 0x04,
+            RUSSIAN = 0x08,
+            JAPANESE = 0x10,
+            GERMAN = 0x20,
+            TEAMLARD = 0x40,
+            unused = 0x80
         }
 
         public enum ScriptType : short

@@ -114,6 +114,7 @@ namespace hogs_gameEditor_wpf.FileFormat
             while (ms.Position < ms.Length)
             {
                 BoneRotation.Add( new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()) );
+                
             }
 
 

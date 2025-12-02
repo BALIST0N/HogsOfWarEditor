@@ -1,4 +1,5 @@
 ﻿using hogs_gameEditor_wpf.FileFormat;
+using SharpGLTF.Animations;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
@@ -100,7 +101,7 @@ namespace hogs_gameEditor_wpf
             "DEMO2",
         };
 
-        public static List<(string, string,Vector3)> modelsWithChilds = new()
+        public static List<(string, string, Vector3)> modelsWithChilds = new()
         {
             ("PILLBOX","PILLBAR", new Vector3(650,200,10) ),
             ("AM_TANK","AMPHGUN",new Vector3(180,250,0)),
@@ -499,8 +500,7 @@ namespace hogs_gameEditor_wpf
         }
 
 
-
-        public static void ExportCharacterWithTexture_GLB(MAD charModel, List<Mtd> pngs )
+        public static void ExportCharacterWithTexture_GLB(MAD charModel,bool withAnims = false)
         {
 
             Directory.CreateDirectory(gameFolder + "devtools/EXPORT/characters/");
@@ -512,14 +512,14 @@ namespace hogs_gameEditor_wpf
 
             Dictionary<int, (MaterialBuilder Material, int Width, int Height)> materialDict = new();
 
-            foreach (Mtd texture in pngs)
+            foreach (Mtd texture in charModel.textures)
             {
                 var data = texture.textureTim.ToPngBytes();
 
                 MaterialBuilder mat = new MaterialBuilder()
                     .WithChannelImage(KnownChannel.BaseColor, ImageBuilder.From(new MemoryImage(data.Item3)))
+                    .WithAlpha(SharpGLTF.Materials.AlphaMode.MASK)
                     .WithDoubleSide(true);
-
 
                 materialDict[texture.indexNumber] = (mat, data.Item1,data.Item2);
             }
@@ -649,91 +649,84 @@ namespace hogs_gameEditor_wpf
                 return mesh;
             }
 
-            Node parent = scene.CreateNode().WithLocalTransform(Matrix4x4.CreateTranslation(0, 0, 0));
+            Node parent = scene.CreateNode("origin").WithLocalTransform(Matrix4x4.CreateTranslation(0, 0, 0));
 
             List<Node> bindings = new();
 
             Node bone = null;
 
+
+
             for (int i = 0; i < charModel.skeleton.Count; ++i)
             {
                 HIR b = charModel.skeleton[i];
 
-                Vector3 pos = new Vector3(b.TransformX, b.TransformY , b.TransformZ );
+                Vector3 pos = new Vector3(b.TransformX, -b.TransformY, b.TransformZ);
 
                 Node node;
 
-                if (b.boneParentIndex == i || b.boneParentIndex < 0)
+                if (b.boneParentIndex == i )
                 {
-                    node = parent.CreateNode().WithLocalTranslation(pos);
+                    node = parent.CreateNode(b.boneName).WithLocalTranslation(pos);
                 }
                 else
                 {
-                    node = bindings[b.boneParentIndex].CreateNode().WithLocalTranslation(pos);
+                    node = bindings[b.boneParentIndex].CreateNode(b.boneName).WithLocalTranslation(pos);
                 }
 
                 bindings.Add(node);
             }
 
 
-
-            for (int i = 0; i < charModel.skeleton.Count; ++i)
+            //animations, working kinda okay but wierd stuff with arms and legs going on 
+            if (withAnims == true)
             {
-                bone = bindings[i];
-
-                foreach (MotionCapture anim in charModel.animations)
+                for (int i = 0; i < charModel.skeleton.Count; ++i)
                 {
-                    
-                    Dictionary<float, Quaternion> boneRotations = new();
-                    Dictionary<float, Vector3> rootTranslations = null;
-
-                    for (int j = 0; j < anim.Keyframes.Count; j++)
+                    bone = bindings[i];
+                    int cnt = 0;
+                    //var anim = charModel.animations.Find(x => x.DataOffset == 205560); //idle animation
+                    foreach (MotionCapture anim in charModel.animations)
                     {
-                        var br = anim.Keyframes[j].BoneRotation[i];
-                        float t = j / 20f; //PAL = 50hz/2
- 
+                        cnt++;
+                        Dictionary<float, Quaternion> boneRotations = new();
+                        Dictionary<float, Vector3> rootTranslations = null;
 
-                        boneRotations[t] = Quaternion.Normalize( new Quaternion(br.x, br.y, -br.z, br.w) );
+                        for (int j = 0; j < anim.Keyframes.Count; j++)
+                        {
+                            var br = anim.Keyframes[j].BoneRotation[i];
+                            float t = j / 29f;
+
+                            //boneRotations[t] = Quaternion.CreateFromYawPitchRoll(-br.y, br.x, br.z);
+                            boneRotations[t] = Quaternion.CreateFromYawPitchRoll(-br.y, br.x, br.z);
+
+                            if (i == 0)
+                            {
+                                rootTranslations ??= new();
+                                rootTranslations[t] = new Vector3(anim.Keyframes[j].rootTransformX, -anim.Keyframes[j].rootTransformY, anim.Keyframes[j].rootTransformZ);
+                            }
+                        }
 
                         if (i == 0)
                         {
-                            rootTranslations ??= new();
-                            rootTranslations[t] = new Vector3(anim.Keyframes[j].rootTransformX,anim.Keyframes[j].rootTransformY,anim.Keyframes[j].rootTransformZ);
+                            bone.WithTranslationAnimation($"anim_{cnt}", rootTranslations);
                         }
+
+                        bone.WithRotationAnimation($"anim_{cnt}", boneRotations);
                     }
-
-                    if (i == 0)
-                    {
-                        bone.WithTranslationAnimation($"anim_{anim.DataOffset}", rootTranslations);
-                    }
-
-                    bone.WithRotationAnimation($"anim_{anim.DataOffset}", boneRotations);
-
-
 
                 }
             }
 
+            
+
             parent = bindings.Last();
 
-            scene.CreateNode().WithSkinnedMesh(mesh, Matrix4x4.Identity, bindings.ToArray());
+            scene.CreateNode().WithSkinnedMesh(mesh, Matrix4x4.CreateScale(1, -1, 1), bindings.ToArray());
 
             model.SaveGLB(outputPath);
 
         }
-
-
-
-
-
-        
-
-        
-
-
-
-
-
 
 
         //to do : add vertexColor1 for lighting but not mandatory ...
@@ -744,8 +737,7 @@ namespace hogs_gameEditor_wpf
 
         public static ModelRoot ExportTerrain_GLB(PMG mapTerrain, PTG mapTextures)
         {
-            MaterialBuilder material = new MaterialBuilder()
-                .WithChannelImage(KnownChannel.BaseColor, TIM.ToPngBytes(mapTextures.CreateIMG(mapTerrain))).WithDoubleSide(true);
+            MaterialBuilder material = new MaterialBuilder().WithChannelImage(KnownChannel.BaseColor, TIM.ToPngBytes(mapTextures.CreateIMG(mapTerrain))).WithDoubleSide(true);
 
             MeshBuilder<VertexPosition, VertexTexture1, VertexEmpty> mesh = new("TerrainMesh");
             PrimitiveBuilder<MaterialBuilder, VertexPosition, VertexTexture1, VertexEmpty> prim = mesh.UsePrimitive(material);
@@ -874,7 +866,7 @@ namespace hogs_gameEditor_wpf
             }*/
 
 
-        }
+            }
 
         public static void ExportCharsFolder()
         {
@@ -931,8 +923,15 @@ namespace hogs_gameEditor_wpf
                 switch (Path.GetFileName(fichier))
                 {
                     case "SKYDOME.MAD": //already added
+                        continue;
+
                     case "british.mad": //character
-                        //ignore for the moment
+                        foreach (string charname in models_category["Characters"])
+                        {
+                            MAD characterModel = MAD.GetCharacter(charname, POG.PigTeam.TEAMLARD );
+                            characterModel.Name = charname; 
+                            ExportCharacterWithTexture_GLB(characterModel, false);
+                        }
                         continue;
 
 
@@ -1539,20 +1538,12 @@ namespace hogs_gameEditor_wpf
 
             }
 
-
             File.WriteAllBytes(exportFolder + "all.MAD", finalMadBytes);
             File.WriteAllBytes(exportFolder + "all.MTD", finalMtdBytes);
-            
-
 
         }
 
-
     }
-
-
-
-
 
 }
 

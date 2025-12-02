@@ -22,6 +22,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using Xceed.Wpf.Toolkit.Primitives;
 using Xceed.Wpf.Toolkit.PropertyGrid;
+using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 
 namespace hogs_gameManager_wpf
@@ -333,35 +334,35 @@ namespace hogs_gameManager_wpf
             };
             switch (mo.team)
             {
-                case POG.PigTeam.Team01:
+                case POG.PigTeam.british:
                     X.Fill = new SolidColorBrush(Color.FromArgb(255, 0, 255, 0));
                     break;
 
-                case POG.PigTeam.Team02:
+                case POG.PigTeam.FRENCH:
                     X.Fill = new SolidColorBrush(Color.FromArgb(255, 0, 0, 255));
                     break;
 
-                case POG.PigTeam.Team03:
+                case POG.PigTeam.AMERICAN:
                     X.Fill = Brushes.Turquoise;
                     break;
 
-                case POG.PigTeam.Team04:
+                case POG.PigTeam.RUSSIAN:
                     X.Fill = Brushes.Red;
                     break;
 
-                case POG.PigTeam.Team05:
+                case POG.PigTeam.JAPANESE:
                     X.Fill = Brushes.Yellow;
                     break;
 
-                case POG.PigTeam.Team06:
+                case POG.PigTeam.GERMAN:
                     X.Fill = Brushes.White;
                     break;
 
-                case POG.PigTeam.Team07:
+                case POG.PigTeam.TEAMLARD:
                     X.Fill = Brushes.Purple;
                     break;
-                case POG.PigTeam.Team08:
-                    X.Fill = Brushes.Magenta;
+                case POG.PigTeam.unused:
+                    X.Fill = Brushes.Black;
                     break;
             }
 
@@ -498,8 +499,6 @@ namespace hogs_gameManager_wpf
                         string m_path = GlobalVars.exportFolder + "maps/" + CurrentMapName + ".glb";
                         await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{m_path}', 999, 0, 0, 0);");
 
-
-
                         int max = CurrentMap.Max(x => x.index);
                         foreach (POG p in CurrentMap)
                         {
@@ -580,7 +579,7 @@ namespace hogs_gameManager_wpf
                     if (webView != null)
                     {
                         try { webView.CoreWebView2.Navigate("about:blank"); } catch { }
-                        await Task.Delay(50);
+                        await Task.Delay(100);
                         webView.Dispose();
                         webView = null;
                     }
@@ -628,9 +627,9 @@ namespace hogs_gameManager_wpf
                 {
                     //its a character
 
-                    MAD characterModel = MAD.GetCharacter(entityName, "british");
+                    MAD characterModel = MAD.GetCharacter(entityName, pog.team);
                     characterModel.Name = entityName; //replace the wrong name with current entity name
-                    GlobalVars.ExportCharacterWithTexture_GLB(characterModel, Mtd.LoadTexturesFromMTD(characterModel.facData, GlobalVars.gameFolder + "Chars/TEAMLARD.MTD", true) );
+                    GlobalVars.ExportCharacterWithTexture_GLB(characterModel,true);
                 }
                 else
                 {
@@ -647,7 +646,6 @@ namespace hogs_gameManager_wpf
 
         private void buttonMapExport_Click(object sender, RoutedEventArgs e)
         {
-
             PMG mapTerrain = new(GlobalVars.mapsFolder + CurrentMapName);
             PTG mapTiles = new(GlobalVars.mapsFolder + CurrentMapName);
 
@@ -663,7 +661,7 @@ namespace hogs_gameManager_wpf
         {
             if (mapListComboBox.SelectedIndex != -1)
             {
-                if (MessageBox.Show("You gonna export all models and textures of this map !,are you sure ? \n\r (Charaters are not exported) ", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show("You gonna export all models and textures of this map !,are you sure ? ", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     buttonMapExport_Click(null, null);
 
@@ -683,14 +681,36 @@ namespace hogs_gameManager_wpf
             }
             else
             {
-                
 
+                
                 ExporterWindow nw = new ExporterWindow()
                 {
                     Top = this.Top + 70,
                     Left = this.Left + 300,
                 };
                 nw.Show();
+                
+
+                /*
+                List< (string, short, short[]) > a = new();
+
+                foreach (string filename in Directory.GetFiles(GlobalVars.mapsFolder, "*.MAD"))
+                {
+                    foreach (POG item in POG.GetAllMapObject( System.IO.Path.GetFileNameWithoutExtension(filename)))
+                    {
+                        if(a.Exists( x => x.Item2 == item.type) == false )
+                        {
+                            a.Add( (item.GetName(), item.type, item.bounds) );
+                        }
+                        
+                    }
+                }
+
+                foreach (var item in a.OrderBy(x => x.Item1))
+                {
+                    Debug.WriteLine(item.Item1 + " (" +item.Item2 + ") : " + item.Item3[0] + "," + item.Item3[1] + "," + item.Item3[2]);
+                }*/
+
 
 
                 /*
@@ -707,6 +727,8 @@ namespace hogs_gameManager_wpf
                 GlobalVars.ExportModelWithOutTexture_GLB(dummy,Vector4.Normalize(new Vector4(133,0,200,255) ),  GlobalVars.exportFolder + "temp_dummy_team_128.glb");
                 
                 */
+
+
 
                 /*
                 List<MAD> wesh_alors = new List<MAD>();
