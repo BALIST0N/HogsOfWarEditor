@@ -695,10 +695,20 @@ namespace hogs_gameEditor_wpf
                         for (int j = 0; j < anim.Keyframes.Count; j++)
                         {
                             var br = anim.Keyframes[j].BoneRotation[i];
-                            float t = j / 29f;
+                            float t = j / 20f;
 
-                            //boneRotations[t] = Quaternion.CreateFromYawPitchRoll(-br.y, br.x, br.z);
-                            boneRotations[t] = Quaternion.CreateFromYawPitchRoll(-br.y, br.x, br.z);
+                            Matrix4x4 rotX = Matrix4x4.CreateRotationX(br.x);
+                            Matrix4x4 rotY = Matrix4x4.CreateRotationY(-br.y);
+                            Matrix4x4 rotZ = Matrix4x4.CreateRotationZ(br.z);
+
+                            Matrix4x4 matrix = rotX * rotY * rotZ;
+
+                            if (!Matrix4x4.Decompose(matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation))
+                            {
+                                rotation = Quaternion.Identity;
+                            }
+
+                            boneRotations[t] = Quaternion.Normalize(rotation);
 
                             if (i == 0)
                             {

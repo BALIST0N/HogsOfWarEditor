@@ -9,6 +9,7 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 done : 
 - manage to export character model with skeleton (.hir) 
+- manage to export character model with skeleton + animations/motionCapture (.mcap)
 - tempoary: export 7 dummy model with team colors (replacing characters to export)
 - export models with attached barrel (pillbox, artillery, tank) 
 - 3D editor : delete selected entity, insert when adding new entity
@@ -32,13 +33,13 @@ done :
 
 TODO : 
 the tool : 
+- when adding new entity to map, create correct collision sizes
+- correct animations exportations ( wierd stuff with arms and positions ?)
 - create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps
 - skyboxes : find witch map has what skybox? <- Decomp exe needed : found something but need investigation
-- when adding new entity to map, create correct collision sizes
 - export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
 - try to understand why VSstudio doesn't compile into a single Exe File....
 - FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation
-- manage to export character model with skeleton + animations/motionCapture (.mcap)
 - manage to export character model with a hat (combine two models)
 - 3d viewer : place character according to team and class
 - export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 
