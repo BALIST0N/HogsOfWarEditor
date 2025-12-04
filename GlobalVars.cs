@@ -38,12 +38,14 @@ namespace hogs_gameEditor_wpf
         public static string mapsViewsFolder = gameFolder + "devtools/mapview/";
         public static string exportFolder = gameFolder + "devtools/EXPORT/";
 
+        public static List<POGL> wesh = JsonSerializer.Deserialize< List<POGL>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/ent_list.json"));
 
-        public static Dictionary<string, List<int>> modelsWithMultipleSkins = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_multipleIds.json"));
+        public static Dictionary<string, List<short>> modelsWithMultipleSkins = wesh.Where(x => x.type.Count > 1).ToDictionary(key => key.name, value => value.type.ToList() ); 
+
+        public static Dictionary<string, short> models_uniqueids = wesh.Where(x => x.type.Count == 1).ToDictionary(key => key.name, value => value.type[0]);
 
         public static Dictionary<string, List<string>> models_category = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"));
 
-        public static Dictionary<string, short> models_uniqueids = JsonSerializer.Deserialize<Dictionary<string, short>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_uniqueIds.json"));
 
         public static string[] BoneNames =
         {

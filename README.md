@@ -8,6 +8,7 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 
 done : 
+- when adding new entity to map, create correct collision boxes
 - manage to export character model with skeleton (.hir) 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)
 - tempoary: export 7 dummy model with team colors (replacing characters to export)
@@ -33,8 +34,8 @@ done :
 
 TODO : 
 the tool : 
-- when adding new entity to map, create correct collision sizes
-- correct animations exportations ( wierd stuff with arms and positions ?)
+- stairs (prisms models) are rotated wrongly ?
+- correct character animations exportations ( wierd stuff with arms and positions ?)
 - create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps
 - skyboxes : find witch map has what skybox? <- Decomp exe needed : found something but need investigation
 - export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?

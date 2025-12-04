@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -691,25 +692,42 @@ namespace hogs_gameManager_wpf
                 nw.Show();
                 
 
+
                 /*
-                List< (string, short, short[]) > a = new();
+                List<POGL> a = new();
 
                 foreach (string filename in Directory.GetFiles(GlobalVars.mapsFolder, "*.MAD"))
                 {
                     foreach (POG item in POG.GetAllMapObject( System.IO.Path.GetFileNameWithoutExtension(filename)))
                     {
-                        if(a.Exists( x => x.Item2 == item.type) == false )
+                        if( GlobalVars.models_category["Characters"].Contains(item.GetName()) == true) { continue; }
+
+                        POGL pogl = a.Find(x => x.name == item.GetName());
+
+                        if ( pogl == null)
                         {
-                            a.Add( (item.GetName(), item.type, item.bounds) );
+                            a.Add( new POGL()
+                            {
+                                name = item.GetName(),
+                                type = new List<short>(){item.type},
+                                bounds = item.bounds,
+                                bounds_type = item.bounds_type,
+                            });
+                        }
+                        else
+                        {
+                            if( pogl.type.Contains(item.type) == false )
+                            {
+                                a[a.IndexOf(pogl)].type.Add(item.type);
+                            }
+                            
                         }
                         
                     }
                 }
 
-                foreach (var item in a.OrderBy(x => x.Item1))
-                {
-                    Debug.WriteLine(item.Item1 + " (" +item.Item2 + ") : " + item.Item3[0] + "," + item.Item3[1] + "," + item.Item3[2]);
-                }*/
+                File.WriteAllText("D:\\projects devs\\hogs_gameManager_wpf\\test.json", JsonSerializer.Serialize(a.OrderBy(x => x.type.FirstOrDefault() ).ToList(), new JsonSerializerOptions { WriteIndented = true }) );
+                */
 
 
 
@@ -759,9 +777,6 @@ namespace hogs_gameManager_wpf
                         }
                     });
                 }
-
-
-
                 
                 GlobalVars.ExportCombinedModels_GLB(wesh_alors[0], bigbar, new Vector3(0, 550, 0), "E:/Games/IGG-HogsofWar/devtools/EXPORT/swill_with_arms.glb");
                 */

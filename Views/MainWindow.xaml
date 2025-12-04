@@ -104,10 +104,18 @@
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
 
-                <xctk:EditorTemplateDefinition TargetProperties="PositionX,PositionY,PositionZ,AngleX,AngleY,AngleZ,FallbackPositionX,FallbackPositionY,FallbackPositionZ">
+                <xctk:EditorTemplateDefinition TargetProperties="PositionX,PositionY,PositionZ,FallbackPositionX,FallbackPositionY,FallbackPositionZ">
                     <xctk:EditorTemplateDefinition.EditingTemplate>                                                 
                         <DataTemplate>                                                                              
                             <xctk:ShortUpDown Value="{Binding Value}" Increment="100" Background="Transparent" Foreground="White" Minimum="-16384" Maximum="16384" />
+                        </DataTemplate>
+                    </xctk:EditorTemplateDefinition.EditingTemplate>
+                </xctk:EditorTemplateDefinition>
+
+                <xctk:EditorTemplateDefinition TargetProperties=",AngleX,AngleY,AngleZ">
+                    <xctk:EditorTemplateDefinition.EditingTemplate>
+                        <DataTemplate>
+                            <xctk:ShortUpDown Value="{Binding Value}" Increment="64" Background="Transparent" Foreground="White" Minimum="0" Maximum="4096" />
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
@@ -120,13 +128,25 @@
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
 
-                <xctk:EditorTemplateDefinition TargetProperties="PositionPreview,AnglesPreview">
+                <xctk:EditorTemplateDefinition TargetProperties="PositionPreview">
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
                                 <xctk:ShortUpDown Value="{Binding X, Mode=TwoWay}" Increment="100" Background="#FF202020" Foreground="White" Minimum="-16384"  Maximum="16384" />
                                 <xctk:ShortUpDown Value="{Binding Y, Mode=TwoWay}" Increment="100" Background="#FF202020" Foreground="White" Minimum="-16384"  Maximum="16384" />
                                 <xctk:ShortUpDown Value="{Binding Z, Mode=TwoWay}" Increment="100" Background="#FF202020" Foreground="White" Minimum="-16384"  Maximum="16384" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </xctk:EditorTemplateDefinition.EditingTemplate>
+                </xctk:EditorTemplateDefinition>
+
+                <xctk:EditorTemplateDefinition TargetProperties="AnglesPreview">
+                    <xctk:EditorTemplateDefinition.EditingTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <xctk:ShortUpDown Value="{Binding X, Mode=TwoWay}" Increment="64" Background="#FF202020" Foreground="White" Minimum="0"  Maximum="4096" />
+                                <xctk:ShortUpDown Value="{Binding Y, Mode=TwoWay}" Increment="64" Background="#FF202020" Foreground="White" Minimum="0"  Maximum="4096" />
+                                <xctk:ShortUpDown Value="{Binding Z, Mode=TwoWay}" Increment="64" Background="#FF202020" Foreground="White" Minimum="0"  Maximum="4096" />
                             </StackPanel>
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>

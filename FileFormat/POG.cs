@@ -414,11 +414,16 @@ namespace hogs_gameEditor_wpf.FileFormat
 
 
     }
-    public class Vec3s
-    {
-        public short X { get; set; }
-        public short Y { get; set; }
-        public short Z { get; set; }
-    }
+    
 
+
+    public class POGL 
+    {
+        public string name { get; set; }
+        public List<short> type { get; set; }
+        public short[] bounds { get; set; }    
+        public short bounds_type { get; set; }
+
+        public POGL() { }
+    }
 }

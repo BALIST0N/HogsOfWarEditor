@@ -1,0 +1,1718 @@
+[
+  {
+    "name": "STF01PPP",
+    "type": [
+      17
+    ],
+    "bounds": [
+      8,
+      1,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STF02PPP",
+    "type": [
+      18
+    ],
+    "bounds": [
+      8,
+      1,
+      16
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STF03PPP",
+    "type": [
+      19
+    ],
+    "bounds": [
+      16,
+      1,
+      16
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STF04PPP",
+    "type": [
+      20
+    ],
+    "bounds": [
+      8,
+      1,
+      32
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STF05PPP",
+    "type": [
+      21
+    ],
+    "bounds": [
+      16,
+      1,
+      32
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STR06PPP",
+    "type": [
+      29
+    ],
+    "bounds": [
+      32,
+      8,
+      16
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "STS_ST01",
+    "type": [
+      30
+    ],
+    "bounds": [
+      4,
+      8,
+      8
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "STS_SU02",
+    "type": [
+      31
+    ],
+    "bounds": [
+      2,
+      8,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW04PP2",
+    "type": [
+      37
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW04PPP",
+    "type": [
+      38
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW04_D2",
+    "type": [
+      39
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW04_W2",
+    "type": [
+      41
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW04_W_",
+    "type": [
+      42
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW05PPP",
+    "type": [
+      43
+    ],
+    "bounds": [
+      12,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW05_W_",
+    "type": [
+      44
+    ],
+    "bounds": [
+      12,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW06DW_",
+    "type": [
+      45
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW06PPP",
+    "type": [
+      46
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW06_W_",
+    "type": [
+      47
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW07PPP",
+    "type": [
+      48
+    ],
+    "bounds": [
+      32,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STW07PWW",
+    "type": [
+      49
+    ],
+    "bounds": [
+      32,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "AM_TANK",
+    "type": [
+      134,
+      145,
+      151
+    ],
+    "bounds": [
+      10,
+      10,
+      10
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TANK",
+    "type": [
+      148,
+      154
+    ],
+    "bounds": [
+      6,
+      6,
+      10
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CRATE1",
+    "type": [
+      67
+    ],
+    "bounds": [
+      4,
+      3,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CRATE2",
+    "type": [
+      68
+    ],
+    "bounds": [
+      4,
+      2,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M_TENT1",
+    "type": [
+      70,
+      94
+    ],
+    "bounds": [
+      9,
+      6,
+      13
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M_TENT2",
+    "type": [
+      71,
+      89,
+      95
+    ],
+    "bounds": [
+      12,
+      6,
+      20
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "PILLBOX",
+    "type": [
+      72,
+      96,
+      90
+    ],
+    "bounds": [
+      14,
+      7,
+      14
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TENT_S",
+    "type": [
+      74
+    ],
+    "bounds": [
+      5,
+      5,
+      7
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BIG_GUN",
+    "type": [
+      75,
+      93,
+      99
+    ],
+    "bounds": [
+      15,
+      16,
+      17
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SHELTER",
+    "type": [
+      97,
+      73,
+      91
+    ],
+    "bounds": [
+      10,
+      6,
+      13
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BUSH1",
+    "type": [
+      111
+    ],
+    "bounds": [
+      3,
+      5,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BUSH2",
+    "type": [
+      112
+    ],
+    "bounds": [
+      7,
+      7,
+      7
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BUSH3",
+    "type": [
+      113
+    ],
+    "bounds": [
+      3,
+      5,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STUMP1",
+    "type": [
+      114
+    ],
+    "bounds": [
+      2,
+      1,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "STUMP2",
+    "type": [
+      115
+    ],
+    "bounds": [
+      2,
+      1,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEB",
+    "type": [
+      116
+    ],
+    "bounds": [
+      3,
+      8,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEG",
+    "type": [
+      117
+    ],
+    "bounds": [
+      3,
+      11,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEP",
+    "type": [
+      118
+    ],
+    "bounds": [
+      3,
+      23,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEW",
+    "type": [
+      119
+    ],
+    "bounds": [
+      4,
+      14,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPA",
+    "type": [
+      129
+    ],
+    "bounds": [
+      2,
+      22,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "AMLAUNCH",
+    "type": [
+      136
+    ],
+    "bounds": [
+      6,
+      6,
+      12
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CARRY",
+    "type": [
+      155
+    ],
+    "bounds": [
+      8,
+      6,
+      12
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRIDGE_C",
+    "type": [
+      165
+    ],
+    "bounds": [
+      8,
+      1,
+      16
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRIDG_C2",
+    "type": [
+      166
+    ],
+    "bounds": [
+      8,
+      1,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRIDGE_S",
+    "type": [
+      167
+    ],
+    "bounds": [
+      8,
+      8,
+      8
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "MONO",
+    "type": [
+      193
+    ],
+    "bounds": [
+      4,
+      9,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "S1S_SU02",
+    "type": [
+      217
+    ],
+    "bounds": [
+      2,
+      8,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "S1S_SU03",
+    "type": [
+      218
+    ],
+    "bounds": [
+      4,
+      8,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "S1W01PPP",
+    "type": [
+      219
+    ],
+    "bounds": [
+      1,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRF01PPP",
+    "type": [
+      237
+    ],
+    "bounds": [
+      8,
+      1,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRR02PPP",
+    "type": [
+      245
+    ],
+    "bounds": [
+      16,
+      8,
+      8
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "BRW01PPP",
+    "type": [
+      253
+    ],
+    "bounds": [
+      1,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRW04_D_",
+    "type": [
+      261
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRW04_W_",
+    "type": [
+      263
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRW06DW_",
+    "type": [
+      266
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRW06_W_",
+    "type": [
+      268
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1F01PPP",
+    "type": [
+      271
+    ],
+    "bounds": [
+      8,
+      1,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1F02PPP",
+    "type": [
+      272
+    ],
+    "bounds": [
+      8,
+      1,
+      16
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1F03PPP",
+    "type": [
+      273
+    ],
+    "bounds": [
+      16,
+      1,
+      16
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1F05PPP",
+    "type": [
+      275
+    ],
+    "bounds": [
+      16,
+      1,
+      32
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1S_ST01",
+    "type": [
+      284
+    ],
+    "bounds": [
+      4,
+      8,
+      8
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "M1S_SU02",
+    "type": [
+      285
+    ],
+    "bounds": [
+      2,
+      8,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1S_SU03",
+    "type": [
+      286
+    ],
+    "bounds": [
+      4,
+      8,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W03PPP",
+    "type": [
+      289
+    ],
+    "bounds": [
+      4,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W04PPP",
+    "type": [
+      293
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W04_W_",
+    "type": [
+      297
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W05PPP",
+    "type": [
+      298
+    ],
+    "bounds": [
+      12,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W05_W_",
+    "type": [
+      299
+    ],
+    "bounds": [
+      12,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W06DW_",
+    "type": [
+      300
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W06PPP",
+    "type": [
+      301
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W06_W_",
+    "type": [
+      302
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W07PPP",
+    "type": [
+      303
+    ],
+    "bounds": [
+      32,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1W07PWW",
+    "type": [
+      304
+    ],
+    "bounds": [
+      32,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SNR05PPP",
+    "type": [
+      316
+    ],
+    "bounds": [
+      16,
+      8,
+      16
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "W1R06PPP",
+    "type": [
+      351
+    ],
+    "bounds": [
+      32,
+      8,
+      16
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "W1W06DW_",
+    "type": [
+      368
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "W1W06_W_",
+    "type": [
+      370
+    ],
+    "bounds": [
+      16,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "W1W07PWW",
+    "type": [
+      372
+    ],
+    "bounds": [
+      32,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BIGLOONY",
+    "type": [
+      373
+    ],
+    "bounds": [
+      12,
+      9,
+      12
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRID2_C",
+    "type": [
+      374
+    ],
+    "bounds": [
+      8,
+      1,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRID2_C1",
+    "type": [
+      375
+    ],
+    "bounds": [
+      8,
+      1,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRID2_S",
+    "type": [
+      377
+    ],
+    "bounds": [
+      8,
+      8,
+      8
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "D_BRID",
+    "type": [
+      378
+    ],
+    "bounds": [
+      8,
+      8,
+      8
+    ],
+    "bounds_type": 1
+  },
+  {
+    "name": "LU_B_SU",
+    "type": [
+      379
+    ],
+    "bounds": [
+      6,
+      4,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SIGN",
+    "type": [
+      382
+    ],
+    "bounds": [
+      4,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CRATE4",
+    "type": [
+      388
+    ],
+    "bounds": [
+      4,
+      3,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "DRUM",
+    "type": [
+      393
+    ],
+    "bounds": [
+      4,
+      6,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "IRONGATE",
+    "type": [
+      394
+    ],
+    "bounds": [
+      20,
+      12,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "PROPOINT",
+    "type": [
+      395
+    ],
+    "bounds": [
+      3,
+      6,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1S_WD01",
+    "type": [
+      396
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "S1S_SU04",
+    "type": [
+      397
+    ],
+    "bounds": [
+      2,
+      16,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BOG",
+    "type": [
+      432
+    ],
+    "bounds": [
+      3,
+      6,
+      5
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CACTUS",
+    "type": [
+      433
+    ],
+    "bounds": [
+      2,
+      5,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CACT2",
+    "type": [
+      434
+    ],
+    "bounds": [
+      2,
+      3,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "DRUM2",
+    "type": [
+      435
+    ],
+    "bounds": [
+      4,
+      6,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "DUMMY",
+    "type": [
+      436
+    ],
+    "bounds": [
+      4,
+      8,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "GATE",
+    "type": [
+      438
+    ],
+    "bounds": [
+      12,
+      24,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "GATES",
+    "type": [
+      439
+    ],
+    "bounds": [
+      16,
+      24,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "LAMP",
+    "type": [
+      440
+    ],
+    "bounds": [
+      1,
+      5,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "MOONS",
+    "type": [
+      442
+    ],
+    "bounds": [
+      6,
+      10,
+      10
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "RELAX1",
+    "type": [
+      444
+    ],
+    "bounds": [
+      4,
+      4,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SNOWB",
+    "type": [
+      445
+    ],
+    "bounds": [
+      4,
+      3,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SNOWH",
+    "type": [
+      446
+    ],
+    "bounds": [
+      2,
+      2,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TV",
+    "type": [
+      447
+    ],
+    "bounds": [
+      2,
+      3,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SHEEP1",
+    "type": [
+      448
+    ],
+    "bounds": [
+      1,
+      2,
+      3
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BARREL",
+    "type": [
+      449
+    ],
+    "bounds": [
+      2,
+      3,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRID2_S2",
+    "type": [
+      451
+    ],
+    "bounds": [
+      8,
+      8,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BRID2C3",
+    "type": [
+      452
+    ],
+    "bounds": [
+      8,
+      1,
+      16
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "M1S_WPP",
+    "type": [
+      453
+    ],
+    "bounds": [
+      8,
+      8,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BARBWIRE",
+    "type": [
+      455
+    ],
+    "bounds": [
+      16,
+      4,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BARBWIR2",
+    "type": [
+      456
+    ],
+    "bounds": [
+      24,
+      4,
+      4
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "WINDM",
+    "type": [
+      462
+    ],
+    "bounds": [
+      8,
+      26,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "WIN_SH",
+    "type": [
+      463
+    ],
+    "bounds": [
+      32,
+      4,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "WIN_SV",
+    "type": [
+      464
+    ],
+    "bounds": [
+      4,
+      32,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "FISH",
+    "type": [
+      468
+    ],
+    "bounds": [
+      1,
+      1,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "CHIM",
+    "type": [
+      469
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SWILL2",
+    "type": [
+      472
+    ],
+    "bounds": [
+      10,
+      21,
+      6
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "SW2ARM",
+    "type": [
+      473
+    ],
+    "bounds": [
+      22,
+      5,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "PIST",
+    "type": [
+      474
+    ],
+    "bounds": [
+      1,
+      7,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "WIND2",
+    "type": [
+      477
+    ],
+    "bounds": [
+      2,
+      16,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "WIND2H",
+    "type": [
+      478
+    ],
+    "bounds": [
+      5,
+      1,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "WIND2V",
+    "type": [
+      479
+    ],
+    "bounds": [
+      1,
+      5,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "RADAR",
+    "type": [
+      480
+    ],
+    "bounds": [
+      4,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "RADAR1",
+    "type": [
+      481
+    ],
+    "bounds": [
+      2,
+      12,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "BUSH2H",
+    "type": [
+      484
+    ],
+    "bounds": [
+      8,
+      7,
+      8
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEBH",
+    "type": [
+      486
+    ],
+    "bounds": [
+      2,
+      14,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEGH",
+    "type": [
+      487
+    ],
+    "bounds": [
+      2,
+      12,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPH",
+    "type": [
+      488
+    ],
+    "bounds": [
+      2,
+      20,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPAH",
+    "type": [
+      489
+    ],
+    "bounds": [
+      2,
+      22,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEGH1",
+    "type": [
+      491
+    ],
+    "bounds": [
+      2,
+      16,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEGH2",
+    "type": [
+      492
+    ],
+    "bounds": [
+      2,
+      10,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEBH1",
+    "type": [
+      493
+    ],
+    "bounds": [
+      2,
+      18,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPH1",
+    "type": [
+      494
+    ],
+    "bounds": [
+      2,
+      20,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPH2",
+    "type": [
+      495
+    ],
+    "bounds": [
+      2,
+      20,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPAH1",
+    "type": [
+      496
+    ],
+    "bounds": [
+      2,
+      18,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "TREEPAH2",
+    "type": [
+      497
+    ],
+    "bounds": [
+      2,
+      20,
+      2
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "FLOWERS",
+    "type": [
+      499
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "GRASS",
+    "type": [
+      500
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "FLOWERS2",
+    "type": [
+      501
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "FLOWERS3",
+    "type": [
+      502
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "GRASS1",
+    "type": [
+      503
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  },
+  {
+    "name": "GRASS2",
+    "type": [
+      504
+    ],
+    "bounds": [
+      1,
+      2,
+      1
+    ],
+    "bounds_type": 0
+  }
+]

@@ -135,7 +135,7 @@
     async function loadModel(path, Id, x, y, z, rx = 0, ry = 0, rz = 0) 
     {
         rx =  BABYLON.Tools.ToRadians(rx);
-        ry =  BABYLON.Tools.ToRadians(ry) + BABYLON.Tools.ToRadians(90);
+        ry =  BABYLON.Tools.ToRadians(-ry) + BABYLON.Tools.ToRadians(90);
         rz =  BABYLON.Tools.ToRadians(rz);
 
 
@@ -226,8 +226,6 @@
 
     async function RotateModel(id,rx,ry,rz)
     {
-
-
         const root = scene.transformNodes.find(t => t.metadata?.id === id);
 
         if (!root) 
@@ -236,12 +234,12 @@
             return;
         }
         rx =  BABYLON.Tools.ToRadians(rx);
-        ry =  BABYLON.Tools.ToRadians(ry) + BABYLON.Tools.ToRadians(90);
+        ry =  BABYLON.Tools.ToRadians(-ry) + BABYLON.Tools.ToRadians(90);
         rz =  BABYLON.Tools.ToRadians(rz);
         root.rotation = new BABYLON.Vector3(rx,ry,rz);
     }
 
-    async function DeleteModel(id,rx,ry,rz)
+    async function DeleteModel(id)
     {
         const root = scene.transformNodes.find(t => t.metadata?.id === id);
 

@@ -225,16 +225,17 @@ namespace hogs_gameEditor_wpf
                     name = POG.NameToCharArray(item.name);
                 }
 
+                POGL pogl = GlobalVars.wesh.Find(x => x.name == item.name);
                 POG mo = new POG();
 
                 mo.name = name;
                 mo.unused0 = POG.NameToCharArray("NULL");
-                mo.position = new short[] { top1, 1000, left1 };
+                mo.position = new short[] { top1, 2000, left1 };
                 mo.index = (short)newId;
                 mo.angles = new short[] { 0, angle, 0 };
                 mo.type = (short)item.type;
-                mo.bounds = new short[] { 10, 10, 10 };
-                mo.bounds_type = 0;
+                mo.bounds = pogl.bounds;
+                mo.bounds_type = pogl.bounds_type;
                 mo.short0 = isPlayerCheckBox.IsChecked == true ? (short)32512 : (short)16128;
                 mo.byte0 = 255;
                 mo.team = POG.PigTeam.british;
@@ -282,18 +283,16 @@ namespace hogs_gameEditor_wpf
                 }
 
                 main.CurrentMap.Add(mo);
-                if(this.objectTypeToAddComboBox.SelectedIndex == 0)
+                var newItem = new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = "" };
+                if (this.objectTypeToAddComboBox.SelectedIndex == 0)
                 {
-                    main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = Convert.ToString(mo.team) });  //this is just adding a row on the listbox
+                    newItem.Team = Convert.ToString(mo.team);
                 }
-                else
-                {
-                    main.MapObjectsListView.Items.Add(newItem: new MapObjectsListViewItem { Name = mo.GetName(), Id = Convert.ToString(mo.index), Team = "" });  //this is just adding a row on the listbox
 
-                }
+                main.MapObjectsListView.Items.Add(newItem); 
+                main.MapObjectsListView.ScrollIntoView(newItem);
                 main.LoadMapObjects();
                 main.mapObjectEdited = true;
-
                 Close();
             }
 
