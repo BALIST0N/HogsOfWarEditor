@@ -12,10 +12,12 @@ namespace hogs_gameEditor_wpf
     /// </summary>
     public partial class ExporterWindow : Window
     {
+        public int total;
         public ExporterWindow()
         {
             InitializeComponent();
             status_progress_bar.Value = 0;
+            total = 1;
             status_progress_bar.Visibility = Visibility.Hidden;
 
             //Generate_thumbnails();
@@ -40,11 +42,11 @@ namespace hogs_gameEditor_wpf
             //GlobalVars.Export_FEBmps();
             List<Task> tasks = [];
 
-            if (exportmaps_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportMapsAndModels)); }
-            if (exportchars_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportCharsFolder)); }
-            if (exportskybox_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportSkyboxes)); }
-            if (exportlanguages_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportLanguages)); }
-            if (exportmoddedmad_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.MadMtdModdingTool)); }
+            if (exportmaps_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportMapsAndModels)); total += 277;  }
+            if (exportchars_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportCharsFolder)); total += 40; }
+            if (exportskybox_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportSkyboxes)); total += 50; }
+            if (exportlanguages_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.ExportLanguages)); total += 174; }
+            if (exportmoddedmad_checkbox.IsChecked == true) { tasks.Add(Task.Run(GlobalVars.MadMtdModdingTool)); total += 2; }
 
             if (tasks.Count > 0)
             {
@@ -52,8 +54,7 @@ namespace hogs_gameEditor_wpf
             }
 
             //heavy stuff there, need your PC resources  !
-            if (exportaudio_checkbox.IsEnabled) { GlobalVars.ExportAudioAndSounds(); }
-
+            if (exportaudio_checkbox.IsChecked == true) { GlobalVars.ExportAudioAndSounds(); total += 1988; }
 
             //todo : messagebox "do you want to zip" -> yes = new thread( zip ) + reset progress bar / process mode | no = close
 
@@ -109,7 +110,7 @@ namespace hogs_gameEditor_wpf
             // Dispatcher.Invoke s'assure qu'on est sur le thread UI
             status_progress_bar.Dispatcher.Invoke(() =>
             {
-                status_progress_bar.Value += 0.0365;
+                status_progress_bar.Value += 100/this.total;
             });
         }
 

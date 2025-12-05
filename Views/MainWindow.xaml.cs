@@ -7,11 +7,11 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
+using System.IO.Pipes;
 using System.Linq;
-using System.Numerics;
+using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,11 +19,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
-using Xceed.Wpf.Toolkit.Primitives;
 using Xceed.Wpf.Toolkit.PropertyGrid;
-using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 
 namespace hogs_gameManager_wpf
@@ -41,9 +38,14 @@ namespace hogs_gameManager_wpf
 
         Storyboard pulseStoryboard;
 
-        public MainWindow()
+        public MainWindow() //the entry point of the application
         {
             InitializeComponent();
+             
+            #if !DEBUG
+                ExtractRessources();
+            #endif
+
 
             #region MapList Fillings
             MapList = new Dictionary<string, string>
@@ -110,6 +112,36 @@ namespace hogs_gameManager_wpf
 
         }
 
+        private void ExtractRessources()
+        {
+            
+            string fldr = System.IO.Path.GetDirectoryName(Environment.ProcessPath)!;
+            //string fldr = "E:/Games/IGG-HogsofWar/";
+
+            if (File.Exists( System.IO.Path.Combine(fldr,"warhogs.exe") ) == true && File.Exists(System.IO.Path.Combine(fldr, "FEProg.exe")) == true )
+            {
+                Directory.CreateDirectory(System.IO.Path.Combine(fldr, "EXPORT") );
+                if( Directory.Exists(System.IO.Path.Combine(fldr, "EXPORT/editorRessources") ) == true )
+                {
+                    return;
+                }
+
+                Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    MessageBox.Show("for using the 3D View, you must export models \n\r simply use that \"Export ALL button\" : ) ");
+                });
+
+                using ZipArchive archive = new ZipArchive( Assembly.GetExecutingAssembly().GetManifestResourceStream("hogs_gameEditor_wpf.editorRessources.zip") );
+                archive.ExtractToDirectory( System.IO.Path.Combine(fldr, "EXPORT/editorRessources/") );
+                
+            }
+            else
+            {
+                MessageBox.Show("are you sure you are in the warhogs game folder ? ( i can't find warhogs.exe ) ");
+                Environment.Exit(1);
+            }
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.pulseStoryboard = new();
@@ -164,7 +196,7 @@ namespace hogs_gameManager_wpf
 
                 //Read the File
                 CurrentMap = POG.GetAllMapObject(CurrentMapName);
-                string[] charsNames = JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"))["Characters"];
+                string[] charsNames = JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText(GlobalVars.editorRessourcesFolder +"models_category.json"))["Characters"];
                 
                 foreach (POG mo in CurrentMap)
                 {
@@ -179,7 +211,7 @@ namespace hogs_gameManager_wpf
                     }
                 }
 
-                MapImageControl.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + CurrentMapName + ".png")); //loading the center map
+                MapImageControl.Source = new BitmapImage(new Uri("file://" + GlobalVars.editorRessourcesFolder + CurrentMapName + ".png")); //loading the center map
 
                 //generate buttons with icons in the minimap
                 LoadMapObjects();
@@ -533,7 +565,7 @@ namespace hogs_gameManager_wpf
                                     string ry = GlobalVars.ScaleDownAngles(p.angles[1]).ToString(CultureInfo.InvariantCulture);
                                     string rz = GlobalVars.ScaleDownAngles(p.angles[2]).ToString(CultureInfo.InvariantCulture);
 
-                                    await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{GlobalVars.exportFolder}temp_dummy_team_{(short)p.team}.glb', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
+                                    await webView.CoreWebView2.ExecuteScriptAsync($@"loadModel('{GlobalVars.editorRessourcesFolder}temp_dummy_team_{(short)p.team}.glb', {p.index}, {p.position[0]}, {p.position[1]}, {p.position[2]},{rx},{ry},{rz});");
 
                                 }
                                 catch (Exception) { continue; }
@@ -557,7 +589,7 @@ namespace hogs_gameManager_wpf
                         handle3DWebViewMessages(e.TryGetWebMessageAsString());
                     };
 
-                    webView.Source = new Uri("file:///D:/projects devs/hogs_gameManager_wpf/Views/scene.html");
+                    webView.Source = new Uri("file:///"+GlobalVars.editorRessourcesFolder+"scene.html");
 
 
 
@@ -649,11 +681,12 @@ namespace hogs_gameManager_wpf
         {
             PMG mapTerrain = new(GlobalVars.mapsFolder + CurrentMapName);
             PTG mapTiles = new(GlobalVars.mapsFolder + CurrentMapName);
+            Directory.CreateDirectory(GlobalVars.exportFolder + "maps");
 
-            string loc = GlobalVars.exportFolder + "/" + CurrentMapName + "/" + CurrentMapName;
+            string loc = GlobalVars.exportFolder + "maps/" + CurrentMapName;
 
             File.WriteAllText(loc + ".json", JsonSerializer.Serialize(CurrentMap.Select(p => p.POG2JSON()), new JsonSerializerOptions { WriteIndented = true }));
-            mapTiles.CreateIMG(mapTerrain).Save(loc + ".png", ImageFormat.Png);
+            //mapTiles.CreateIMG(mapTerrain).Save(loc + ".png", ImageFormat.Png);
 
             GlobalVars.ExportTerrain_GLB(mapTerrain, mapTiles, loc + ".glb");
         }
@@ -665,6 +698,7 @@ namespace hogs_gameManager_wpf
                 if (MessageBox.Show("You gonna export all models and textures of this map !,are you sure ? ", "/!\\", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     buttonMapExport_Click(null, null);
+                    Directory.CreateDirectory(GlobalVars.exportFolder + "models");
 
                     MAD.GetMapEntitiesList(CurrentMapName).ForEach(entityName =>
                     {
@@ -683,15 +717,13 @@ namespace hogs_gameManager_wpf
             else
             {
 
-                
+
                 ExporterWindow nw = new ExporterWindow()
                 {
                     Top = this.Top + 70,
                     Left = this.Left + 300,
                 };
                 nw.Show();
-                
-
 
                 /*
                 List<POGL> a = new();

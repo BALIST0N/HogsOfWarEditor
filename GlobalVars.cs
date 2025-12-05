@@ -1,13 +1,10 @@
 ﻿using hogs_gameEditor_wpf.FileFormat;
-using SharpGLTF.Animations;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
-using SharpGLTF.Runtime;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
-using SharpGLTF.Transforms;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,11 +15,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
-using System.Windows.Media.Animation;
-using System.Xml.Linq;
 using Path = System.IO.Path;
 
 
@@ -33,19 +28,24 @@ namespace hogs_gameEditor_wpf
     /// </summary>
     public static class GlobalVars
     {
-        public static string gameFolder = "E:/Games/IGG-HogsofWar/";
+        #if DEBUG
+            public static string gameFolder = "E:/Games/IGG-HogsofWar/";
+        #else
+            public static string gameFolder = System.IO.Path.GetDirectoryName(Environment.ProcessPath) + "/";
+        #endif
+
         public static string mapsFolder = gameFolder + "Maps/";
-        public static string mapsViewsFolder = gameFolder + "devtools/mapview/";
-        public static string exportFolder = gameFolder + "devtools/EXPORT/";
+        public static string exportFolder = gameFolder + "EXPORT/";
+        public static string editorRessourcesFolder = exportFolder + "editorRessources/";
 
-        public static List<POGL> wesh = JsonSerializer.Deserialize< List<POGL>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/ent_list.json"));
+        public static List<POGL> wesh = JsonSerializer.Deserialize< List<POGL>>(File.ReadAllText(editorRessourcesFolder + "ent_list.json"));
 
-        public static Dictionary<string, List<short>> modelsWithMultipleSkins = wesh.Where(x => x.type.Count > 1).ToDictionary(key => key.name, value => value.type.ToList() ); 
+        public static Dictionary<string, List<short>> modelsWithMultipleSkins = wesh.Where(x => x.type.Count > 1).ToDictionary( key => key.name, value => value.type.ToList() ); 
 
         public static Dictionary<string, short> models_uniqueids = wesh.Where(x => x.type.Count == 1).ToDictionary(key => key.name, value => value.type[0]);
 
-        public static Dictionary<string, List<string>> models_category = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(File.ReadAllText("D:/projects devs/hogs_gameManager_wpf/models_category.json"));
-
+        public static Dictionary<string, List<string>> models_category = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(File.ReadAllText(editorRessourcesFolder + "models_category.json"));
+        private static readonly SemaphoreSlim ffmpegLimiter = new SemaphoreSlim(8);
 
         public static string[] BoneNames =
         {
@@ -505,8 +505,8 @@ namespace hogs_gameEditor_wpf
         public static void ExportCharacterWithTexture_GLB(MAD charModel,bool withAnims = false)
         {
 
-            Directory.CreateDirectory(gameFolder + "devtools/EXPORT/characters/");
-            string outputPath = gameFolder + "devtools/EXPORT/characters/" + charModel.GetName();
+            Directory.CreateDirectory(exportFolder + "/characters/");
+            string outputPath = exportFolder + "/characters/" + charModel.GetName();
 
  
             var model = ModelRoot.CreateModel();
@@ -899,18 +899,7 @@ namespace hogs_gameEditor_wpf
              mcap.mad <- motion capture for all chars models
              pig.HIR <- model skeletion for all chars models
 
-            //is SKYDOME.MAD 
-            //thoses are mtd skyboxes files but names are in .mad (wtf i was so confused ?) 
-             COLDSKY.MAD
-             DESERT.MAD
-             NIGHT1.MAD
-             OMINOUS.MAD
-             SPACE.MAD
-             SUNNY.MAD
-             SUNRISE.MAD
-             SUNSET.MAD
-             TOY.MAD
-             WHITE.MAD
+
             */
 
             IEnumerable<string> list = Directory.EnumerateFiles(gameFolder + "Chars/", "*", SearchOption.AllDirectories);
@@ -948,7 +937,7 @@ namespace hogs_gameEditor_wpf
 
 
                     case "pig.HIR":
-                        File.WriteAllText(exportFolder + "/characters/Pig.HIR.json", JsonSerializer.Serialize(HIR.GetSkeletonList(fichier), new JsonSerializerOptions { WriteIndented = true })); ;
+                        File.WriteAllText(exportFolder + "/characters/Pig.HIR.json", JsonSerializer.Serialize(HIR.GetSkeletonList(fichier), new JsonSerializerOptions { WriteIndented = true }));
                         window.IncrementProgress();
                         break;
 
@@ -1154,35 +1143,44 @@ namespace hogs_gameEditor_wpf
         }
 
         // Fonction utilitaire qui lance ffmpeg et notifie la fenêtre
-        private static Task RunFfmpegAsync(string inputFile, string outputFile, ExporterWindow window)
+        private static async Task RunFfmpegAsync(string inputFile, string outputFile, ExporterWindow window)
         {
-            TaskCompletionSource<bool> tcs = new();
+            await ffmpegLimiter.WaitAsync(); 
 
-            ProcessStartInfo psi = new()
+            try
             {
-                FileName = "D:\\projects devs\\hogs_gameManager_wpf/ffmpeg.exe",
-                Arguments = $"-y -i \"{inputFile}\" -c:a libopus -b:a 48k -ac 1 \"{outputFile}\"",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = false,
-                RedirectStandardError = false
-            };
+                TaskCompletionSource<bool> tcs = new();
 
-            Process ffmpeg = new()
+                ProcessStartInfo psi = new()
+                {
+                    FileName = editorRessourcesFolder + "ffmpeg.exe",
+                    Arguments = $"-y -i \"{inputFile}\" -c:a libopus -b:a 48k -ac 1 \"{outputFile}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = false,
+                    RedirectStandardError = false
+                };
+
+                Process ffmpeg = new()
+                {
+                    StartInfo = psi,
+                    EnableRaisingEvents = true
+                };
+
+                ffmpeg.Exited += (s, e) =>
+                {
+                    ffmpeg.Dispose();
+                    Application.Current.Dispatcher.Invoke(() => window.IncrementProgress());
+                    tcs.SetResult(true);
+                };
+
+                ffmpeg.Start();
+                await tcs.Task;
+            }
+            finally
             {
-                StartInfo = psi,
-                EnableRaisingEvents = true
-            };
-
-            ffmpeg.Exited += (s, e) =>
-            {
-                ffmpeg.Dispose();
-                Application.Current.Dispatcher.Invoke(() => window.IncrementProgress());
-                tcs.SetResult(true);
-            };
-
-            ffmpeg.Start();
-            return tcs.Task;
+                ffmpegLimiter.Release(); 
+            }
         }
 
         public static void ExportMapsAndModels()

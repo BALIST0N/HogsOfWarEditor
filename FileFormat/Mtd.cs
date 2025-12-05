@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
-using System.Windows;
 
 namespace hogs_gameEditor_wpf.FileFormat
 {

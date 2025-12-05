@@ -121,7 +121,7 @@ namespace hogs_gameEditor_wpf
             amountUpDown.IsEnabled = false;
             isPlayerCheckBox.IsEnabled = false;
 
-            mapImage.Source = new BitmapImage(new Uri("file://" + GlobalVars.mapsViewsFolder + mapName + ".png"));
+            mapImage.Source = new BitmapImage(new Uri("file://" + GlobalVars.editorRessourcesFolder + mapName + ".png"));
 
             Ellipse eli = new()
             {
@@ -295,7 +295,6 @@ namespace hogs_gameEditor_wpf
                 main.mapObjectEdited = true;
                 Close();
             }
-
 
         }
 
