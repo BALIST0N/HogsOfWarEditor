@@ -9,6 +9,8 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 <details>
   <summary>done : </summary>
+
+	
 - FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation 
 
 - First use case (extracting editor ressources) 
@@ -18,7 +20,6 @@ Extractor function : Exract and convert any asset of the game into modern format
 - when adding new entity to map, create correct collision boxes
 
 - manage to export character model with skeleton (.hir) 
-
 
 - manage to export character model with skeleton + animations/motionCapture (.mcap)
 
@@ -66,7 +67,9 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 <details>
   <summary>TODO :  </summary>
-	- stairs (prisms models) are rotated wrongly ?
+
+
+- stairs (prisms models) are rotated wrongly ?
 	
 	- correct character animations exportations ( wierd stuff with arms and positions ?)
 	
@@ -107,3 +110,4 @@ todo for PC version (need to decompile code):
 - extra weapons 
 - new campaigns
 - defense mode
+
