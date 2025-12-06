@@ -4,11 +4,9 @@ using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
-using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -716,7 +714,7 @@ namespace hogs_gameManager_wpf
             }
             else
             {
-                GlobalVars.Export_FEBmps();
+                //GlobalVars.Export_FEBmps();
 
                 ExporterWindow nw = new ExporterWindow()
                 {

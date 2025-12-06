@@ -1,6 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Media.Media3D;
+﻿using System.Drawing;
 
 
 namespace hogs_gameEditor_wpf.FileFormat
