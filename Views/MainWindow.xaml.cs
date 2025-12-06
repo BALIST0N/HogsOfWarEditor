@@ -38,7 +38,7 @@ namespace hogs_gameManager_wpf
 
         Storyboard pulseStoryboard;
 
-        public MainWindow() //the entry point of the application
+        public MainWindow() //the entry point of the application, its called by App.xaml
         {
             InitializeComponent();
              
@@ -716,7 +716,7 @@ namespace hogs_gameManager_wpf
             }
             else
             {
-
+                GlobalVars.Export_FEBmps();
 
                 ExporterWindow nw = new ExporterWindow()
                 {

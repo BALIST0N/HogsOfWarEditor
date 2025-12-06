@@ -4,10 +4,13 @@ a tool to edit maps data, planning to do much more
 
 Primary functions : display in a 2d or in 3D all entities of each map of the game, 
 customizing the game with modifing stuff and even adding new ones 
+
 Extractor function : Exract and convert any asset of the game into modern format : .GLB for models, .opus for audio, .png for textures... 
 
 
 done : 
+- FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation 
+- First use case (extracting editor ressources) 
 - build entire application into a single Exe File (build.cmd)
 - when adding new entity to map, create correct collision boxes
 - manage to export character model with skeleton (.hir) 
@@ -40,7 +43,6 @@ the tool :
 - create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps
 - skyboxes : find witch map has what skybox? <- Decomp exe needed : found something but need investigation
 - export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
-- FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation
 - manage to export "heavy" character model with respective hat
 - 3d viewer : place character according to team and class
 - export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 

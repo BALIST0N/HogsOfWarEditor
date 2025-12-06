@@ -1,20 +1,17 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using System.Windows.Media.Media3D;
+
 
 namespace hogs_gameEditor_wpf.FileFormat
 {
     internal class MGL
     {
-        public byte[] data { get; set; }
         public Bitmap image { get; set; }
 
         public MGL(byte[] hex)
         {
-            data = Decompress(hex);
-        }
-
-        public static byte[] Decompress(byte[] input)
-        {
-            return null; 
+            
         }
 
         public static Bitmap RemoveMagenta(Bitmap b)

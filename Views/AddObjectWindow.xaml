@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Add New Object To the  Map" Height="500" Width="800" Loaded="Window_Loaded" ResizeMode="NoResize" WindowStyle="ToolWindow">
     <Grid Background="AntiqueWhite" >
-        <Label x:Name="label_Copy0" Content="Position" Margin="515,265,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label x:Name="label_Copy0" Content="0 | 0" Margin="529,269,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
         <Label x:Name="label_Copy3" Content="Rotation" Margin="515,300,0,0" Width="60" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 
         <Image x:Name="mapImage" Margin="0,10,10,0" Height="256" Width="256" VerticalAlignment="Top" HorizontalAlignment="Right"/>

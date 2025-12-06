@@ -18,6 +18,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Xml.Linq;
 using Path = System.IO.Path;
 
 
@@ -45,6 +47,7 @@ namespace hogs_gameEditor_wpf
         public static Dictionary<string, short> models_uniqueids = wesh.Where(x => x.type.Count == 1).ToDictionary(key => key.name, value => value.type[0]);
 
         public static Dictionary<string, List<string>> models_category = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(File.ReadAllText(editorRessourcesFolder + "models_category.json"));
+
         private static readonly SemaphoreSlim ffmpegLimiter = new SemaphoreSlim(8);
 
         public static string[] BoneNames =
@@ -1385,7 +1388,7 @@ namespace hogs_gameEditor_wpf
 
         }
 
-        public static void Export_FEBmps() //a list of .mgl files , those are LZ77 compressed bmp 
+        public static void Export_FEBmps() //a list of .mgl files , those are bmp ui images, but wierd format 
         {
             Directory.CreateDirectory(exportFolder + "FEBMP/");
 
@@ -1393,20 +1396,19 @@ namespace hogs_gameEditor_wpf
 
             int endContenTable = BitConverter.ToInt32(febmps, 16);
 
-            for (int i = 48; i <= endContenTable; i++)
+            for (int i = 0; i <= endContenTable; i++)
             {
                 int endblockContentTable = i + 24;
                 if (endblockContentTable <= endContenTable)
                 {
                     Mtd mtd = new(febmps[i..(i + 24)]);
-                    if (mtd.Name == "propoint.mgl")
-                    {
-                        //byte[] decompressed = MGL.DecompressAuto(febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)]);
-                        byte[] b = MGL.Decompress(febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)]);
-                        File.WriteAllBytes(exportFolder + "FEBMP/" + mtd.Name + ".BMP", b);
-                    }
 
-                }
+                    mtd.textureData = febmps[mtd.DataOffset..(mtd.DataOffset + mtd.DataSize)];
+
+                    //mtd.textureTim.ToBitmap().Save( exportFolder + "FEBMP/" + Path.GetFileNameWithoutExtension(mtd.Name) + ".Bmp", ImageFormat.Bmp );
+                    File.WriteAllBytes ( exportFolder + "FEBMP/" + mtd.Name, mtd.textureData );
+
+                }   
                 i += 23;
             }
         }

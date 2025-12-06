@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -137,15 +138,12 @@ namespace hogs_gameEditor_wpf
             {
                 Point pos = e.GetPosition(mapCanvas);
 
-                double x = pos.X - (eli.Width / 2);
-                double y = pos.Y - (eli.Height / 2);
-
                 // limite à 256x256
-                x = Math.Clamp(x, 0, 256 - eli.Width);
-                y = Math.Clamp(y, 0, 256 - eli.Height);
+                double x = Math.Clamp(pos.X, 0, 256) ;
+                double y = Math.Clamp(pos.Y, 0, 256);
 
-                Canvas.SetLeft(eli, x);
-                Canvas.SetTop(eli, y);
+                Canvas.SetLeft(eli, x-4);
+                Canvas.SetTop(eli, y-4);
 
                 label_Copy0.Content = $"{(x * 128) - 16384} | {-((y * 128) - 16384)}";
             };
@@ -183,7 +181,7 @@ namespace hogs_gameEditor_wpf
                             EntityListView.Items.Add(new
                             {
                                 name = ent_name,
-                                img = new BitmapImage(new Uri("file://" + GlobalVars.exportFolder + "thumbnails/" + ent_name + "_" + model_type + ".png")),
+                                img = new BitmapImage(new Uri("file://" + GlobalVars.editorRessourcesFolder  + ent_name + "_" + model_type + ".png")),
                                 type = model_type
                             });
                         }
@@ -194,7 +192,7 @@ namespace hogs_gameEditor_wpf
                         EntityListView.Items.Add(new
                         {
                             name = ent_name,
-                            img = new BitmapImage(new Uri("file://" + GlobalVars.exportFolder + "thumbnails/" + ent_name + ".png")),
+                            img = new BitmapImage(new Uri("file://" + GlobalVars.editorRessourcesFolder + ent_name + ".png")),
                             type = GlobalVars.models_uniqueids.TryGetValue(ent_name, out short id) ? (short)id : (short)0
                         });
                     }
@@ -207,10 +205,7 @@ namespace hogs_gameEditor_wpf
         {
             if (objectTypeToAddComboBox.SelectedIndex != -1 && EntityListView.SelectedValue != null)
             {
-                FrameworkElement fe = (FrameworkElement)mapCanvas.Children[0];
-
-                short top1 = (short)((Canvas.GetLeft(fe) * 128) - 16384);
-                short left1 = (short)-((Canvas.GetTop(fe) * 128) - 16384);
+                string[] numbers = label_Copy0.Content.ToString().Split('|');
 
                 short angle = (short)GlobalVars.ScaleUpAngles(rotationSlider.Value);
                 dynamic item = EntityListView.SelectedValue;
@@ -230,7 +225,7 @@ namespace hogs_gameEditor_wpf
 
                 mo.name = name;
                 mo.unused0 = POG.NameToCharArray("NULL");
-                mo.position = new short[] { top1, 2000, left1 };
+                mo.position = new short[] { short.Parse(numbers[0]), 1500, short.Parse(numbers[1]) };
                 mo.index = (short)newId;
                 mo.angles = new short[] { 0, angle, 0 };
                 mo.type = (short)item.type;
