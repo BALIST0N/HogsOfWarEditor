@@ -1,15 +1,42 @@
-# Hogs_Game_Editor
+# HOGS OF WAR Map Editor
 
-a tool to edit maps data, planning to do much more 
+### A tool to edit, visualize and export maps, for PC version
 
-Primary functions : display in a 2d or in 3D all entities of each map of the game, 
-customizing the game with modifing stuff and even adding new ones 
+Primary functions : display in a 2d or in 3D view all entities of each map of the game, 
+customizing the game with modifing anything on the map and even adding new entities 
 
-Extractor function : Exract and convert any asset of the game into modern format : .GLB for models, .opus for audio, .png for textures... 
+Extractor function : Convert any asset of the game into modern format : .GLB for models, .opus for audio, .png for textures...
 
 <details>
-  <summary>done : </summary>
+  <summary>TODO :  </summary>
 
+
+- stairs (prisms models) are rotated wrongly ?
+	
+- correct character animations exportations ( wierd stuff with arms and positions ?)
+	
+- create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps
+	
+- skyboxes : find witch map has what skybox? <- Decomp exe needed : found something but need investigation
+	
+- export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
+	
+- manage to export "heavy" character model with respective hat
+	
+- 3d viewer : place character according to team and class
+	
+- export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 
+	
+- export FEBmps (ui)
+	
+- class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
+	
+- 3d viewer : load all models and export then load 3d view with exported models
+	
+</details>
+
+<details>
+  <summary>Features done : </summary>
 	
 - FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation 
 
@@ -65,33 +92,6 @@ Extractor function : Exract and convert any asset of the game into modern format
 
 
 
-<details>
-  <summary>TODO :  </summary>
-
-
-- stairs (prisms models) are rotated wrongly ?
-	
-	- correct character animations exportations ( wierd stuff with arms and positions ?)
-	
-	- create 3 different "modding .mad & .mtd", one for normal maps, one for snow maps, one for desert maps
-	
-	- skyboxes : find witch map has what skybox? <- Decomp exe needed : found something but need investigation
-	
-	- export 1 model with multiple skins (tents, shelter) -> possible but need GLB/GLTF extension?
-	
-	- manage to export "heavy" character model with respective hat
-	
-	- 3d viewer : place character according to team and class
-	
-	- export an all-in-one character : Skeleton (hir) + animations (mcap) + all color skins (mtd) + attach hats 
-	
-	- export FEBmps (ui)
-	
-	- class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
-	
-	- 3d viewer : load all models and export then load 3d view with exported models
-	
-</details>
 
 Scrapped/ cancelled : 
 - converting fonts images to TTF (no library available, too complex, useless)
@@ -100,7 +100,7 @@ Scrapped/ cancelled :
 _________________________________________________________
 
 
-todo for PC version (need to decompile code): 
+Planned features if one day we are able to decomple the code of the game :
 
 - AI behavior 
 - game fixed resolution / borderless window (d3d9.dll)
@@ -110,4 +110,5 @@ todo for PC version (need to decompile code):
 - extra weapons 
 - new campaigns
 - defense mode
+
 
