@@ -1,5 +1,6 @@
 ﻿using hogs_gameEditor_wpf;
 using hogs_gameEditor_wpf.FileFormat;
+using hogs_gameEditor_wpf.Views;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
@@ -23,12 +24,9 @@ using Xceed.Wpf.Toolkit.PropertyGrid;
 
 namespace hogs_gameManager_wpf
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly Dictionary<string, string> MapList;
+        public Dictionary<string, string> MapList;
         public List<POG> CurrentMap;
         private string CurrentMapName;
         public bool mapObjectEdited = false;
@@ -36,77 +34,86 @@ namespace hogs_gameManager_wpf
 
         Storyboard pulseStoryboard;
 
+        public WarhogsExeEditor wee;
+
+
         public MainWindow() //the entry point of the application, its called by App.xaml
         {
             InitializeComponent();
-             
+
             #if !DEBUG
                 ExtractRessources();
             #endif
 
+            InitMapList();
 
-            #region MapList Fillings
+        }
+
+        public void InitMapList()
+        {
+            this.wee = new();
+
             MapList = new Dictionary<string, string>
             {
-                { "You Hillock", "ARCHI" },
-                { "Doomed", "ARTGUN" },
-                { "15: Fortified Swine", "BAY" },
-                { "Dam Busters", "BHILL" },
-                { "Friendly Fire", "BOOM" },
-                { "17: Geneva Convention", "BRIDGE" },
-                { "Moon Buttes", "BUTE" },
-                { "00: Boot Camp", "CAMP" },
-                { "Cratermass", "CMASS" },
-                { "Graveyard Shift", "CREEPY2" },
-                { "Death Bowl", "DBOWL" },
-                { "04 Beta", "DEMO" },
-                { "Ice Flow Beta", "DEMO2" },
-                { "18: I Spy", "DESVAL" },
-                { "04: Morning Glory", "DEVI" },
-                { "Death Valley Beta", "DVAL" },
-                { "Death Valley", "DVAL2" },
-                { "15 Beta", "EASY" },
-                { "20: Achilles Heal", "EMPLACE" },
-                { "01: The War Foundation", "ESTU" },
-                { "14: Battle Stations", "EYRIE" },
-                { "25: Well, Well, Well!", "FINAL" },
-                { "13: Glacier Guns", "FJORDS" },
-                { "24: Hamburger Hill", "FOOT" },
-                { "10: Bangers 'N' Mash", "GUNS" },
-                { "Pigin' Hell", "HELL2" },
-                { "Skulduggery", "HELL3" },
-                { "Completely unused", "HILLBASE" },
-                { "Chill Hill", "ICE" },
-                { "Ice Flow", "ICEFLOW" },
-                { "Island Hopper", "ISLAND" },
-                { "22: Assassination", "KEEP" },
-                { "The Lake", "LAKE" },
-                { "Bridge The Gap", "LECPROD" },
-                { "11: Saving Private Rind", "LIBERATE" },
-                { "Pigs in Space", "LUNAR1" },
-                { "09: The Village People", "MASHED" },
-                { "Hedge Maze", "MAZE" },
-                { "16: Over The Top", "MEDIX" },
-                { "Frost Fight", "MLAKE" },
-                { "12: Just Deserts", "OASIS" },
-                { "One Way System", "ONEWAY" },
-                { "Play Pen", "PLAY1" },
-                { "Duvet Fun", "PLAY2" },
-                { "Ridge Back", "RIDGE" },
-                { "02: Routine Patrol", "ROAD" },
-                { "05: Island Invasion", "RUMBLE" },
-                { "Square Off", "SEPIA1" },
-                { "19: Chemical Compound", "SNAKE" },
-                { "08: The Spying Game", "SNIPER" },
-                { "21: High And Dry", "SUPLINE" },
-                { "23: Hero Warship", "TESTER" },
-                { "03: Trench Warfare", "TRENCH" },
-                { "07: Communication Breakdown", "TWIN" },
-                { "06: Under Siege", "ZULUS" }
+                {"00: Boot Camp", "CAMP"},
+                {"01: The War Foundation",      wee.mapOrder[1] },
+                {"02: Routine Patrol",          wee.mapOrder[2] },
+                {"03: Trench Warfare",          wee.mapOrder[3] },
+                {"04: Morning Glory",           wee.mapOrder[4] },
+                {"05: Island Invasion",         wee.mapOrder[5] },
+                {"06: Under Siege",             wee.mapOrder[6] },
+                {"07: Communication Breakdown", wee.mapOrder[7] },
+                {"08: The Spying Game",         wee.mapOrder[8] },
+                {"09: The Village People",      wee.mapOrder[9] },
+                {"10: Bangers 'N' Mash",        wee.mapOrder[10] },
+                {"11: Saving Private Rind",     wee.mapOrder[11] },
+                {"12: Just Deserts",            wee.mapOrder[12] },
+                {"13: Glacier Guns",            wee.mapOrder[13] },
+                {"14: Battle Stations",         wee.mapOrder[14] },
+                {"15: Fortified Swine",         wee.mapOrder[15] },
+                {"16: Over The Top",            wee.mapOrder[16] },
+                {"17: Geneva Convention",       wee.mapOrder[17] },
+                {"18: I Spy",                   wee.mapOrder[18] },
+                {"19: Chemical Compound",       wee.mapOrder[19] },
+                {"20: Achilles Heal",           wee.mapOrder[20] },
+                {"21: High And Dry",            wee.mapOrder[21] },
+                {"22: Assassination",           wee.mapOrder[22] },
+                {"23: Hero Warship",            wee.mapOrder[23] },
+                {"24: Hamburger Hill",          wee.mapOrder[24] },
+                {"25: Well, Well, Well!",       wee.mapOrder[25] },
+                {"Bridge The Gap", "LECPROD"},
+                {"Chill Hill", "ICE"},
+                {"Cratermass", "CMASS"},
+                {"Dam Busters", "BHILL"},
+                {"Death Bowl", "DBOWL"},
+                {"Death Valley", "DVAL2"},
+                {"Death Valley Beta", "DVAL"},
+                {"Doomed", "ARTGUN"},
+                {"Duvet Fun", "PLAY2"},
+                {"Friendly Fire", "BOOM"},
+                {"Frost Fight", "MLAKE"},
+                {"Graveyard Shift", "CREEPY2"},
+                {"Hedge Maze", "MAZE"},
+                {"Ice Flow", "ICEFLOW"},
+                {"Ice Flow Beta", "DEMO2"},
+                {"Island Hopper", "ISLAND"},
+                {"Moon Buttes", "BUTE"},
+                {"One Way System", "ONEWAY"},
+                {"Pigin' Hell", "HELL2"},
+                {"Pigs in Space", "LUNAR1"},
+                {"Play Pen", "PLAY1"},
+                {"Ridge Back", "RIDGE"},
+                {"Skulduggery", "HELL3"},
+                {"Square Off", "SEPIA1"},
+                {"The Lake", "LAKE"},
+                {"You Hillock", "ARCHI"},
+                {"04 Beta", "DEMO"},
+                {"15 Beta", "EASY"},
+                {"Completely unused", "HILLBASE"},
             };
 
-            MapList = MapList.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-            #endregion
+            this.mapListComboBox.IsEnabled = true;
+
 
         }
 
@@ -284,6 +291,7 @@ namespace hogs_gameManager_wpf
                 case "DRUM":
                     GenerateObjectMapButton(mo, Brushes.DarkOrange, Brushes.Crimson);
                     break;
+
                 case "DRUM2":
                     GenerateObjectMapButton(mo, Brushes.GreenYellow, Brushes.LawnGreen);
                     break;
@@ -716,12 +724,16 @@ namespace hogs_gameManager_wpf
             {
                 //GlobalVars.Export_FEBmps();
 
+                /*
+
                 ExporterWindow nw = new ExporterWindow()
                 {
                     Top = this.Top + 70,
                     Left = this.Left + 300,
                 };
                 nw.Show();
+                */
+
 
                 /*
                 List<POGL> a = new();
@@ -864,6 +876,24 @@ namespace hogs_gameManager_wpf
 
         }
 
+        private void buttonEditMapOrder_Click(object sender, RoutedEventArgs e)
+        {
+            this.mapListComboBox.SelectedIndex = -1;
+            this.pulseStoryboard.Stop();
+
+            MapObjectPropertiesControl.SelectedObject = null;
+            MapObjectsListView.Items.Clear();
+            CanvasImageMap.Children.Clear();
+            mapObjectEdited = false;
+            CurrentMapName = "";
+            buttonExportEntity.Content = "";
+            buttonMapExport.Content = "";
+
+            CurrentMap = null;
+            this.mapListComboBox.IsEnabled = false;
+
+            new EditMapOrder(this.Left,this.Top, this.MapList).Show();
+        }
     }
 
 

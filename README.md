@@ -7,8 +7,12 @@ customizing the game with modifing anything on the map and even adding new entit
 
 Extractor function : Convert any asset of the game into modern format : .GLB for models, .opus for audio, .png for textures...
 
+
+found out how to swap map in the exe, i need to adapt the tool to be able to modify what map on what mission
+
 <details>
   <summary>TODO :  </summary>
+
 
 
 - stairs (prisms models) are rotated wrongly ?
@@ -32,11 +36,17 @@ Extractor function : Convert any asset of the game into modern format : .GLB for
 - class triangle, plane, normal, vertices (pmg and vtx) -> use vector3 vector4 & vector2 ?
 	
 - 3d viewer : load all models and export then load 3d view with exported models
+
+- 3D Viewer : Tile editor (slipery, mines, water)
 	
 </details>
 
 <details>
   <summary>Features done : </summary>
+
+- Map swapper : Create a window to modifiy map missions references
+
+- Map swapper : read .exe at specific address to get current map mission order
 	
 - FileSystem managemenet : rewrite/improve 'file handling' sections and export folders manipulation 
 
@@ -110,5 +120,6 @@ Planned features if one day we are able to decomple the code of the game :
 - extra weapons 
 - new campaigns
 - defense mode
+
 
 

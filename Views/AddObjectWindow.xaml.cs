@@ -219,7 +219,15 @@ namespace hogs_gameEditor_wpf
                     name = POG.NameToCharArray(item.name);
                 }
 
-                POGL pogl = GlobalVars.wesh.Find(x => x.name == item.name);
+                POGL pogl = GlobalVars.wesh.Find(x => x.name == item.name) ;
+                if (pogl == null)
+                {
+                    pogl = new POGL()
+                    {
+                        bounds = new short[] { 5, 5, 5 },
+                        bounds_type = 0
+                    };
+                }
                 POG mo = new POG();
 
                 mo.name = name;
@@ -248,6 +256,7 @@ namespace hogs_gameEditor_wpf
                     {
                         return;
                     }
+                    mo.byte0 = 0;
                     mo.ScriptParameters[0] = weaponList["" + weaponComboBox.SelectedItem];
                     mo.ScriptParameters[1] = (byte)amountUpDown.Value;
                     mo.objective = POG.ScriptType.PICKUP_ITEM;
@@ -255,6 +264,7 @@ namespace hogs_gameEditor_wpf
 
                 if (item.name == "CRATE2")
                 {
+                    mo.byte0 = 0;
                     mo.ScriptParameters[0] = 255;
                     mo.ScriptParameters[1] = (byte)amountUpDown.Value;
                     mo.objective = POG.ScriptType.PICKUP_ITEM;

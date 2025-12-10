@@ -40,6 +40,7 @@
 
 	"Bridges":
 	[
+		"D_BRID",
 		"BRID2C3",
 		"BRID2_C",
 		"BRID2_C1",
@@ -48,6 +49,7 @@
 		"BRIDGE_C",
 		"BRIDGE_S",
 		"BRIDG_C2"
+
 	],
 
 
@@ -61,7 +63,6 @@
 		"BRW04_W_",
 		"BRW06DW_",
 		"BRW06_W_",
-		"D_BRID",
 		"CHIM",
 		"GATE",
 		"GATES",

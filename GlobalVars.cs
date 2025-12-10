@@ -18,7 +18,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Path = System.IO.Path;
+
 
 
 namespace hogs_gameEditor_wpf
@@ -31,7 +31,7 @@ namespace hogs_gameEditor_wpf
         #if DEBUG
             public static string gameFolder = "E:/Games/IGG-HogsofWar/";
         #else
-            public static string gameFolder = System.IO.Path.GetDirectoryName(Environment.ProcessPath) + "/";
+            public static string gameFolder = Path.GetDirectoryName(Environment.ProcessPath) + "/";
         #endif
 
         public static string mapsFolder = gameFolder + "Maps/";
@@ -1223,7 +1223,7 @@ namespace hogs_gameEditor_wpf
                             POG pog = pogs.Find(x => x.GetName() == entityName);
                             if (pog != null  )
                             {
-                                if (pog.type == 66)
+                                if (pog.type == 66 || pog.type == 64)
                                 { continue; }
                                 loc = exportFolder + "models/" + pog.GetName() + "_" + pog.type + ".glb";
                             }
@@ -1256,6 +1256,7 @@ namespace hogs_gameEditor_wpf
                         if (File.Exists(loc) == false)
                         {
                             MAD model = MAD.GetModelFromMAD(entityName, fileNameB);
+
                             if (model.facData != null)
                             {
                                 model.textures = Mtd.LoadTexturesFromMTD(model.facData, fileNameB);
