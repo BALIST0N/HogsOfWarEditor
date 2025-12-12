@@ -29,7 +29,7 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public void DumpTiles()
         {
-            string destination = GlobalVars.gameFolder + "devtools/EXPORT/map/";
+            string destination = GlobalVars.exportFolder + "/map/";
             for (int i = 0; i < textureCount; i++)
             {
                 File.WriteAllBytes(destination + i + ".png", textures[i].ToPngBytes().Item3);

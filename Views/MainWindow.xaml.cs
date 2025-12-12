@@ -4,7 +4,6 @@ using hogs_gameEditor_wpf.Views;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -17,7 +16,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Xceed.Wpf.Toolkit.PropertyGrid;
 
@@ -198,6 +196,7 @@ namespace hogs_gameManager_wpf
                 CurrentMapName = MapList.ElementAt(mapListComboBox.SelectedIndex).Value;
                 buttonExportEntity.Content = "";
                 buttonMapExport.Content = "Export " + CurrentMapName;
+                buttonEditMapOrder.Visibility = Visibility.Hidden;
 
                 //Read the File
                 CurrentMap = POG.GetAllMapObject(CurrentMapName);
@@ -216,7 +215,13 @@ namespace hogs_gameManager_wpf
                     }
                 }
 
-                MapImageControl.Source = new BitmapImage(new Uri("file://" + GlobalVars.editorRessourcesFolder + CurrentMapName + ".png")); //loading the center map
+                if(File.Exists(GlobalVars.editorRessourcesFolder + CurrentMapName + ".png") == false )
+                {
+                    new PTG(GlobalVars.gameFolder + CurrentMapName).CreateIMG(new PMG(GlobalVars.gameFolder + CurrentMapName)).Save(GlobalVars.editorRessourcesFolder+CurrentMapName+".png");
+                }
+
+                MapImageControl.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("file://" + GlobalVars.editorRessourcesFolder + CurrentMapName + ".png")); //loading the center map
+
 
                 //generate buttons with icons in the minimap
                 LoadMapObjects();
@@ -441,10 +446,8 @@ namespace hogs_gameManager_wpf
         private void B_Click(object sender, RoutedEventArgs e)
         {
             Shape b = (Shape)sender;
-            MapObjectPropertiesControl.PropertyValueChanged -= MapObjectPropertiesControl_PropertyValueChanged;
             MapObjectsListView.SelectedIndex = Convert.ToInt32(b.Name.Replace("n", string.Empty));
             MapObjectsListView.ScrollIntoView(MapObjectsListView.Items[MapObjectsListView.SelectedIndex]);
-            MapObjectPropertiesControl.PropertyValueChanged += MapObjectPropertiesControl_PropertyValueChanged;
         }
 
         private async void MapObjectPropertiesControl_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
@@ -453,14 +456,19 @@ namespace hogs_gameManager_wpf
             //just need to update the visual position 
             if( this.viewMode3D  == true )
             {
-                string propertyName = e.OriginalSource is Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item ? item.PropertyName : null;
-                POG pgm = e.OriginalSource is Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem propertyItem ? (POG)propertyItem.Instance : null;
+                string propertyName = e.OriginalSource is PropertyItem item ? item.PropertyName : null;
+                if(propertyName == "[0]" || propertyName == "[1]" || propertyName == "[2]"  )
+                {
+                    return;
+                }
+
+                POG pgm = e.OriginalSource is PropertyItem propertyItem ? (POG)propertyItem.Instance : null;
                 if (propertyName != null && pgm != null)
                 {
                     if(propertyName == "PositionX" || propertyName == "PositionY" | propertyName == "PositionZ")
                     {
                         await webView.CoreWebView2.ExecuteScriptAsync($@"positionModel( {pgm.index},{pgm.position[0]},{pgm.position[1]},{pgm.position[2]} );");
-                        Debug.WriteLine(" Id : "+ pgm.index+ " / pos : "+ pgm.position[0] + " - " + pgm.position[1] + " - " + pgm.position[2]);
+                        //Debug.WriteLine(" Id : "+ pgm.index+ " / pos : "+ pgm.position[0] + " - " + pgm.position[1] + " - " + pgm.position[2]);
                     }
 
                     if (propertyName == "AngleX" || propertyName == "AngleY" | propertyName == "AngleZ")
@@ -473,6 +481,12 @@ namespace hogs_gameManager_wpf
 
                 }
 
+            }
+
+
+            if (Equals(e.NewValue, e.OldValue))
+            {
+                return; // rien n'a changé réellement
             }
 
 
@@ -489,9 +503,11 @@ namespace hogs_gameManager_wpf
                 AddObjectWindow a = new(CurrentMapName)
                 {
                     Left = this.Left + 150,
-                    Top = this.Top + 40
+                    Top = this.Top + 40,
+                    Owner = this
                 };
-                a.Show();
+
+                a.ShowDialog();
             }
         }
 
@@ -518,8 +534,8 @@ namespace hogs_gameManager_wpf
                     // --- CRÉER WEBVIEW PROPRE ---
                     webView = new Microsoft.Web.WebView2.Wpf.WebView2()
                     {
-                        Height = 480,
                         Width = 640,
+                        Height = 480,
                         Margin = new Thickness(240, 0, 0, 0),
                         VerticalAlignment = VerticalAlignment.Top,
                         HorizontalAlignment = HorizontalAlignment.Left,
@@ -596,8 +612,6 @@ namespace hogs_gameManager_wpf
                     };
 
                     webView.Source = new Uri("file:///"+GlobalVars.editorRessourcesFolder+"scene.html");
-
-
 
                 }
                 else
@@ -724,17 +738,13 @@ namespace hogs_gameManager_wpf
             {
                 //GlobalVars.Export_FEBmps();
 
-                /*
-
                 ExporterWindow nw = new ExporterWindow()
                 {
                     Top = this.Top + 70,
                     Left = this.Left + 300,
                 };
                 nw.Show();
-                */
-
-
+                
                 /*
                 List<POGL> a = new();
 
@@ -892,7 +902,20 @@ namespace hogs_gameManager_wpf
             CurrentMap = null;
             this.mapListComboBox.IsEnabled = false;
 
-            new EditMapOrder(this.Left,this.Top, this.MapList).Show();
+            var emo = new EditMapOrder(this.MapList)
+            {
+
+                Left = this.Left + 50,
+                Top = this.Top + 50,
+                Owner = this
+            };
+
+            emo.Closing += (s, ev) =>
+            {
+                this.mapListComboBox.IsEnabled = true;
+            };
+
+            emo.ShowDialog();
         }
     }
 

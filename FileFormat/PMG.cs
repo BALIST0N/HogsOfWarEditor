@@ -14,9 +14,9 @@ namespace hogs_gameEditor_wpf.FileFormat
 
         public Block[,] blocks = new Block[16, 16];
 
-        public PMG(string filepath)
+        public PMG(string filepathWithoutExtension)
         {
-            using MemoryStream ms = new(File.ReadAllBytes(filepath + ".PMG"));
+            using MemoryStream ms = new(File.ReadAllBytes(filepathWithoutExtension + ".PMG"));
             using BinaryReader reader = new(ms); //using a binaryreader make the offset advance by itself
 
             while (ms.Position < ms.Length)

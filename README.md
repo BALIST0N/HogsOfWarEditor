@@ -7,12 +7,10 @@ customizing the game with modifing anything on the map and even adding new entit
 
 Extractor function : Convert any asset of the game into modern format : .GLB for models, .opus for audio, .png for textures...
 
-
-found out how to swap map in the exe, i need to adapt the tool to be able to modify what map on what mission
+Map swapper : modify solo campaign maps with any map existing
 
 <details>
   <summary>TODO :  </summary>
-
 
 
 - stairs (prisms models) are rotated wrongly ?
@@ -44,7 +42,7 @@ found out how to swap map in the exe, i need to adapt the tool to be able to mod
 <details>
   <summary>Features done : </summary>
 
-- Map swapper : Create a window to modifiy map missions references
+- Map swapper : Create a window to modifiy map missions references and save into exe
 
 - Map swapper : read .exe at specific address to get current map mission order
 	

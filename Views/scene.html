@@ -17,6 +17,14 @@
     const scene = new BABYLON.Scene(engine);
     scene.useRightHandedSystem = true;
     scene.clearColor = new BABYLON.Color4(0.725, 0.882, 1.0, 1.0);
+    scene.skipPointerMovePicking = true;
+    scene.shadowsEnabled = false;
+    scene.skipFrustumClipping = true;
+    scene.imageProcessingConfiguration.isEnabled = false;
+    scene.postProcessesEnabled = false;
+    scene.fogEnabled = false;
+    scene.proceduralTexturesEnabled = false;
+
 
     let selectionedItemId = null;
     // -----------------------------------------------------
@@ -76,25 +84,22 @@
         }
     });
 
-    async function highlightById(id, color = BABYLON.Color3.Yellow()) 
+    function highlightById(id, color = BABYLON.Color3.Yellow()) 
     {
-        // Trouver le root correspondant à l’ID
-        const root = scene.transformNodes.find(t => t.metadata?.id === id);
-
-        if (!root) 
+        scene.meshes.forEach(m => 
         {
-            console.warn("Aucun modèle trouvé avec l'id :", id);
-            return;
-        }
-
-        // Clear highlight précédent
-        hl.removeAllMeshes();
-
-        // Highlight tous les meshes enfants du modèle
-        root.getChildMeshes().forEach(mesh => {
-            hl.addMesh(mesh, color);
+            if (m.__originalEmissive) {
+                m.material.emissiveColor = m.__originalEmissive;
+            }
         });
 
+        const root = scene.transformNodes.find(t => t.metadata?.id === id);
+        if (!root) return;
+
+        root.getChildMeshes().forEach(m => {
+            if (!m.__originalEmissive) m.__originalEmissive = m.material.emissiveColor.clone();
+            m.material.emissiveColor = color;
+        });
     }
 
 
@@ -106,26 +111,44 @@
     // -----------------------------------------------------
     function cloneModel(original, Id, x, y, z, rx = 0, ry = 0, rz = 0) 
     {
+        // Clone du root
         const cloneRoot = original.clone(`${original.name}_${Id}`);
 
+        // Position + rotation
+        cloneRoot.position.set(x, y, -z);
+        cloneRoot.rotation.set(rx, ry, rz);
 
-        cloneRoot.position = new BABYLON.Vector3(x, y, -z);
-        cloneRoot.rotation = new BABYLON.Vector3(rx, ry, rz);
+        // Clonage et optimisation des meshes enfants
+        const originalChildren = original.getChildMeshes();
+        const cloneChildren = cloneRoot.getChildMeshes();
 
-        cloneRoot.getChildMeshes().forEach((m, i) => 
-        {
-            const originalChild = original.getChildMeshes()[i];
-            if (originalChild.material) 
-            {
-                // Créer une copie du matériau pour ce clone
+        for (let i = 0; i < cloneChildren.length; i++) {
+            const m = cloneChildren[i];
+            const originalChild = originalChildren[i];
+
+            // Clone du matériau (si existe)
+            if (originalChild.material) {
                 m.material = originalChild.material.clone(`${originalChild.material.name}_${Id}`);
+
+                // OPTIMISATION GÉNÉRALE
                 m.material.backFaceCulling = false;
                 m.material.forceNormalForward = true;
-            }
-            m.metadata = { parentId: Id };
-        });
+                m.material.useNormalMapFromBumpMap = false;
 
+                // Figé le matériau (beaucoup moins de GPU)
+                m.material.freeze();
+            }
+
+            m.metadata = { parentId: Id };
+
+        }
+
+        // Metadata du root
         cloneRoot.metadata = { id: Id, source: original.name };
+
+        // OPTIMISATION : le root ne bouge pas → figer sa worldMatrix aussi
+        cloneRoot.freezeWorldMatrix();
+
         return cloneRoot;
     }
 
@@ -170,6 +193,8 @@
             {
                 mesh.material.backFaceCulling = false;
                 mesh.material.forceNormalForward = true;
+                mesh.material.useNormalMapFromBumpMap = false;
+                mesh.material.disableLighting = false;
             }
 
             // RESET ABSOLU POUR PERMETTRE LA ROTATION DU ROOT
@@ -178,6 +203,16 @@
                 mesh.position = BABYLON.Vector3.Zero();
                 mesh.rotation = BABYLON.Vector3.Zero();
 
+            }
+
+        });
+
+        root.getChildMeshes().forEach(m => 
+        {
+            m.freezeWorldMatrix();   // plus de recalcul de matrices
+            if (m.material) 
+            {
+                m.material.freeze(); // plus de recalcul shader
             }
         });
 
@@ -264,6 +299,9 @@
 
     // RENDER LOOP
     engine.runRenderLoop(() => {  scene.render(); });
+    engine.setHardwareScalingLevel(2);
+    scene.getEngine().enableOfflineSupport = false;
+    scene.imageProcessingConfiguration.isEnabled = false;
     window.addEventListener("resize", () => engine.resize());
 </script>
 

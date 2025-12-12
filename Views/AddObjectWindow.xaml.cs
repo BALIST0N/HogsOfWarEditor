@@ -15,9 +15,7 @@ using System.Windows.Shapes;
 
 namespace hogs_gameEditor_wpf
 {
-    /// <summary>
-    /// Interaction logic for AddObjectWindow.xaml
-    /// </summary>
+
     public partial class AddObjectWindow : Window
     {
         private readonly string mapName;
@@ -138,7 +136,7 @@ namespace hogs_gameEditor_wpf
                 Point pos = e.GetPosition(mapCanvas);
 
                 // limite à 256x256
-                double x = Math.Clamp(pos.X, 0, 256) ;
+                double x = Math.Clamp(pos.X, 0, 256);
                 double y = Math.Clamp(pos.Y, 0, 256);
 
                 Canvas.SetLeft(eli, x-4);
@@ -150,7 +148,6 @@ namespace hogs_gameEditor_wpf
             Canvas.SetLeft(eli, 124);
             Canvas.SetTop(eli, 124);
         }
-
 
 
         private void objectTypeToAddComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -297,7 +294,7 @@ namespace hogs_gameEditor_wpf
                 main.MapObjectsListView.ScrollIntoView(newItem);
                 main.LoadMapObjects();
                 main.mapObjectEdited = true;
-                Close();
+                this.Close();
             }
 
         }
@@ -317,7 +314,7 @@ namespace hogs_gameEditor_wpf
                         break;
 
                     case "Crates":
-                        if (item.name is (dynamic)"CRATE1" or (dynamic)"CRATE4")
+                        if (item.name is "CRATE1" or "CRATE4")
                         {
                             weaponComboBox.IsEnabled = true;
                             amountUpDown.IsEnabled = true;

@@ -13,7 +13,7 @@ namespace hogs_gameEditor_wpf.Views
     {
         private Dictionary<string, string> mapList;
 
-        public EditMapOrder(double posX, double posY, Dictionary<string, string> mapList)
+        public EditMapOrder(Dictionary<string, string> mapList)
         {
             InitializeComponent();
 
@@ -24,9 +24,6 @@ namespace hogs_gameEditor_wpf.Views
                 this.mapList.Add(a.Key, a.Value);
             }
 
-            // Positionner la fenêtre ici
-            this.Left = posX + 50;
-            this.Top = posY + 50;
 
             foreach (var item in this.mapList)
             {
