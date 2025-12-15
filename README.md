@@ -108,16 +108,6 @@ Scrapped/ cancelled :
 _________________________________________________________
 
 
-Planned features if one day we are able to decomple the code of the game :
-
-- AI behavior 
-- game fixed resolution / borderless window (d3d9.dll)
-- extra classes
-- modifiable progression tree 
-- machine gun behavior (manual direction while autoshooting + recoil , -4hp & -8hp)
-- extra weapons 
-- new campaigns
-- defense mode
 
 
 
